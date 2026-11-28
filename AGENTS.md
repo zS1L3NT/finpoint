@@ -2,7 +2,7 @@
 
 ## Project Shape
 - Next.js App Router app; mostly client-side, plus a tiny auth broker. `npm run dev` is the only thing needed to start.
-- `app/layout.tsx` renders the shell (metadata, theme/sidebar cookies, `app/providers.tsx`) while IndexedDB (Dexie) opens and seeds in the background. No boot gate: live queries populate the UI as data arrives.
+- `app/layout.tsx` renders the shell (metadata, theme cookie, `app/providers.tsx`) while IndexedDB (Dexie) opens and seeds in the background. No boot gate: live queries populate the UI as data arrives.
 - Layer segregation (UI must not cross it):
   - `app/**/page.tsx` + `src/components/*` are UI only: render, read domain data via `useLiveQuery`, and call `logic/*`. Tables fed by a live query receive `loading={query === undefined}`; reserve silent `?? []` fallbacks for auxiliary lookup lists. Local reads show no spinner or loading copy. While a live query is still `undefined`, render nothing (no `Skeleton` placeholders, no empty-state or "not found" copy) and let the content's reveal animation play once the data arrives; never use blocking loaders. Interactive routes are `"use client"` (search params via `next/navigation`, covered by the root `Suspense` so routes stay static); static content pages (privacy, terms) stay server components.
   - `src/logic/*` holds domain reads and operations, retaining the old Laravel `Api/*Controller` mapping where applicable. Workspace backup/reset operations and background Drive sync also belong here.

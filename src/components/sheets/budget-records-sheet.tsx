@@ -1,7 +1,9 @@
 "use client"
 
+import { useLiveQuery } from "dexie-react-hooks"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DataTable from "@/components/table/data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { byDay } from "@/components/table/row-groups"
@@ -13,6 +15,8 @@ import {
 	SheetTitle,
 } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useRecordEditor } from "@/hooks/use-record-editor"
+import { listCategories } from "@/logic/categories"
 import type { Record } from "@/types"
 
 const byRecordDay = byDay<Record>("Record")
@@ -28,18 +32,20 @@ export default function BudgetRecordsSheet({
 	title,
 	description,
 	records,
-	pageName,
 	onClose,
 }: Shown & {
 	open: boolean
-	pageName: string
 	onClose: () => void
 }) {
 	const router = useRouter()
 	// Phones get a bottom sheet; wider screens keep the side sheet.
 	const isMobile = useIsMobile()
-	const columns = useRecordColumns<Record>({ pageName, grouped: true })
-	const mobileRow = useRecordMobileRow<Record>({ pageName, grouped: true })
+	// A Record opens in its editor over the sheet, which stays open behind it.
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
+	const categories = useLiveQuery(() => listCategories(), [])
+	const [content, setContent] = useState<HTMLDivElement | null>(null)
+	const columns = useRecordColumns<Record>({ onOpen: handleEdit, grouped: true })
+	const mobileRow = useRecordMobileRow<Record>({ onOpen: handleEdit, grouped: true })
 
 	// Keep the last content while the sheet slides out, so it does not blank mid-exit.
 	const [shown, setShown] = useState<Shown>({ title, description, records })
@@ -62,6 +68,9 @@ export default function BudgetRecordsSheet({
 	return (
 		<Sheet open={open} onOpenChange={isOpen => !isOpen && dismiss()}>
 			<SheetContent
+				ref={setContent}
+				// Escape closes the Record editor first; the sheet stays open behind it.
+				onEscapeKeyDown={event => editingRecord && event.preventDefault()}
 				side={isMobile ? "bottom" : "right"}
 				overlayClassName="supports-backdrop-filter:backdrop-blur-xs"
 				className="gap-0 data-[side=bottom]:max-h-[85dvh] data-[side=bottom]:rounded-t-2xl md:data-[side=right]:max-w-xl"
@@ -83,11 +92,24 @@ export default function BudgetRecordsSheet({
 							columns={columns}
 							mobileRow={mobileRow}
 							groupBy={byRecordDay}
+							onRowClick={handleEdit}
 						/>
 					) : (
 						<p className="text-muted-foreground">No Records</p>
 					)}
 				</div>
+				{editingRecord ? (
+					<RecordEditorDialog
+						record={editingRecord}
+						statements={editingRecord.statements}
+						categories={categories ?? []}
+						container={content}
+						isOpen
+						setIsOpen={isOpen => {
+							if (!isOpen) setEditingRecord(null)
+						}}
+					/>
+				) : null}
 			</SheetContent>
 		</Sheet>
 	)

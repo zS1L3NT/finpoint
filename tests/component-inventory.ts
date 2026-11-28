@@ -88,7 +88,7 @@ export const scenarioFamilies: Record<string, Record<string, string>> = {
 	},
 	shell: {
 		consumer:
-			"Verify shared shell/sidebar/theme/toasts or not-found behaviour through routes, stable month header and nonblocking query reveal",
+			"Verify shared shell/navigation/theme/toasts or not-found behaviour through routes, stable month header and nonblocking query reveal",
 	},
 	auth: {
 		boundary:
@@ -100,9 +100,10 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/allocate-bar.tsx",
 		owner: "team3",
-		routes: ["/statements/[id]", "/allocator", "/records"],
-		visibleExports: ["AllocationMismatch", "default"],
-		dormantExports: [],
+		routes: ["/statements", "/allocator", "/records"],
+		visibleExports: ["AllocationMismatch"],
+		// Its Statement page went; the harness still renders it.
+		dormantExports: ["default"],
 		helperExports: [],
 		scenarios: ["display", "allocation"],
 	},
@@ -226,9 +227,10 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/detail-summary.tsx",
 		owner: "team3",
-		routes: ["/statements/[id]", "/records/[id]"],
-		visibleExports: ["DetailSummary", "DetailSummaryItem"],
-		dormantExports: [],
+		routes: [],
+		visibleExports: [],
+		// The Record and Statement pages that used it became previews; the harness still renders it.
+		dormantExports: ["DetailSummary", "DetailSummaryItem"],
 		helperExports: [],
 		scenarios: ["display"],
 	},
@@ -298,7 +300,41 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/dialogs/pending-statement.tsx",
 		owner: "team2",
-		routes: ["/statements/[id]", "/statements", "/accounts/[id]", "/records/[id]"],
+		routes: ["/statements", "/accounts/[id]", "/records"],
+		visibleExports: ["PendingStatementForm", "default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["editor"],
+	},
+	{
+		path: "src/components/dialogs/item-preview.tsx",
+		owner: "team2",
+		routes: [
+			"/records",
+			"/statements",
+			"/accounts/[id]",
+			"/allocator",
+			"/allocator/pending",
+			"/budgets/[id]",
+			"/",
+		],
+		visibleExports: ["AllocationList", "PreviewHeader", "PreviewItem", "PreviewSection"],
+		dormantExports: [],
+		helperExports: ["allocatedOf"],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/dialogs/statement.tsx",
+		owner: "team2",
+		routes: [
+			"/records",
+			"/statements",
+			"/accounts/[id]",
+			"/allocator",
+			"/allocator/pending",
+			"/budgets/[id]",
+			"/",
+		],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -316,14 +352,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/dialogs/record-editor.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -351,13 +380,11 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/form/amount-field.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/",
 		],
@@ -369,15 +396,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/form/category-field.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/statement-rules",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/allocator", "/records", "/statement-rules", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -387,10 +406,9 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/form/combobox-field.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
+			"/statements",
 			"/budgets/[id]",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/statement-rules",
@@ -422,16 +440,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/form/datetime-field.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/statements",
-			"/budgets/[id]",
-			"/accounts/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/accounts/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -441,14 +450,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/form/field.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -464,14 +471,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/form/record-analytics-fields.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -490,12 +490,10 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/form/select-field.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/accounts/[id]",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -511,13 +509,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/form/text-field.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
+			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -532,16 +529,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/form/textarea-field.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/statements",
-			"/budgets/[id]",
-			"/accounts/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/accounts/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -551,7 +539,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/icon.tsx",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -560,7 +547,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -579,7 +565,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/icons.ts",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -588,7 +573,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -604,10 +588,9 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["indirect"],
 	},
 	{
-		path: "src/components/layout/app-header.tsx",
+		path: "src/components/layout/app-nav.tsx",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -616,35 +599,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
-			"/records",
-			"/categories",
-			"/",
-			"/terms",
-			"/settings",
-			"/sync",
-			"/importer",
-			"/privacy",
-		],
-		visibleExports: ["default"],
-		dormantExports: [],
-		helperExports: [],
-		scenarios: ["display"],
-	},
-	{
-		path: "src/components/layout/app-sidebar.tsx",
-		owner: "team3",
-		routes: [
-			"/statements/[id]",
-			"/statements",
-			"/budgets/[id]",
-			"/budgets",
-			"/accounts/[id]",
-			"/accounts",
-			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -672,7 +626,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/layout/page-content.tsx",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -681,7 +634,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -700,7 +652,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/layout/page-header.tsx",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -709,7 +660,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/terms",
@@ -727,7 +677,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/layout/shell-header.tsx",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -736,7 +685,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -764,12 +712,10 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/monthly-budget-badge.tsx",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/accounts/[id]",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -782,7 +728,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/record-amount.tsx",
 		owner: "team3",
-		routes: ["/records/[id]"],
+		routes: ["/records"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -836,14 +782,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/sheets/statement-search.tsx",
 		owner: "team3",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -870,7 +809,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/table/data-table.tsx",
 		owner: "team3",
-		routes: ["/statements/[id]", "/budgets/[id]", "/records/[id]", "/"],
+		routes: ["/statements", "/budgets/[id]", "/records", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -929,16 +868,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/table/record-columns.tsx",
 		owner: "team3",
-		routes: [
-			"/statements/[id]",
-			"/statements",
-			"/budgets/[id]",
-			"/accounts/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/accounts/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["PendingBadge", "RecordAmountCell", "RecordDetails"],
 		dormantExports: [],
 		helperExports: ["amountTone", "formatRowTime", "useRecordColumns", "useRecordMobileRow"],
@@ -948,14 +878,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/table/row-groups.tsx",
 		owner: "team3",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/",
 		],
@@ -974,8 +902,8 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/table/statement-columns.tsx",
 		owner: "team3",
-		routes: ["/statements", "/accounts/[id]", "/allocator", "/records/[id]"],
-		visibleExports: [],
+		routes: ["/statements", "/accounts/[id]", "/allocator", "/records"],
+		visibleExports: ["StatementBadges"],
 		dormantExports: [],
 		helperExports: ["useStatementColumns", "useStatementMobileRow"],
 		scenarios: ["table"],
@@ -1004,12 +932,11 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/alert.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
+			"/statements",
 			"/budgets/[id]",
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/",
 		],
@@ -1022,7 +949,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/badge.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1030,7 +956,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/",
 			"/sync",
@@ -1054,7 +979,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/button.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1063,7 +987,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1083,13 +1006,11 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/calendar.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/settings",
 			"/",
@@ -1103,12 +1024,11 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/card.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
+			"/statements",
 			"/budgets/[id]",
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1144,13 +1064,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/combobox.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
+			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1199,7 +1118,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/dialog.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1208,7 +1126,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1260,12 +1177,11 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/empty.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
+			"/statements",
 			"/budgets/[id]",
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/",
 		],
@@ -1285,14 +1201,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/field.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1308,14 +1222,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/input-group.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1330,7 +1242,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/input.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1339,7 +1250,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1378,14 +1288,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/label.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1434,13 +1342,11 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/popover.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/",
 			"/settings",
@@ -1453,14 +1359,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/ui/progress.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["Progress"],
 		dormantExports: [],
 		helperExports: [],
@@ -1469,14 +1368,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/ui/scroll-area.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/",
-		],
+		routes: ["/statements", "/budgets/[id]", "/allocator", "/records", "/"],
 		visibleExports: ["ScrollArea", "ScrollBar"],
 		dormantExports: [],
 		helperExports: [],
@@ -1486,14 +1378,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/select.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/accounts/[id]",
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1520,7 +1410,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/separator.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1529,7 +1418,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1548,7 +1436,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/sheet.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1557,7 +1444,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1583,7 +1469,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/sidebar.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1592,7 +1477,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1636,7 +1520,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/skeleton.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1645,7 +1528,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1664,7 +1546,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/sonner.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1673,7 +1554,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1692,14 +1572,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/table.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/",
 		],
@@ -1712,14 +1590,12 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/textarea.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1749,7 +1625,6 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/ui/tooltip.tsx",
 		owner: "team2",
 		routes: [
-			"/statements/[id]",
 			"/statements",
 			"/budgets/[id]",
 			"/budgets",
@@ -1758,7 +1633,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/allocator/duplicates",
 			"/allocator/pending",
-			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
@@ -1776,7 +1650,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/value-swap.tsx",
 		owner: "team3",
-		routes: ["/statements/[id]", "/budgets/[id]", "/accounts/[id]", "/records/[id]", "/"],
+		routes: ["/statements", "/budgets/[id]", "/accounts/[id]", "/records", "/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -1791,16 +1665,57 @@ export const componentInventory: InventoryEntry[] = [
 		helperExports: [],
 		scenarios: ["display"],
 	},
+	{
+		path: "src/components/tab-nav.tsx",
+		owner: "team3",
+		routes: [
+			"/allocator",
+			"/allocator/duplicates",
+			"/allocator/pending",
+			"/settings",
+			"/categories",
+			"/statement-rules",
+			"/importer",
+			"/sync",
+		],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/scroll-strip.tsx",
+		owner: "team3",
+		routes: [
+			"/",
+			"/records",
+			"/statements",
+			"/accounts",
+			"/budgets",
+			"/allocator",
+			"/settings",
+			"/categories",
+			"/statement-rules",
+			"/importer",
+			"/sync",
+		],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/settings-tabs.tsx",
+		owner: "team3",
+		routes: ["/settings", "/categories", "/statement-rules", "/importer", "/sync"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
 ]
 
 export const routeInventory: RouteEntry[] = [
-	{
-		path: "app/statements/[id]/page.tsx",
-		url: "/statements/[id]",
-		kind: "page",
-		owner: "team3",
-		scenarios: ["route"],
-	},
 	{
 		path: "app/statements/page.tsx",
 		url: "/statements",
@@ -1853,13 +1768,6 @@ export const routeInventory: RouteEntry[] = [
 	{
 		path: "app/allocator/pending/page.tsx",
 		url: "/allocator/pending",
-		kind: "page",
-		owner: "team3",
-		scenarios: ["route"],
-	},
-	{
-		path: "app/records/[id]/page.tsx",
-		url: "/records/[id]",
 		kind: "page",
 		owner: "team3",
 		scenarios: ["route"],
@@ -2055,6 +1963,8 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Budget category and chart day drills open the sheet with only those Records; browser Back and Escape close it, and keyboard Enter on a chart day keeps it open",
 	"src/components/sheets/budget-records-sheet.tsx#display.values":
 		"The sheet names the category or day, the Budget, the Record count and their spent total",
+	"src/components/dialogs/item-preview.tsx#display.interaction":
+		"Allocation rows open the other preview one level deep by pointer and keyboard with a pointer cursor; Escape closes only the nested preview, and Edit swaps the form in place",
 	"src/components/sheets/records-sheet.tsx#display.interaction":
 		"Dashboard drills open the sheet in place without a Back entry; browser Back and Escape close it, Forward reopens it, and a Record opened from it returns to the open sheet",
 	"src/components/sheets/record-search.tsx#display.interaction":
@@ -2144,12 +2054,18 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Standalone and menu placeholders have visible bounded geometry; non-positional pulse changes opacity without moving or resizing the standalone placeholder under every motion preference",
 	"src/components/layout/page-header.tsx#display.interaction":
 		"Back control is above destination heading and restores exact category/record origin URLs",
+	"src/components/tab-nav.tsx#display.interaction":
+		"Keyboard Enter on a tab changes the page and marks that tab active, in both the Workflow views and the Settings sections",
+	"src/components/scroll-strip.tsx#display.interaction":
+		"On phones the earlier and later chevrons show only on the side that hides more and scroll hidden pages into view, and the active page or Settings section is fully visible",
+	"src/components/settings-tabs.tsx#display.interaction":
+		"Keyboard Enter opens General, Categories, Statement rules, Importer and Data from the Settings sections, each marked active while Settings stays current in the top navigation",
 	"src/components/workflow-tabs.tsx#display.interaction":
 		"Keyboard navigation changes Replace Pending, Fix Duplicates and Allocate destinations; returning to Allocate carries configured default start date",
-	"src/components/layout/app-sidebar.tsx#display.interaction":
-		"Visible sidebar Dashboard link navigates and clears drill history; header sidebar trigger toggles via keyboard (dialog on mobile)",
-	"src/components/layout/app-sidebar.tsx#export.default.behaviour":
-		"Visible sidebar Dashboard link navigates and clears drill history; header sidebar trigger toggles via keyboard (dialog on mobile)",
+	"src/components/layout/app-nav.tsx#display.interaction":
+		"Top navigation Dashboard link navigates and clears drill history; keyboard Enter opens Records and Settings and marks each active",
+	"src/components/layout/app-nav.tsx#export.default.behaviour":
+		"Top navigation Dashboard link navigates and clears drill history; keyboard Enter opens Records and Settings and marks each active",
 	"app/importer/page.tsx#route.data":
 		"Invalid CSV/workbook produces format errors without changing statements; valid import adds exactly one statement and repeat import adds none",
 	"app/settings/page.tsx#route.data":
@@ -2164,10 +2080,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		'Direct account detail fallback is tested by "direct Accounts detail has a working fallback"; "accounts keyboard card to detail to Back keeps exact origin" verifies this route\'s filtered keyboard return and Back above heading',
 	"app/budgets/[id]/page.tsx#route.navigation":
 		'Direct budget detail fallback is tested by "direct Budgets detail has a working fallback"; "budgets keyboard card Enter to detail to Back keeps exact origin" verifies this route\'s filtered keyboard return and Back above heading',
-	"app/records/[id]/page.tsx#route.navigation":
-		'Direct record detail fallback is tested by "direct Records detail has a working fallback"; "records keyboard filtered list to detail to Back keeps exact origin" verifies this route\'s filtered keyboard return and Back above heading',
-	"app/statements/[id]/page.tsx#route.navigation":
-		'Direct statement detail fallback is tested by "direct Statements detail has a working fallback"; "statements keyboard filtered list to detail to Back keeps exact origin" verifies this route\'s filtered keyboard return and Back above heading',
 	"src/components/ui/dialog.tsx#export.DialogPortal.behaviour":
 		"Structural portal pass-through; covered through the composed backdrop/focus consumer rather than an isolated mount",
 	"src/components/ui/alert-dialog.tsx#export.AlertDialogPortal.behaviour":
@@ -2226,12 +2138,10 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Statement pagination keeps search in the URL and changes row identity; search resets page and survives reload",
 	"src/components/table/statement-columns.tsx#table.rows":
 		"Populated/empty rows retain pending and duplicate badges, zero/signed amounts and allocable remainder; oversized description stays accessible and same-day signed subtotal reconciles; unsupported archive/null states have source reasons in facetNotApplicable",
-	"src/components/layout/app-header.tsx#display.values":
-		"Header h1 copy is asserted across all 19 layout routes and theme branches; reachable titles are fixed by ShellHeader.TITLES, so arbitrary entity-name h1 is inapplicable (facetNotApplicable)",
 	"src/components/layout/shell-header.tsx#display.values":
 		"Header h1 copy is asserted across all 19 layout routes and theme branches; ShellHeader.TITLES supplies fixed route labels, with no entity-name input (facetNotApplicable)",
-	"src/components/layout/app-sidebar.tsx#display.values":
-		"Finpoint/Local-first finance brand copy visible in the desktop sidebar and the mobile dialog via keyboard toggle",
+	"src/components/layout/app-nav.tsx#display.values":
+		"Finpoint brand link and the page links are visible in the top navigation, with the current page marked active",
 	"app/statements/page.tsx#route.navigation":
 		"Keyboard filtered list to detail with exact origin, Back above heading and keyboard return; pointer fallbacks covered separately",
 	"app/budgets/page.tsx#route.navigation":
@@ -2249,11 +2159,11 @@ export const scenarioDescriptions: Record<string, string> = {
 	"app/categories/page.tsx#route.navigation":
 		"Keyboard nested drill through filtered Records with two keyboard Back returns; no detail route exists by design",
 	"app/settings/page.tsx#route.navigation":
-		'Top-level sidebar destination (app-sidebar.tsx): Back exemption applies to that navigation. "settings keyboard save persists across reload" verifies date pick/save/reload; ordinary drill Back is covered by route-specific keyboard detail cases',
+		'Settings section reached from the top navigation (app-nav.tsx, settings-tabs.tsx): Back exemption applies to that navigation. "settings keyboard save persists across reload" verifies date pick/save/reload; ordinary drill Back is covered by route-specific keyboard detail cases',
 	"app/sync/page.tsx#route.navigation":
-		'Top-level sidebar destination (app-sidebar.tsx): Back exemption applies to that navigation. "sync keyboard clear cancelled preserves data" uses a visible-only Monthly Salary assertion on both responsive layouts; ordinary drill Back is covered by route-specific keyboard detail cases',
+		'Settings section reached from the top navigation (app-nav.tsx, settings-tabs.tsx): Back exemption applies to that navigation. "sync keyboard clear cancelled preserves data" uses a visible-only Monthly Salary assertion on both responsive layouts; ordinary drill Back is covered by route-specific keyboard detail cases',
 	"app/importer/page.tsx#route.navigation":
-		'Top-level sidebar destination (app-sidebar.tsx): Back exemption applies to that navigation. "importer keyboard bank select and invalid rejection" verifies bank radio/file chooser/rejection; ordinary drill Back is covered by route-specific keyboard detail cases',
+		'Settings section reached from the top navigation (app-nav.tsx, settings-tabs.tsx): Back exemption applies to that navigation. "importer keyboard bank select and invalid rejection" verifies bank radio/file chooser/rejection; ordinary drill Back is covered by route-specific keyboard detail cases',
 	"src/components/selection-bar.tsx#selection.state":
 		"Keyboard one-selection with dialog/cancel retention and clear, honestly disabled two-selection replace, small-viewport keyboard clear, and post-clear identity; no select-all header control exists by design",
 	"src/components/table/data-table.tsx#table.motion":
@@ -2276,8 +2186,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"UI archival persists its flag and historical assignment; record consumers retain archived badge/totals and disabled option, Unbudgeted fallback and treatment eligibility; those fields belong to record consumers, not this editor (facetNotApplicable)",
 	"app/statements/page.tsx#route.data":
 		"Populated/empty/paginated rows retain pending, zero, signed/allocable state and silent reveal; long description and signed grouped subtotal are asserted; archive/null fields are unsupported (facetNotApplicable)",
-	"app/statements/[id]/page.tsx#route.data":
-		"Split/unallocated allocations, related rows, missing-ID copy and silent reveal; oversized pending description, Pending footer/edit action and confirmed imported-index footer are asserted",
 	"app/budgets/page.tsx#route.data":
 		"Populated/empty/searchable directory with silent reveal; long-name overflow is covered via route.long and zero/negative plan facets via charts",
 	"app/budgets/[id]/page.tsx#route.data":
@@ -2288,8 +2196,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Related rows, missing-ID copy and silent reveal; pending count/badge/edit action are distinguished from imported confirmed activity and real pending editor opens",
 	"app/records/page.tsx#route.data":
 		"Populated/empty/paginated/filtered rows retain zero/signed values and silent reveal; long Unicode title and optional values remain accessible through keyboard drill and reload",
-	"app/records/[id]/page.tsx#route.data":
-		"Zero/pending/null/income variants, allocations, missing-ID copy and silent reveal; long Unicode title/people/location/description survive real list drill and reload with reachable Edit",
 	"app/categories/page.tsx#route.data":
 		"Populated/empty/searchable directory with silent reveal; long-name overflow is covered via route.long",
 	"app/(month)/page.tsx#route.data":
@@ -2509,6 +2415,59 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record editor: backdrop, values, cursors, fit and keyboard reopen work",
 		"Record editor: popup enters as a whole",
 		"Record editor: null optional fields, long title, sign and penny keyboard steps persist",
+		"Record preview: a row opens it read-only, Edit swaps in the form and Cancel returns",
+	],
+	"src/components/dialogs/statement.tsx#editor.open": [
+		"Pending Statement editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Pending Statement editor: popup enters as a whole",
+	],
+	"src/components/dialogs/statement.tsx#editor.validation": [
+		"Pending Statement editor: prepopulates its description, protects Allocations, rejects zero and persists a negative amount",
+	],
+	"src/components/dialogs/statement.tsx#editor.long": [
+		"Statement detail: long pending description stays readable on list and detail with confirmation state",
+	],
+	"src/components/dialogs/statement.tsx#editor.conditional": [
+		"Statement preview: a row opens it with its Records, and a Pending one edits in place",
+	],
+	"src/components/dialogs/statement.tsx#export.default.behaviour": [
+		"Statement preview: a row opens it with its Records, and a Pending one edits in place",
+		"Statement detail: split Allocation shows its assigned amount and confirmed Account",
+		"Statement detail: unallocated confirmed Statement shows resolved empty Records",
+	],
+	"src/components/dialogs/pending-statement.tsx#export.PendingStatementForm.behaviour": [
+		"Pending Statement editor: prepopulates its description, protects Allocations, rejects zero and persists a negative amount",
+		"Pending Statement creator: required Account, description and negative amount persist",
+	],
+	"src/components/dialogs/item-preview.tsx#display.values": [
+		"Record detail nulls: renders amount, Category, Treatment and Allocations",
+		"Record detail partialPending: renders amount, Category, Treatment and Allocations",
+		"Statement detail: long pending description stays readable on list and detail with confirmation state",
+	],
+	"src/components/dialogs/item-preview.tsx#display.interaction": [
+		"Statement preview: a row opens it with its Records, and a Pending one edits in place",
+		"Record preview: a row opens it read-only, Edit swaps in the form and Cancel returns",
+	],
+	"src/components/dialogs/item-preview.tsx#export.AllocationList.behaviour": [
+		"Statement preview: a row opens it with its Records, and a Pending one edits in place",
+		"Statement detail: split Allocation shows its assigned amount and confirmed Account",
+		"Statement detail: unallocated confirmed Statement shows resolved empty Records",
+	],
+	"src/components/dialogs/item-preview.tsx#export.PreviewHeader.behaviour": [
+		"Statement detail: long pending description stays readable on list and detail with confirmation state",
+		"Record detail partialPending: renders amount, Category, Treatment and Allocations",
+	],
+	"src/components/dialogs/item-preview.tsx#export.PreviewItem.behaviour": [
+		"Record detail nulls: renders amount, Category, Treatment and Allocations",
+		"Record detail salaryIncome: renders amount, Category, Treatment and Allocations",
+	],
+	"src/components/dialogs/item-preview.tsx#export.PreviewSection.behaviour": [
+		"Record detail partialPending: renders amount, Category, Treatment and Allocations",
+		"Statement detail: split Allocation shows its assigned amount and confirmed Account",
+	],
+	"src/components/table/statement-columns.tsx#export.StatementBadges.behaviour": [
+		"Statement cells: retain pending, Allocation, zero and signed amount meaning",
+		"Statement detail: long pending description stays readable on list and detail with confirmation state",
 	],
 	"src/components/dialogs/record-editor.tsx#editor.validation": [
 		"Record editor: null optional fields, long title, sign and penny keyboard steps persist",
@@ -2812,11 +2771,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record creator: an insufficient Allocation warns that the Record stays Pending",
 	],
 	"src/components/allocate-bar.tsx#export.default.behaviour": [
-		"Allocation bar: not, partial and fully allocated states show finite values",
 		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
 	],
 	"src/components/allocate-bar.tsx#display.values": [
-		"Allocation bar: not, partial and fully allocated states show finite values",
 		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
 	],
 	"src/components/selection-bar.tsx#export.default.behaviour": [
@@ -2837,13 +2794,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/sheets/records-sheet.tsx#export.default.behaviour": [
 		"Category mix: drilldown carries Treatment and Category filters",
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
-		"Records sheet: a Record saved from its page shows in the sheet and survives reload",
+		"Records sheet: a Record saved from the sheet shows in it and survives reload",
 	],
 	"src/components/sheets/records-sheet.tsx#display.interaction": [
 		"Records sheet: a chart drill adds no Back, browser Back closes it and Forward reopens it",
 		"Records sheet: phones get a bottom sheet and wider screens a side sheet",
 		"Record lists: each Record shows its Monthly Budget under its title, not its category name",
-		"chart drill: nested Record returns to the open Records sheet",
+		"chart drill: a Record opens over the Records sheet and closes back to it",
 	],
 	"src/components/sheets/record-search.tsx#export.default.behaviour": [
 		"Record search sheet: handles query misses and hits, persists attachment, closes with Escape and reopens by click",
@@ -2979,7 +2936,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/table/record-columns.tsx#table.interaction": [
 		"Records table: keeps search in the URL and moves between pages",
 		"Records table: Category selection narrows Records and survives reload",
-		"multifilter Unicode origin: returns exactly after reload",
+		"multifilter Unicode origin: a Statement preview keeps the exact filtered list across reload",
 		"Records table: long title and optional Record values survive list drill and reload",
 	],
 	"src/components/table/record-columns.tsx#table.motion": [
@@ -3636,13 +3593,43 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"facet skeleton: pulse changes opacity through frames while placeholder geometry stays stable",
 	],
 	"src/components/layout/page-header.tsx#export.default.behaviour": [
-		"Budget drill: nested detail returns to exact filtered origins",
+		"Budget drill: a Record opens over the Budget and Back returns to Budgets",
 	],
 	"src/components/layout/page-header.tsx#display.interaction": [
-		"Budget drill: nested detail returns to exact filtered origins",
+		"Budget drill: a Record opens over the Budget and Back returns to Budgets",
 	],
 	"src/components/layout/page-header.tsx#display.values": [
-		"Budget drill: nested detail returns to exact filtered origins",
+		"Budget drill: a Record opens over the Budget and Back returns to Budgets",
+	],
+	"src/components/tab-nav.tsx#export.default.behaviour": [
+		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/tab-nav.tsx#display.values": [
+		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/tab-nav.tsx#display.interaction": [
+		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/scroll-strip.tsx#export.default.behaviour": [
+		"scroll strip: on phones the chevrons reveal hidden pages and keep the active one in view",
+	],
+	"src/components/scroll-strip.tsx#display.values": [
+		"scroll strip: on phones the chevrons reveal hidden pages and keep the active one in view",
+	],
+	"src/components/scroll-strip.tsx#display.interaction": [
+		"scroll strip: on phones the chevrons reveal hidden pages and keep the active one in view",
+	],
+	"src/components/settings-tabs.tsx#export.default.behaviour": [
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/settings-tabs.tsx#display.values": [
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/settings-tabs.tsx#display.interaction": [
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"src/components/workflow-tabs.tsx#export.default.behaviour": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
@@ -3653,13 +3640,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/workflow-tabs.tsx#display.interaction": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
-	"src/components/layout/app-sidebar.tsx#export.default.behaviour": [
-		"sidebar: clears drill history",
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+	"src/components/layout/app-nav.tsx#export.default.behaviour": [
+		"top navigation: clears drill history",
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
-	"src/components/layout/app-sidebar.tsx#display.interaction": [
-		"sidebar: clears drill history",
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+	"src/components/layout/app-nav.tsx#display.interaction": [
+		"top navigation: clears drill history",
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"app/(month)/layout.tsx#shell.consumer": [
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
@@ -3691,14 +3678,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Statement detail: long pending description stays readable on list and detail with confirmation state",
 		"Statements table: signed same-day Statements show their exact grouped subtotal",
 	],
-	"app/statements/[id]/page.tsx#route.data": [
-		"Statement detail: split Allocation shows its assigned amount and confirmed Account",
-		"Statement detail: unallocated confirmed Statement shows resolved empty Records",
-		"/statements/t1-s-pending detail: renders real related rows",
-		"/statements/t1-s-pending page: stays silent while the database opens, then reveals its data",
-		"statements page: missing ID resolves to not-found copy without a loader",
-		"Statement detail: long pending description stays readable on list and detail with confirmation state",
-	],
 	"app/budgets/page.tsx#route.data": [
 		"/budgets page: resolves to its useful empty state",
 		"/budgets page: search finds populated data and clears no-match copy",
@@ -3729,15 +3708,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/records page: stays silent while the database opens, then reveals its data",
 		"Records table: long title and optional Record values survive list drill and reload",
 	],
-	"app/records/[id]/page.tsx#route.data": [
-		"Record detail zero: renders amount, Category, Treatment and Allocations",
-		"Record detail partialPending: renders amount, Category, Treatment and Allocations",
-		"Record detail nulls: renders amount, Category, Treatment and Allocations",
-		"Record detail salaryIncome: renders amount, Category, Treatment and Allocations",
-		"/records/t1-r-partial page: stays silent while the database opens, then reveals its data",
-		"records page: missing ID resolves to not-found copy without a loader",
-		"Records table: long title and optional Record values survive list drill and reload",
-	],
 	"app/categories/page.tsx#route.data": [
 		"/categories page: resolves to its useful empty state",
 		"/categories page: search finds populated data and clears no-match copy",
@@ -3763,16 +3733,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"direct Budgets detail: has a working fallback",
 		"Budget card: keyboard card Enter to detail to Back keeps exact origin",
 	],
-	"app/records/[id]/page.tsx#route.navigation": [
-		"direct Records detail: has a working fallback",
-		"Records list: keyboard filtered list to detail to Back keeps exact origin",
-	],
-	"app/statements/[id]/page.tsx#route.navigation": [
-		"direct Statements detail: has a working fallback",
-		"Statements list: keyboard filtered list to detail to Back keeps exact origin",
-	],
 	"app/statements/page.tsx#route.navigation": [
-		"Statements list: keyboard filtered list to detail to Back keeps exact origin",
+		"Statements list: keyboard opens the Statement preview over the filtered list",
 	],
 	"app/budgets/page.tsx#route.navigation": [
 		"Budget card: keyboard card Enter to detail to Back keeps exact origin",
@@ -3790,13 +3752,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"pending queue: keyboard replace and confirm replace the Pending Statement",
 	],
 	"app/records/page.tsx#route.navigation": [
-		"Records list: keyboard filtered list to detail to Back keeps exact origin",
+		"Records list: keyboard opens the Record editor over the filtered list",
 	],
 	"app/categories/page.tsx#route.navigation": [
 		"Categories page: search lives in the URL, survives reload and one Back clears it",
 	],
 	"app/statement-rules/page.tsx#route.navigation": [
-		"Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload",
+		"Statement rules page: the Settings tab opens it and pause, resume and delete persist after reload",
 	],
 	"app/settings/page.tsx#route.navigation": [
 		"settings: keyboard save of default filters persists across reload",
@@ -3825,32 +3787,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/icons.ts#indirect.consumer": [
 		"icons: missing, invalid, prefixed and dynamic icons keep real SVG output and reserved size",
 	],
-	"src/components/layout/app-header.tsx#export.default.behaviour": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
-	],
-	"src/components/layout/app-header.tsx#display.interaction": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
-	],
-	"src/components/layout/app-header.tsx#display.values": [
-		"/ page: populated content and enabled controls stay inside the viewport",
-		"/records page: populated content and enabled controls stay inside the viewport",
-		"/statements page: populated content and enabled controls stay inside the viewport",
-		"/accounts page: populated content and enabled controls stay inside the viewport",
-		"/budgets page: populated content and enabled controls stay inside the viewport",
-		"/categories page: populated content and enabled controls stay inside the viewport",
-		"/allocator page: populated content and enabled controls stay inside the viewport",
-		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
-		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
-		"/importer page: populated content and enabled controls stay inside the viewport",
-		"/settings page: populated content and enabled controls stay inside the viewport",
-		"/sync page: populated content and enabled controls stay inside the viewport",
-		"/privacy page: populated content and enabled controls stay inside the viewport",
-		"/terms page: populated content and enabled controls stay inside the viewport",
-		"/accounts/t1-acc-dbs page: populated content and enabled controls stay inside the viewport",
-		"/budgets/t1-b-manual page: populated content and enabled controls stay inside the viewport",
-		"/records/t1-r-partial page: populated content and enabled controls stay inside the viewport",
-		"/statements/t1-s-pending page: populated content and enabled controls stay inside the viewport",
-	],
 	"src/components/layout/month-header-slot.tsx#export.MonthHeaderPortal.behaviour": [
 		"monthly shell: the scope picker sits beside the month navigation and still scopes the month",
 		"monthly shell: Pending review links sit under the month subtitle and still open the sheet",
@@ -3862,11 +3798,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/privacy page: populated content and enabled controls stay inside the viewport",
 	],
 	"src/components/layout/shell-header.tsx#export.default.behaviour": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+		"top navigation: keyboard opens a page, Settings and its sections",
 		"/privacy page: populated content and enabled controls stay inside the viewport",
 	],
 	"src/components/layout/shell-header.tsx#display.interaction": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"src/components/layout/shell-header.tsx#display.values": [
 		"/ page: populated content and enabled controls stay inside the viewport",
@@ -3885,11 +3821,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/terms page: populated content and enabled controls stay inside the viewport",
 		"/accounts/t1-acc-dbs page: populated content and enabled controls stay inside the viewport",
 		"/budgets/t1-b-manual page: populated content and enabled controls stay inside the viewport",
-		"/records/t1-r-partial page: populated content and enabled controls stay inside the viewport",
-		"/statements/t1-s-pending page: populated content and enabled controls stay inside the viewport",
 	],
-	"src/components/layout/app-sidebar.tsx#display.values": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+	"src/components/layout/app-nav.tsx#display.values": [
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"src/components/ui/alert.tsx#export.Alert.behaviour": [
 		"alerts: render both variants with title, description and action",
@@ -4006,7 +3940,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"sidebar display: renders badge, footer, label and separator",
 	],
 	"src/components/allocate-bar.tsx#allocation.amount": [
-		"Allocation bar: not, partial and fully allocated states show finite values",
 		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
 	],
 	"src/components/charts/sparkline.tsx#chart.values": [
@@ -4378,7 +4311,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/(month)/page.tsx#route.navigation": [
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
-		"sidebar: clears drill history",
+		"top navigation: clears drill history",
 	],
 	"app/layout.tsx#shell.consumer": [
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
@@ -4388,9 +4321,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/statements/page.tsx#route.viewport": [
 		"/statements page: populated content and enabled controls stay inside the viewport",
-	],
-	"app/statements/[id]/page.tsx#route.viewport": [
-		"/statements/t1-s-pending page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/budgets/page.tsx#route.viewport": [
 		"/budgets page: populated content and enabled controls stay inside the viewport",
@@ -4415,9 +4345,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/records/page.tsx#route.viewport": [
 		"/records page: populated content and enabled controls stay inside the viewport",
-	],
-	"app/records/[id]/page.tsx#route.viewport": [
-		"/records/t1-r-partial page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/categories/page.tsx#route.viewport": [
 		"/categories page: populated content and enabled controls stay inside the viewport",
@@ -4452,10 +4379,6 @@ export const openFacets: Record<string, string[]> = {}
 /** Source-backed exceptions within otherwise applicable scenarios. These do not
  * exempt the remaining facets or provide behavioural evidence. */
 export const facetNotApplicable: Record<string, Record<string, string>> = {
-	"src/components/layout/app-header.tsx#display.values": {
-		"arbitrary long h1":
-			"src/components/layout/shell-header.tsx TITLES supplies every reachable AppHeader title; no entity name or user text reaches h1. Real fixed titles are checked by route.layout cases.",
-	},
 	"src/components/layout/shell-header.tsx#display.values": {
 		"arbitrary long h1":
 			"src/components/layout/shell-header.tsx TITLES and Page not found fallback are fixed strings. Entity names render in PageHeader h2, covered separately by long Record/Statement cases.",
@@ -4588,7 +4511,6 @@ export const scenarioProjects: Record<
 		"light",
 		"reduced-motion",
 	],
-	"app/statements/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/statements/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/budgets/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/budgets/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
@@ -4601,7 +4523,6 @@ export const scenarioProjects: Record<
 		"tall-desktop",
 		"reduced-motion",
 	],
-	"app/records/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/records/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/categories/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/(month)/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
@@ -4622,15 +4543,15 @@ export const scenarioProjects: Record<
 	"src/components/value-swap.tsx#display.values": ["reduced-motion"],
 	"src/components/table/row-groups.tsx#table.rows": ["mobile"],
 	"src/components/ui/sidebar.tsx#primitive.consumer": ["mobile"],
-	"src/components/layout/app-sidebar.tsx#export.default.behaviour": ["mobile"],
-	"src/components/layout/app-sidebar.tsx#display.interaction": ["mobile"],
-	"src/components/layout/app-sidebar.tsx#display.values": ["mobile"],
-	"src/components/layout/app-header.tsx#display.interaction": ["reduced-motion"],
+	"src/components/layout/app-nav.tsx#export.default.behaviour": ["mobile"],
+	"src/components/layout/app-nav.tsx#display.interaction": ["mobile"],
+	"src/components/layout/app-nav.tsx#display.values": ["mobile"],
 	"src/components/layout/shell-header.tsx#display.interaction": ["reduced-motion"],
 	"src/components/dialogs/account.tsx#editor.long": ["mobile"],
 	"src/components/dialogs/budget-editor.tsx#editor.long": ["mobile"],
 	"src/components/dialogs/record-creator.tsx#editor.long": ["mobile"],
 	"src/components/dialogs/record-editor.tsx#editor.long": ["mobile"],
+	"src/components/dialogs/statement.tsx#editor.long": ["mobile"],
 	"src/components/ui/alert.tsx#primitive.responsive": ["mobile"],
 	"src/components/ui/badge.tsx#primitive.responsive": ["mobile"],
 	"src/components/ui/button.tsx#primitive.responsive": ["mobile"],
@@ -4725,6 +4646,8 @@ export const scenarioProjectExemptions: Record<string, Record<string, string>> =
  * scroll" wording describes tall popup content scrolling on small viewports,
  * not execution in the tall-desktop project. */
 export const scenarioProjectLexiconExemptions: Record<string, string> = {
+	"src/components/dialogs/statement.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
 	"src/components/dialogs/account.tsx#editor.open":
 		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
 	"src/components/dialogs/budget-creator.tsx#editor.open":
@@ -4787,6 +4710,10 @@ export const modalAnimationCoverage: Record<string, string[]> = {
 		"editor popups: saving every existing editor preserves its popup and backdrop exit",
 		"editor popups: every create and update dialog exits before removal and reopens",
 	],
+	"src/components/dialogs/statement.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
 	"src/components/dialogs/statement-rule.tsx": [
 		"editor popups: saving every existing editor preserves its popup and backdrop exit",
 		"editor popups: successful creation preserves every creator exit",
@@ -4815,11 +4742,9 @@ export const modalAnimationCoverage: Record<string, string[]> = {
 	"src/components/sheets/pending-statement-confirmation.tsx": [
 		"search sheets: every sheet animates in and out on dismissal and completion",
 	],
-	"src/components/table/amount-filter.tsx": [
-		"mobile modal sheets: sidebar and amount filter animate in and out",
-	],
+	"src/components/table/amount-filter.tsx": ["mobile amount filter sheet: animates in and out"],
 	"src/components/ui/sidebar.tsx": [
-		"mobile modal sheets: sidebar and amount filter animate in and out",
+		"mobile sidebar sheet: trigger and Escape animate in and out",
 	],
 	"src/components/ui/command.tsx": [
 		"modal primitives: dialog, sheet, command and alert animate in and out",

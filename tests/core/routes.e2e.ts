@@ -25,22 +25,16 @@ const titles: Record<string, string> = {
 	"/terms": "Terms of Service",
 	"/accounts/t1-acc-dbs": "Account",
 	"/budgets/t1-b-manual": "Budget",
-	"/records/t1-r-partial": "Record",
-	"/statements/t1-s-pending": "Statement",
 }
 
 const routeReady: Record<string, string> = {
-	"/records": "Edit FairPrice Run",
 	"/accounts": "Rename Everyday Savings",
 	"/budgets": "Edit October Buffer",
 	"/categories": "Edit Groceries",
-	"/statements": "Edit pending statement",
 	"/allocator/pending": "Pasar malam snacks",
 	"/allocator/duplicates": "Review deletion",
 	"/accounts/t1-acc-dbs": "Edit Account",
 	"/budgets/t1-b-manual": "Edit Budget",
-	"/records/t1-r-partial": "Edit Record",
-	"/statements/t1-s-pending": "Edit Pending Statement",
 }
 
 async function expectRouteLayout(page: Page, route: string, title: string) {
@@ -53,7 +47,9 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 			page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
 		).toBeVisible()
 	if (route === "/statements" || route === "/allocator")
-		await expect(page.getByRole("link", { name: "Open statement" }).first()).toBeVisible()
+		await expect(
+			page.locator('a[href^="/statements?statement="]').filter({ visible: true }).first(),
+		).toBeVisible()
 	if (["/accounts", "/budgets", "/categories"].includes(route))
 		await expect(page.locator("main article").first()).toBeVisible()
 	if (route === "/")
@@ -83,6 +79,19 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 
 async function expectRouteButtons(page: Page, route: string) {
 	await expect(page.locator("main h2").first()).toBeVisible()
+	// Record and Statement rows carry no button of their own: the title link opens the item.
+	if (route === "/records")
+		await expect(
+			page
+				.getByRole("link", { name: "Open FairPrice Run", exact: true })
+				.filter({ visible: true }),
+		).toBeVisible()
+	if (route === "/statements")
+		await expect(
+			page
+				.locator('main a[href="/statements?statement=t1-s-pending"]')
+				.filter({ visible: true }),
+		).toBeVisible()
 	if (routeReady[route])
 		await expect(
 			page
@@ -100,7 +109,12 @@ async function expectRouteButtons(page: Page, route: string) {
 	const candidates = page.locator(
 		'button:visible, [role="button"]:visible, a[data-slot="button"]:visible',
 	)
-	expect(await candidates.count(), `${route}: inspect actual enabled controls`).toBeGreaterThan(0)
+	// Static pages have only links on desktop, now that the top navigation has no sidebar toggle.
+	if (!["/privacy", "/terms"].includes(route))
+		expect(
+			await candidates.count(),
+			`${route}: inspect actual enabled controls`,
+		).toBeGreaterThan(0)
 	const failures = await page
 		.locator('button:visible, [role="button"]:visible, a[data-slot="button"]:visible')
 		.evaluateAll(elements =>
@@ -195,7 +209,9 @@ test("Statement rules page: empty, populated and paused rules show conditions, a
 	await seedWorkspace(page, "empty")
 	await page.goto("/statement-rules")
 	await expect(page.getByText("No rules yet", { exact: true })).toBeVisible()
-	await page.getByRole("button", { name: "Create a rule", exact: true }).click()
+	// The empty state explains rules; the header's New rule is the one way to add one.
+	await expect(page.getByRole("button", { name: "Create a rule", exact: true })).toHaveCount(0)
+	await page.getByRole("button", { name: "New rule", exact: true }).click()
 	await expect(page.getByRole("dialog", { name: "New rule", exact: true })).toBeVisible()
 	await page.keyboard.press("Escape")
 
@@ -239,16 +255,19 @@ test("Statement rules page: empty, populated and paused rules show conditions, a
 	for (let index = 0; index < 5; index++) await fits(page, cards.nth(index))
 })
 
-test("Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload", async ({
+test("Statement rules page: the Settings tab opens it and pause, resume and delete persist after reload", async ({
 	page,
-	isMobile,
 }) => {
 	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
 	await page.goto("/records")
-	// Tap at once: the mobile flag settles in a mount effect, and a tap before it
-	// must still open the mobile sheet rather than collapse the desktop sidebar.
-	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
-	await page.getByRole("link", { name: "Rules", exact: true }).filter({ visible: true }).click()
+	await page
+		.getByRole("navigation", { name: "Main", exact: true })
+		.getByRole("link", { name: "Settings", exact: true })
+		.click()
+	await page
+		.getByRole("navigation", { name: "Settings sections", exact: true })
+		.getByRole("link", { name: "Statement rules", exact: true })
+		.click()
 	await expect(page).toHaveURL(/\/statement-rules$/)
 	await expect(page.locator("header h1")).toHaveText("Statement rules")
 
@@ -322,14 +341,7 @@ for (const [group, routes, tags] of [
 	],
 	[
 		"details",
-		[
-			"/accounts/t1-acc-dbs",
-			"/budgets/t1-b-manual",
-			"/records/t1-r-partial",
-			"/statements/t1-s-pending",
-			"/privacy",
-			"/terms",
-		],
+		["/accounts/t1-acc-dbs", "/budgets/t1-b-manual", "/privacy", "/terms"],
 		["@tall", "@reduced-motion"],
 	],
 ] as [string, string[], string[]][]) {
@@ -449,8 +461,6 @@ const PREMATURE = [
 	"No statements allocated yet",
 	"Account not found.",
 	"Budget not found.",
-	"Record not found.",
-	"Statement not found.",
 	"Page not found",
 ]
 
@@ -461,11 +471,9 @@ for (const [route, ready] of [
 	["/allocator/pending", "Pasar malam snacks"],
 	["/accounts/t1-acc-dbs", "Everyday Savings"],
 	["/budgets/t1-b-manual", "October Buffer"],
-	["/statements/t1-s-pending", "Pasar malam snacks"],
 	["/accounts", "Everyday Savings"],
 	["/categories", "Groceries"],
 	["/budgets", "October Buffer"],
-	["/records/t1-r-partial", "Hawker Dinner"],
 ] as const) {
 	test(`${route} page: stays silent while the database opens, then reveals its data`, async ({
 		page,
@@ -590,13 +598,24 @@ test.describe("pinned 15 October 2026 date", () => {
 			})
 		}
 	})
-	test("missing detail IDs: Record, Statement, Account and Budget pages resolve to not-found copy", async ({
+	test("missing detail IDs: Account and Budget pages resolve to not-found copy, and missing previews say so", async ({
 		page,
 	}) => {
 		await seedWorkspace(page)
-		for (const [route, missing] of [
+		for (const [route, name] of [
 			["records", "Record"],
 			["statements", "Statement"],
+		] as const) {
+			await test.step(`${route} preview: a missing ID says so and leaves the list usable`, async () => {
+				await page.goto(`/${route}?${name.toLowerCase()}=ui-regression-missing-id`)
+				await expect(
+					page.getByText(`Unable to open this ${name}.`, { exact: true }),
+				).toBeVisible()
+				await expect(page.getByRole("dialog")).toHaveCount(0)
+				await expect(page.locator("main h2")).toHaveText(`${name}s`)
+			})
+		}
+		for (const [route, missing] of [
 			["accounts", "Account"],
 			["budgets", "Budget"],
 		] as const) {
@@ -621,25 +640,17 @@ test.describe("pinned 15 October 2026 date", () => {
 					const data = getScenario("populated").tables
 					const record = data.records.find(row => row.id === IDS.records[key])
 					if (!record) throw new Error(`Missing fixture Record ${key}`)
-					await page.goto(`/records/${record.id}`)
-					await expect(
-						page.getByRole("heading", { name: record.title, exact: false }),
-					).toBeVisible()
-					await expect(
-						page
-							.getByText("Amount", { exact: true })
-							.first()
-							.locator("..")
-							.locator(".."),
-					).toContainText(
+					await page.goto(`/records?record=${record.id}`)
+					const preview = page.getByRole("dialog", { name: "Record", exact: true })
+					const header = preview.locator('[data-slot="dialog-header"]')
+					await expect(header).toContainText(record.title)
+					await expect(header).toContainText(
 						new Intl.NumberFormat("en-SG", {
 							style: "currency",
 							currency: "SGD",
 						}).format(record.amount),
 					)
-					await expect(
-						page.getByText("Category", { exact: true }).locator("..").locator(".."),
-					).toContainText(
+					await expect(header).toContainText(
 						data.categories.find(row => row.id === record.category_id)?.name ??
 							"Missing category fixture",
 					)
@@ -656,9 +667,11 @@ test.describe("pinned 15 October 2026 date", () => {
 						neutral: "Transfer / excluded",
 						automatic: "Automatic",
 					}[effectiveTreatment]
-					await expect(page.getByText(/Treatment ·/)).toHaveText(
-						`Treatment · ${treatment}`,
-					)
+					const item = (label: string) =>
+						preview
+							.getByText(label, { exact: true })
+							.locator("xpath=following-sibling::dd")
+					await expect(item("Treatment")).toContainText(treatment)
 					const canUseBudget =
 						effectiveTreatment === "spending" ||
 						(effectiveTreatment === "automatic" && record.amount < 0)
@@ -673,53 +686,45 @@ test.describe("pinned 15 October 2026 date", () => {
 								? (category?.default_monthly_budget_id ?? null)
 								: null
 						: null
-					if (!canUseBudget) {
-						await expect(page.getByText(/Monthly budget ·/)).toHaveCount(0)
-					} else {
-						await expect(page.getByText(/Monthly budget ·/)).toContainText(
-							effectiveBudgetId
+					await expect(item("Monthly budget")).toContainText(
+						!canUseBudget
+							? "Not counted"
+							: effectiveBudgetId
 								? (data.monthly_budgets.find(row => row.id === effectiveBudgetId)
 										?.name ?? "Missing monthly budget fixture")
 								: "Unbudgeted",
-						)
-					}
+					)
 					const allocations = data.allocations.filter(row => row.record_id === record.id)
 					if (!allocations.length)
 						await expect(
-							page
-								.getByText("No statements found.", { exact: true })
-								.filter({ visible: true }),
+							preview.getByText("No Statements", { exact: true }),
 						).toBeVisible()
 					else
-						for (const allocation of allocations)
+						for (const allocation of allocations) {
+							const statement = data.statements.find(
+								row => row.id === allocation.statement_id,
+							)
 							await expect(
-								page
-									.getByRole("link", { name: "Open statement" })
-									.and(
-										page.locator(
-											`[href="/statements/${allocation.statement_id}"]`,
-										),
-									),
+								preview.getByRole("button", {
+									name: `Open ${statement?.description || "No description"}`,
+									exact: true,
+								}),
 							).toBeVisible()
+						}
+					// Missing optional values read as a dash, not as blank space.
+					if (key === "nulls") await expect(item("People")).toHaveText("—")
 					if (key === "partialPending")
-						await expect(
-							page
-								.getByText("Amount", { exact: true })
-								.first()
-								.locator("..")
-								.locator(".."),
-						).toContainText("[-$25.00]")
+						await expect(preview).toContainText("-$25.00 of -$60.00 allocated")
 				})
 			}
 		})
 	}
-	test("detail pages: related rows render real content for Account, Statement and Budget details", async ({
+	test("detail pages: related rows render real content for Account and Budget details", async ({
 		page,
 	}) => {
 		await seedWorkspace(page)
 		for (const [route, heading, content] of [
 			[`/accounts/${IDS.accounts.dbs}`, "Everyday Savings", "Showing"],
-			[`/statements/${IDS.statements.pending}`, "Pasar malam snacks", "Pasar Malam"],
 			[`/budgets/${IDS.budgets.manual}`, "October Buffer", "FairPrice Run"],
 		] as const) {
 			await test.step(`${route} detail: renders real related rows`, async () => {
@@ -884,29 +889,23 @@ test.describe("pinned 15 October 2026 date", () => {
 	}) => {
 		await seedWorkspace(page)
 		await test.step("Statement detail: split Allocation shows its assigned amount and confirmed Account", async () => {
-			await page.goto(`/statements/${IDS.statements.splitPair[0]}`)
-			await expect(
-				page.getByRole("heading", { name: /Uniqlo Basics · Contactless 1001/ }),
-			).toBeVisible()
-			await expect(page.getByText("One Card", { exact: true }).first()).toBeVisible()
-			await expect(
-				page.getByRole("link", { name: "Open Uniqlo Basics", exact: true }),
-			).toBeVisible()
-			await expect(
-				page.getByText("Amount", { exact: true }).first().locator("..").locator(".."),
-			).toContainText("-$60.00")
+			await page.goto(`/statements?statement=${IDS.statements.splitPair[0]}`)
+			const preview = page.getByRole("dialog", { name: "Statement", exact: true })
+			const header = preview.locator('[data-slot="dialog-header"]')
+			await expect(header).toContainText("Uniqlo Basics · Contactless 1001")
+			await expect(header).toContainText("-$60.00")
+			await expect(header).toContainText("One Card")
+			await expect(preview.getByText("Confirmed", { exact: true })).toBeVisible()
+			const record = preview.getByRole("button", { name: "Open Uniqlo Basics", exact: true })
+			await expect(record).toContainText("-$60.00")
+			await expect(record).toContainText("of -$100.00")
 		})
 		await test.step("Statement detail: unallocated confirmed Statement shows resolved empty Records", async () => {
-			await page.goto(`/statements/${IDS.statements.unallocated[0]}`)
-			await expect(
-				page.getByRole("heading", { name: /DON DON DONKI PURCHASE 8821/ }),
-			).toBeVisible()
-			await expect(
-				page.getByText("No records found.", { exact: true }).filter({ visible: true }),
-			).toBeVisible()
-			await expect(
-				page.getByRole("button", { name: "Edit Pending Statement", exact: true }),
-			).toHaveCount(0)
+			await page.goto(`/statements?statement=${IDS.statements.unallocated[0]}`)
+			const preview = page.getByRole("dialog", { name: "Statement", exact: true })
+			await expect(preview).toContainText("DON DON DONKI PURCHASE 8821")
+			await expect(preview.getByText("No Records", { exact: true })).toBeVisible()
+			await expect(preview.getByRole("button", { name: "Edit", exact: true })).toHaveCount(0)
 		})
 	})
 	test("Budget detail: manual and automatic membership sums reconcile", async ({ page }) => {
@@ -959,8 +958,8 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 	await test.step("Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment", async () => {
 		const name = `Daily 早餐 café ${"long plan ".repeat(7)}`.trim()
 		await patchRows(page, "monthly_budgets", [{ id: "t1-mb-daily", name }])
-		await page.goto("/records/t1-r-groceries")
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+		await page.goto("/records?record=t1-r-groceries")
+		await page.getByRole("button", { name: "Edit", exact: true }).click()
 		const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
 		const budget = dialog.locator("#monthly_budget_id")
 		await budget.click()
@@ -1014,18 +1013,20 @@ test("Statement detail: long pending description stays readable on list and deta
 	await expect(row).toContainText(description)
 	await expect(row.getByText("Pending", { exact: true })).toBeVisible()
 	await fits(page, row)
-	await row.getByRole("link", { name: "Open statement", exact: true }).click()
-	await expect(page.locator("main h2")).toContainText(description)
-	await expect(page.getByText("Status · Pending Statement", { exact: true })).toBeVisible()
-	await fits(page, page.locator("main h2"))
-	await fits(page, page.getByRole("button", { name: "Edit Pending Statement", exact: true }))
-	await expect(page.getByRole("link", { name: "Open Pasar Malam", exact: true })).toBeVisible()
-	await page.goto(`/statements/${IDS.statements.splitPair[0]}`)
-	await expect(page.getByText("Imported day index · 1", { exact: true })).toBeVisible()
-	await expect(page.getByText("Status · Pending Statement", { exact: true })).toHaveCount(0)
+	await row.locator('a[href^="/statements?statement="]').click()
+	const preview = page.getByRole("dialog", { name: "Statement", exact: true })
+	await expect(preview.locator('[data-slot="dialog-header"]')).toContainText(description)
+	await expect(preview.getByText("Awaiting confirmation", { exact: true })).toBeVisible()
+	await fits(page, preview.locator('[data-slot="dialog-header"]'))
+	await fits(page, preview.getByRole("button", { name: "Edit", exact: true }))
 	await expect(
-		page.getByRole("button", { name: "Edit Pending Statement", exact: true }),
-	).toHaveCount(0)
+		preview.getByRole("button", { name: "Open Pasar Malam", exact: true }),
+	).toBeVisible()
+	await page.goto(`/statements?statement=${IDS.statements.splitPair[0]}`)
+	const confirmed = page.getByRole("dialog", { name: "Statement", exact: true })
+	await expect(confirmed.getByText("Confirmed", { exact: true })).toBeVisible()
+	await expect(confirmed.getByText("Awaiting confirmation", { exact: true })).toHaveCount(0)
+	await expect(confirmed.getByRole("button", { name: "Edit", exact: true })).toHaveCount(0)
 })
 
 test("narrow desktop: pages stack by available width and popups keep side margins", {

@@ -138,8 +138,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 	const recordColumns = useRecordColumns<Record>({
 		grouped: true,
-		pageName: budget?.name ?? "Budget",
-		onEdit: handleEdit,
+		onOpen: handleEdit,
 		extraActions: record => (
 			<Button
 				variant="ghost"
@@ -156,8 +155,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	})
 	const recordMobileRow = useRecordMobileRow<Record>({
 		grouped: true,
-		pageName: budget?.name ?? "Budget",
-		onEdit: handleEdit,
+		onOpen: handleEdit,
 		extraActions: record => (
 			<Button
 				variant="ghost"
@@ -361,6 +359,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							columns={recordColumns}
 							mobileRow={recordMobileRow}
 							groupBy={byDay<Record>("Record")}
+							onRowClick={handleEdit}
 							emptyMessage="No records found."
 						/>
 					</CardContent>
@@ -373,7 +372,6 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 					title={drillTitle}
 					description={`${budget.name} · ${pluralize(drillRecords.length, "Record")} · ${formatCurrency(budgetSpent(drillRecords))}`}
 					records={drillRecords}
-					pageName={budget.name}
 					onClose={closeDrill}
 				/>
 			) : null}

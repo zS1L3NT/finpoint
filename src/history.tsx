@@ -100,9 +100,9 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 	useEffect(() => {
 		// Cover ordinary links too, including links rendered by static content pages.
 		// An in-flight ordinary origin survives unrelated input: only another
-		// unmodified ordinary navigation replaces it. Tab and sidebar navigations
-		// never create Back entries, so they discard it instead. Workflow tabs
-		// have no explicit clear handler (unlike the sidebar and monthly tabs,
+		// unmodified ordinary navigation replaces it. Tab and top navigation
+		// links never create Back entries, so they discard it instead. Section tabs
+		// have no explicit clear handler (unlike the top navigation and monthly tabs,
 		// which clear through their own onClick), so they also clear the
 		// committed drill stack here for consistent tab semantics.
 		const rememberLink = (event: MouseEvent) => {
@@ -116,12 +116,12 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 			)
 				return
 			const link = event.target instanceof Element ? event.target.closest("a[href]") : null
-			if (!(link instanceof HTMLAnchorElement)) return
-			if (
-				link.closest('[data-sidebar], [role="tablist"], nav[aria-label="Workflow views"]')
-			) {
+			// A link that opens its target over this page (a Record's editor) navigates nowhere.
+			if (!(link instanceof HTMLAnchorElement) || link.hasAttribute("data-opens-in-place"))
+				return
+			if (link.closest('[data-app-nav], [role="tablist"], [data-tab-nav]')) {
 				pendingLink.current = null
-				if (link.closest('nav[aria-label="Workflow views"]')) {
+				if (link.closest("[data-tab-nav]")) {
 					historyRef.current = []
 					setHistory([])
 				}

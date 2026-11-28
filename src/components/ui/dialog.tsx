@@ -12,8 +12,9 @@ import { ScrollBar } from "@/components/ui/scroll-area"
 function Dialog({ onOpenChange, ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} onOpenChange={(open, details) => {
     // Radix sheets are portalled outside the Base UI dialog tree. Let the
-    // focused sheet handle Escape before closing its underlying editor.
-    if (!open && details.reason === "escape-key" && details.event.target instanceof Element && details.event.target.closest('[data-slot="sheet-content"]')) {
+    // focused sheet handle Escape before closing its underlying editor. A dialog
+    // mounted inside a sheet is nearer the focus than that sheet, and closes itself.
+    if (!open && details.reason === "escape-key" && details.event.target instanceof Element && details.event.target.closest('[data-slot="sheet-content"], [data-slot="dialog-content"]')?.getAttribute("data-slot") === "sheet-content") {
       details.cancel()
       details.allowPropagation()
       return
@@ -54,17 +55,20 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  container,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
+  /** Portal target. A dialog opened from a Radix sheet mounts inside it, so the sheet's focus trap and pointer lock include the dialog. */
+  container?: DialogPrimitive.Portal.Props["container"]
 }) {
   return (
-    <DialogPortal>
+    <DialogPortal container={container}>
       <DialogOverlay />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-[50vw] z-50 grid max-h-[calc(100svh-1.5rem)] min-w-0 w-[calc(100vw-1.5rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-x-hidden overflow-y-auto rounded-xl has-[>[data-slot=dialog-body]]:grid-rows-[auto_minmax(0,1fr)_auto] has-[>[data-slot=dialog-body]]:overflow-y-hidden bg-popover p-4 text-sm text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none transition-[opacity,transform] duration-200 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 starting:transform-[translateY(6px)] data-starting-style:transform-[translateY(6px)] data-ending-style:transform-[translateY(6px)] motion-reduce:transition-none motion-reduce:transform-none motion-reduce:starting:transform-none motion-reduce:data-starting-style:transform-none motion-reduce:starting:opacity-100 motion-reduce:data-starting-style:opacity-100 [&>*]:min-w-0 md:max-h-[calc(100svh-2rem)] md:w-[calc(100vw-2rem)] md:max-w-sm",
+          "fixed top-1/2 left-[50vw] z-50 grid max-h-[calc(100svh-1.5rem)] min-w-0 w-[calc(100vw-1.5rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-x-hidden overflow-y-auto rounded-xl has-[>[data-slot=dialog-body]]:grid-rows-[auto_minmax(0,1fr)_auto] has-[>[data-slot=dialog-body]]:overflow-y-hidden bg-popover p-4 text-sm text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none transition-[opacity,transform,filter,scale] duration-200 data-nested-dialog-open:scale-[0.97] data-nested-dialog-open:brightness-75 motion-reduce:data-nested-dialog-open:scale-100 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 starting:transform-[translateY(6px)] data-starting-style:transform-[translateY(6px)] data-ending-style:transform-[translateY(6px)] motion-reduce:transition-none motion-reduce:transform-none motion-reduce:starting:transform-none motion-reduce:data-starting-style:transform-none motion-reduce:starting:opacity-100 motion-reduce:data-starting-style:opacity-100 [&>*]:min-w-0 md:max-h-[calc(100svh-2rem)] md:w-[calc(100vw-2rem)] md:max-w-sm",
           className
         )}
         {...props}

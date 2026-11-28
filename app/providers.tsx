@@ -5,9 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { MotionConfig } from "framer-motion"
 import { useEffect, useState } from "react"
 import { preloadCategoryIcons } from "@/components/icon"
-import AppSidebar from "@/components/layout/app-sidebar"
 import ShellHeader from "@/components/layout/shell-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { db } from "@/data/db"
@@ -63,25 +61,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 			<HistoryProvider>
 				<UrlParamsProvider>
 					<TooltipProvider delayDuration={0}>
-						<SidebarProvider
-							defaultOpen
-							style={
-								{
-									"--sidebar-width": "calc(var(--spacing) * 72)",
-									"--header-height": "calc(var(--spacing) * 12)",
-								} as React.CSSProperties
-							}
-						>
-							<Boot />
-							<Toaster />
-							<Analytics />
-							<SpeedInsights />
-							<AppSidebar />
-							<SidebarInset className="min-h-full">
-								<ShellHeader />
-								{children}
-							</SidebarInset>
-						</SidebarProvider>
+						<Boot />
+						<Toaster />
+						<Analytics />
+						<SpeedInsights />
+						<div className="flex min-h-svh flex-col">
+							<ShellHeader />
+							<main className="flex-1">{children}</main>
+						</div>
 					</TooltipProvider>
 				</UrlParamsProvider>
 			</HistoryProvider>

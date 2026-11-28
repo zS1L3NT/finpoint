@@ -1,11 +1,9 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
-import { useMemo, useState } from "react"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { useMemo } from "react"
+import Icon from "@/components/icon"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { useHistory } from "@/history"
 import { canUseMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
 import { pathRecord } from "@/routes"
@@ -15,10 +13,9 @@ type RecordRow = Record & { pivot?: Allocation }
 
 type RecordTableOptions<TRecord extends RecordRow> = {
 	amount?: "amount" | "allocated"
-	pageName?: string
+	/** Opens the Record. Pass the same handler as the table's `onRowClick`, so the whole row opens it. */
+	onOpen?: (record: TRecord) => void | Promise<unknown>
 	extraActions?: (record: TRecord) => React.ReactNode
-	actionWidth?: string
-	onEdit?: (record: TRecord) => void | Promise<unknown>
 	/** Rows sit under day headers, so only the time is shown. */
 	grouped?: boolean
 }
@@ -41,7 +38,7 @@ function pendingReason(record: Record) {
 	if (record.allocated_amount === 0) return "No statements allocated yet"
 	if (record.allocated_amount !== record.amount)
 		return `${formatCurrency(record.allocated_amount)} of ${formatCurrency(record.amount)} allocated`
-	if (record.pending_statement_count) return "Awaiting the imported bank statement"
+	if (record.pending_statement_count) return "Awaiting confirmation of a Pending Statement"
 	return "Pending"
 }
 
@@ -61,14 +58,18 @@ export function PendingBadge({ record }: { record: Record }) {
 export function RecordDetails({
 	record,
 	details,
+	status,
 	className,
 }: {
 	record: Record
 	details: React.ReactNode
+	/** Leads the line, for rows too narrow to show the status beside the title. */
+	status?: React.ReactNode
 	className?: string
 }) {
 	return (
 		<p className={cn("flex min-w-0 items-center gap-1 text-muted-foreground", className)}>
+			{status}
 			<RecordMonthlyBudget record={record} inline />
 			{details ? <span className="min-w-0 truncate">· {details}</span> : null}
 		</p>
@@ -114,74 +115,37 @@ export function RecordAmountCell({
 	)
 }
 
-function RecordEditButton<TRecord extends RecordRow>({
+/** The Record's title. With `onOpen` it is the row's keyboard and screen reader way to open the Record. */
+function RecordTitle<TRecord extends RecordRow>({
 	record,
-	onEdit,
+	onOpen,
 }: {
 	record: TRecord
-	onEdit: (record: TRecord) => void | Promise<unknown>
+	onOpen?: (record: TRecord) => void | Promise<unknown>
 }) {
-	const [busy, setBusy] = useState(false)
-
+	if (!onOpen) return <span className="min-w-0 truncate font-medium">{record.title}</span>
+	// A real link, so a modified click still opens the Record's own page in a new tab.
 	return (
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			title="Edit"
-			aria-label={`Edit ${record.title}`}
-			aria-busy={busy}
-			onClick={() => {
-				if (busy) return
-				setBusy(true)
-				void Promise.resolve(onEdit(record)).finally(() => setBusy(false))
+		<Link
+			href={pathRecord(record.id)}
+			data-opens-in-place
+			aria-label={`Open ${record.title}`}
+			className="min-w-0 truncate rounded-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+			onClick={event => {
+				if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+				event.preventDefault()
+				void onOpen(record)
 			}}
 		>
-			<IconifyIcon icon={busy ? "lucide:loader-circle" : "lucide:pencil"} />
-		</Button>
+			{record.title}
+		</Link>
 	)
-}
-
-function RecordActions<TRecord extends RecordRow>({
-	record,
-	options,
-}: {
-	record: TRecord
-	options: RecordTableOptions<TRecord>
-}) {
-	const { handlePush } = useHistory()
-	const { pageName, extraActions, onEdit } = options
-	return (
-		<div className="flex shrink-0 items-center justify-end gap-0.5">
-			{onEdit ? <RecordEditButton record={record} onEdit={onEdit} /> : null}
-			{extraActions?.(record)}
-			<Button variant="ghost" size="icon-sm" title="Open" asChild>
-				<Link
-					href={pathRecord(record.id)}
-					aria-label={`Open ${record.title}`}
-					onClick={pageName ? handlePush(pageName) : undefined}
-				>
-					<IconifyIcon icon="lucide:chevron-right" />
-				</Link>
-			</Button>
-		</div>
-	)
-}
-
-function RecordActionsCell<TRecord extends RecordRow>({
-	row,
-	column,
-}: CellContext<TRecord, unknown>) {
-	const { recordActions } = column.columnDef.meta as {
-		recordActions: RecordTableOptions<TRecord>
-	}
-	return <RecordActions record={row.original} options={recordActions} />
 }
 
 export function useRecordColumns<TRecord extends RecordRow>({
 	amount = "amount",
-	pageName,
+	onOpen,
 	extraActions,
-	onEdit,
 	grouped = false,
 }: RecordTableOptions<TRecord>): ColumnDef<TRecord>[] {
 	return useMemo(
@@ -193,9 +157,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 						<Icon {...row.original.category} size={14} />
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
-								<span className="min-w-0 truncate font-medium">
-									{row.original.title}
-								</span>
+								<RecordTitle record={row.original} onOpen={onOpen} />
 								<PendingBadge record={row.original} />
 							</p>
 							<RecordDetails
@@ -244,25 +206,27 @@ export function useRecordColumns<TRecord extends RecordRow>({
 					/>
 				),
 			},
-			{
-				id: "actions",
-				meta: {
-					recordActions: { pageName, extraActions, onEdit },
-					width: extraActions ? "w-36" : onEdit ? "w-24" : "w-14",
-				},
-				cell: RecordActionsCell,
-			},
+			...(extraActions
+				? [
+						{
+							id: "actions",
+							meta: { width: "w-14" },
+							cell: ({ row }: CellContext<TRecord, unknown>) => (
+								<div className="flex justify-end">{extraActions(row.original)}</div>
+							),
+						},
+					]
+				: []),
 		],
-		[amount, pageName, extraActions, onEdit, grouped],
+		[amount, onOpen, extraActions, grouped],
 	)
 }
 
 export function useRecordMobileRow<TRecord extends RecordRow>({
 	amount = "amount",
-	pageName,
+	onOpen,
 	extraActions,
 	leading,
-	onEdit,
 	grouped = false,
 }: RecordTableOptions<TRecord> & {
 	leading?: (record: TRecord) => React.ReactNode
@@ -279,12 +243,13 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 						{leading?.(record)}
 						<Icon {...record.category} size={14} />
 						<div className="min-w-0 flex-1">
-							<p className="flex items-center gap-1.5">
-								<span className="min-w-0 truncate font-medium">{record.title}</span>
-								<PendingBadge record={record} />
+							<p className="flex">
+								<RecordTitle record={record} onOpen={onOpen} />
 							</p>
+							{/* The status shares the second line so the title keeps the full width. */}
 							<RecordDetails
 								record={record}
+								status={<PendingBadge record={record} />}
 								details={[record.subtitle, formatRowTime(record.datetime, grouped)]
 									.filter(Boolean)
 									.join(" · ")}
@@ -297,10 +262,14 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 						value={value}
 						showAllocated={amount === "amount" && record.is_pending}
 					/>
-					<RecordActions record={record} options={{ pageName, extraActions, onEdit }} />
+					{extraActions ? (
+						<div className="flex justify-end">{extraActions(record)}</div>
+					) : (
+						<span />
+					)}
 				</>
 			)
 		},
-		[amount, pageName, extraActions, leading, onEdit, grouped],
+		[amount, onOpen, extraActions, leading, grouped],
 	)
 }

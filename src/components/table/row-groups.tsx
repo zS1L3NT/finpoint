@@ -20,7 +20,9 @@ export type RowGroup<TData> = {
  * Mobile rows render as `[main, amount, actions]`.
  */
 export const MOBILE_LIST_CLASS = "grid grid-cols-[minmax(0,1fr)_auto_auto]"
-export const MOBILE_ROW_CLASS = "col-span-full grid grid-cols-subgrid items-center gap-x-3"
+// Cells space themselves, so a row with no actions leaves no trailing gap after its amount.
+export const MOBILE_ROW_CLASS =
+	"col-span-full grid grid-cols-subgrid items-center [&>*:first-child]:pr-3 [&>*:nth-child(3):not(:empty)]:pl-3"
 
 /** Index of each group's first row → that group's key and members, in display order. */
 export function groupStarts<TData>(rows: TData[], group: RowGroup<TData> | undefined) {

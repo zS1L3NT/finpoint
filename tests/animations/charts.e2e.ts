@@ -110,16 +110,6 @@ test("chart intro: overview and Budget charts grow once and hover or resize neve
 	for (const destination of ["overview", "budget"] as const) {
 		await test.step(`chart intro: ${destination} charts grow real graph marks once and respect reduced motion`, async () => {
 			await page.goto(destination === "overview" ? "/records" : "/budgets")
-			// Before hydration the trigger does nothing, so retry until the sheet is open.
-			if (destination === "overview" && isMobile)
-				await expect(async () => {
-					await page.locator('header [data-slot="sidebar-trigger"]').click()
-					await expect(
-						page.getByRole("dialog", { name: "Sidebar", exact: true }),
-					).toBeVisible({
-						timeout: 2000,
-					})
-				}).toPass()
 			const titles = destination === "overview" ? overviewCharts : ["Spending over time"]
 			const frames = await chartFrames(page, titles, async () => {
 				if (destination === "overview")
@@ -170,7 +160,7 @@ test("chart intro: overview and Budget charts grow once and hover or resize neve
 					`${title}: graph settles`,
 				).toBe(1)
 			}
-			// Hover and sidebar resize may update geometry; they must not restart the grow-in clip.
+			// Hover and a window resize may update geometry; they must not restart the grow-in clip.
 			const chart = page
 				.locator('[data-slot="card"]')
 				.filter({
@@ -197,21 +187,16 @@ test("chart intro: overview and Budget charts grow once and hover or resize neve
 			await page.waitForTimeout(600)
 			if (!isMobile) {
 				const viewport = page.viewportSize()
-				// Wide viewports cap content width (container mx-auto), which absorbs
-				// the sidebar toggle before it reaches the chart. Narrow below the
-				// cap first so the toggle genuinely resizes the chart; restoring
-				// afterwards is a second observed resize, not silent cleanup.
-				const narrowed = viewport !== null && viewport.width > 1600
-				if (narrowed && viewport)
-					await page.setViewportSize({ width: 1500, height: viewport.height })
+				if (!viewport) throw new Error("Expected a viewport")
+				// Narrow the window so the chart genuinely resizes; restoring afterwards
+				// is a second observed resize, not silent cleanup.
 				const width = await chart.evaluate(element => element.getBoundingClientRect().width)
-				await page.locator('header [data-slot="sidebar-trigger"]').click()
+				await page.setViewportSize({ width: 1100, height: viewport.height })
 				await expect
 					.poll(() => chart.evaluate(element => element.getBoundingClientRect().width))
 					.not.toBe(width)
 				await page.waitForTimeout(600)
-				if (narrowed && viewport)
-					await page.setViewportSize({ width: viewport.width, height: viewport.height })
+				await page.setViewportSize({ width: viewport.width, height: viewport.height })
 				await page.waitForTimeout(600)
 			}
 			const replayed = await watcher.evaluate(state => {
@@ -317,7 +302,7 @@ test("Monthly Budget donut: focus dims sibling segments in a smooth transition",
 		// SVGElement here, which instanceof HTMLElement excludes, so an HTML-only
 		// blur predicate would leave the path focused and dimmed.
 		await page.mouse.move(0, 0)
-		await page.locator('header [data-slot="sidebar-trigger"]').focus()
+		await page.locator("[data-app-nav] a").first().focus()
 		await expect
 			.poll(() => groupElement.evaluate(element => getComputedStyle(element).opacity))
 			.toBe("1")

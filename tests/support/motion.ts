@@ -120,9 +120,11 @@ async function startSampling(
 					style.clipPath !== "inset(50%)" &&
 					rect.width > 0 &&
 					rect.height > 0 &&
+					// A row resting on the fold is off screen; half a pixel absorbs the sub-pixel
+					// noise that would otherwise flip it in and out while its rise transform resolves.
 					(insidePopup ||
-						(top + rect.height > 0 &&
-							top < innerHeight &&
+						(top + rect.height > 0.5 &&
+							top < innerHeight - 0.5 &&
 							rect.right > 0 &&
 							rect.left < innerWidth))
 				)

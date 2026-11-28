@@ -67,8 +67,8 @@ export default function RecordAnalyticsFields({
 			: monthlyBudgetId || UNBUDGETED
 
 	return (
-		<div className="grid gap-4 rounded-lg border p-4">
-			<p className="text-sm font-semibold">Analytics</p>
+		<section className="grid gap-4 rounded-lg border p-4">
+			<h3 className="text-sm font-semibold">Analytics</h3>
 			<FieldGroup>
 				<SelectField
 					id="analytics_treatment"
@@ -145,6 +145,6 @@ export default function RecordAnalyticsFields({
 					) : null}
 				</AnimatePresence>
 			</FieldGroup>
-		</div>
+		</section>
 	)
 }

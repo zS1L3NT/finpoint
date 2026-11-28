@@ -3,7 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useMemo, useState } from "react"
 import AccountDialog from "@/components/dialogs/account"
-import PendingStatementDialog from "@/components/dialogs/pending-statement"
+import StatementDialog from "@/components/dialogs/statement"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
 import { formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
-import { getAccount, listAccounts } from "@/logic/accounts"
+import { getAccount } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
 import { pathAccounts } from "@/routes"
@@ -24,12 +24,11 @@ import type { Statement } from "@/types"
 export default function AccountPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = use(params)
 	const [isEditingAccount, setIsEditingAccount] = useState(false)
-	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
+	const [openStatement, setOpenStatement] = useState<Statement | null>(null)
 
 	const { page, pageSize } = usePaginatedTableState()
 
 	const account = useLiveQuery(() => (id ? getAccount(id).catch(() => null) : null), [id])
-	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const statementsQuery = useLiveQuery(() => listStatements({ account_id: id ?? null }), [id])
 	const statements = statementsQuery ?? []
 	const paginated = useMemo(
@@ -39,14 +38,12 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 
 	const columns = useStatementColumns<Statement>({
 		showAccount: false,
-		pageName: `Account ${account?.name ?? ""}`,
-		onEdit: setEditingStatement,
+		onOpen: setOpenStatement,
 		grouped: true,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
 		showAccount: false,
-		pageName: `Account ${account?.name ?? ""}`,
-		onEdit: setEditingStatement,
+		onOpen: setOpenStatement,
 		grouped: true,
 	})
 
@@ -134,17 +131,17 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}
+					onRowClick={setOpenStatement}
 					emptyMessage="No statements found."
 				/>
 			</PageContent>
 
-			{editingStatement ? (
-				<PendingStatementDialog
-					statement={editingStatement}
-					accounts={accounts}
+			{openStatement ? (
+				<StatementDialog
+					statement={openStatement}
 					isOpen
-					setIsOpen={open => {
-						if (!open) setEditingStatement(null)
+					setIsOpen={isOpen => {
+						if (!isOpen) setOpenStatement(null)
 					}}
 				/>
 			) : null}

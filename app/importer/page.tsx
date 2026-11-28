@@ -11,6 +11,7 @@ import TextField from "@/components/form/text-field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import SettingsTabs from "@/components/settings-tabs"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -148,6 +149,8 @@ export default function ImporterPage() {
 	return (
 		<>
 			<PageContent>
+				<SettingsTabs active="import" />
+
 				<PageHeader
 					title="Importer"
 					subtitle="Upload one or more bank CSV exports, create any missing accounts, and move straight into allocation once the feed is loaded."
@@ -156,7 +159,7 @@ export default function ImporterPage() {
 				/>
 
 				<form
-					className="grid max-w-3xl gap-6"
+					className="grid max-w-5xl gap-6"
 					onSubmit={event => {
 						event.preventDefault()
 						void form.handleSubmit()

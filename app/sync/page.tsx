@@ -8,6 +8,7 @@ import DriveOverwriteConfirmation from "@/components/dialogs/drive-overwrite-con
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import SettingsTabs from "@/components/settings-tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -573,6 +574,8 @@ export default function DataSettingsPage() {
 	return (
 		<>
 			<PageContent>
+				<SettingsTabs active="data" />
+
 				<PageHeader
 					title="Data"
 					subtitle="Your data lives in this browser. Back it up automatically to your own Google Drive, or to a file you keep."
@@ -686,29 +689,6 @@ export default function DataSettingsPage() {
 								)}
 							</div>
 						)}
-					</section>
-
-					<section
-						aria-label="Data in this browser"
-						className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-3 lg:grid-cols-6"
-					>
-						{COUNT_ROWS.map(([key, label, icon]) => (
-							<div key={key} className="grid gap-1 bg-card px-4 py-3">
-								<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-									<IconifyIcon icon={icon} className="size-3.5" />
-									{label}
-								</span>
-								{counts ? (
-									<span className="text-lg font-semibold tracking-tight tabular-nums">
-										{(counts[key] ?? 0).toLocaleString()}
-									</span>
-								) : (
-									<span className="invisible text-lg font-semibold tracking-tight">
-										0
-									</span>
-								)}
-							</div>
-						))}
 					</section>
 
 					<div className="grid gap-6 lg:grid-cols-2">
@@ -881,7 +861,8 @@ export default function DataSettingsPage() {
 							)}
 						</Card>
 
-						<Card className="gap-0 py-0">
+						{/* With Drive unavailable, the method that works leads. */}
+						<Card className={cn("gap-0 py-0", driveUnconfigured && "order-first")}>
 							<MethodHeader
 								icon="lucide:file-json"
 								title="Backup file"
@@ -985,6 +966,30 @@ export default function DataSettingsPage() {
 							</CardContent>
 						</Card>
 					</div>
+
+					{/* What is stored follows the ways to keep it, so a backup is one step from the status. */}
+					<section
+						aria-label="Data in this browser"
+						className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-3 lg:grid-cols-6"
+					>
+						{COUNT_ROWS.map(([key, label, icon]) => (
+							<div key={key} className="grid gap-1 bg-card px-4 py-3">
+								<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+									<IconifyIcon icon={icon} className="size-3.5" />
+									{label}
+								</span>
+								{counts ? (
+									<span className="text-lg font-semibold tracking-tight tabular-nums">
+										{(counts[key] ?? 0).toLocaleString()}
+									</span>
+								) : (
+									<span className="invisible text-lg font-semibold tracking-tight">
+										0
+									</span>
+								)}
+							</div>
+						))}
+					</section>
 
 					<Card className="gap-0 py-0">
 						<CardHeader className="border-b py-4">

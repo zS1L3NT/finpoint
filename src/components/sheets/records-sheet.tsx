@@ -5,6 +5,7 @@ import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import RecordEditorDialog from "@/components/dialogs/record-editor"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import DataTable from "@/components/table/data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useMonthParams } from "@/hooks/use-month-params"
+import { useRecordEditor } from "@/hooks/use-record-editor"
 import { type RecordsSheetFilters, useRecordsSheet } from "@/hooks/use-records-sheet"
 import { treatmentLabel } from "@/lib/analytics"
 import { pluralize } from "@/lib/utils"
@@ -37,14 +39,11 @@ export default function RecordsSheet() {
 	// Phones get a bottom sheet; wider screens keep the side sheet.
 	const isMobile = useIsMobile()
 	const categories = useLiveQuery(() => listCategories(), [])
-	const columns = useRecordColumns<Record>({
-		pageName: "Dashboard",
-		grouped: true,
-	})
-	const mobileRow = useRecordMobileRow<Record>({
-		pageName: "Dashboard",
-		grouped: true,
-	})
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
+	// The Record editor mounts inside the sheet, so the sheet keeps focus and pointer input on it.
+	const [content, setContent] = useState<HTMLDivElement | null>(null)
+	const columns = useRecordColumns<Record>({ onOpen: handleEdit, grouped: true })
+	const mobileRow = useRecordMobileRow<Record>({ onOpen: handleEdit, grouped: true })
 
 	// Keep the last filters while the sheet slides out, so its content does not blank mid-exit.
 	const key = filters ? JSON.stringify(filters) : null
@@ -108,6 +107,9 @@ export default function RecordsSheet() {
 	return (
 		<Sheet open={!!filters} onOpenChange={isOpen => !isOpen && dismiss()}>
 			<SheetContent
+				ref={setContent}
+				// Escape closes the open Record editor first, not the sheet under it.
+				onEscapeKeyDown={event => editingRecord && event.preventDefault()}
 				side={isMobile ? "bottom" : "right"}
 				overlayClassName="supports-backdrop-filter:backdrop-blur-xs"
 				className="gap-0 data-[side=bottom]:max-h-[85dvh] data-[side=bottom]:rounded-t-2xl md:data-[side=right]:max-w-xl"
@@ -136,6 +138,7 @@ export default function RecordsSheet() {
 									columns={columns}
 									mobileRow={mobileRow}
 									groupBy={byRecordDay}
+									onRowClick={handleEdit}
 								/>
 							) : later.length ? null : (
 								<p className="text-muted-foreground">No matching Records</p>
@@ -158,6 +161,7 @@ export default function RecordsSheet() {
 											columns={columns}
 											mobileRow={mobileRow}
 											groupBy={byRecordDay}
+											onRowClick={handleEdit}
 										/>
 									</div>
 								</section>
@@ -190,6 +194,18 @@ export default function RecordsSheet() {
 						</Link>
 					</Button>
 				</div>
+				{editingRecord ? (
+					<RecordEditorDialog
+						record={editingRecord}
+						statements={editingRecord.statements}
+						categories={categories ?? []}
+						container={content}
+						isOpen
+						setIsOpen={isOpen => {
+							if (!isOpen) setEditingRecord(null)
+						}}
+					/>
+				) : null}
 			</SheetContent>
 		</Sheet>
 	)

@@ -173,6 +173,23 @@ test("modal primitives: dialog, sheet, command and alert animate in and out", {
 	}
 })
 
+test("mobile sidebar sheet: trigger and Escape animate in and out", {
+	tag: ["@reduced-motion"],
+}, async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 })
+	await page.goto(`${HARNESS_URL}/?section=primitives`)
+	const trigger = page
+		.getByTestId("primitive-sidebar")
+		.getByRole("button", { name: "Toggle Sidebar", exact: true })
+	await trigger.scrollIntoViewIfNeeded()
+	await expectModalEntrance(page, '[data-slot="sidebar"][data-mobile="true"]', () =>
+		trigger.click(),
+	)
+	await expectModalExit(page, '[data-slot="sidebar"][data-mobile="true"]', () =>
+		page.keyboard.press("Escape"),
+	)
+})
+
 for (const action of ["Cancel", "Replace Drive backup"] as const) {
 	test(`Drive overwrite confirmation: ${action} animates popup and backdrop in and out`, {
 		tag: ["@reduced-motion"],

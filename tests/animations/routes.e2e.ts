@@ -7,13 +7,13 @@ import {
 	expectVisibleRowCascade,
 	sampleVisibleRowAnimations,
 } from "../support/motion"
-import { type MotionConsumer, openMobileSidebarFromConsumerMotion } from "../support/tables"
+import type { MotionConsumer } from "../support/tables"
 
 const denseCardConsumers: MotionConsumer[] = [
 	{
 		name: "Accounts",
 		origin: "/records",
-		action: "sidebar",
+		action: "nav",
 		target: "Accounts",
 		selector: "main div:has(> article)",
 		dense: true,
@@ -21,15 +21,16 @@ const denseCardConsumers: MotionConsumer[] = [
 	{
 		name: "Budgets",
 		origin: "/records",
-		action: "sidebar",
+		action: "nav",
 		target: "Budgets",
 		selector: "main div:has(> article)",
 		dense: true,
 	},
 	{
 		name: "Categories",
-		origin: "/records",
-		action: "sidebar",
+		// Categories is a Settings section, reached from its tabs.
+		origin: "/settings",
+		action: "nav",
 		target: "Categories",
 		selector: "main div:has(> article)",
 		dense: true,
@@ -74,11 +75,8 @@ test("card grids: Accounts, Budgets and Categories enter as a cascade in the vie
 				await setDateOnly(page, new Date("2026-09-15T12:00:00+08:00"))
 			await page.goto(consumer.origin)
 			await expect(page.locator("main h2").first()).toBeVisible()
-			if (consumer.action === "sidebar" && isMobile) {
-				await openMobileSidebarFromConsumerMotion(page)
-			}
 			const samples = await sampleVisibleRowAnimations(page, consumer.selector, async () => {
-				if (consumer.action === "sidebar")
+				if (consumer.action === "nav")
 					await page
 						.getByRole("link", { name: consumer.target, exact: true })
 						.filter({ visible: true })
@@ -92,11 +90,6 @@ test("card grids: Accounts, Budgets and Categories enter as a cascade in the vie
 						.click()
 				else if (consumer.action === "heading")
 					await page.getByRole("heading", { name: consumer.target, exact: true }).click()
-				else if (consumer.action === "statement")
-					await page
-						.getByRole("link", { name: "Open statement" })
-						.and(page.locator(`[href="/statements/${consumer.target}"]`))
-						.click()
 				else if (consumer.action === "view") {
 					await page.getByRole("combobox", { name: "Duplicate view" }).click()
 					await pickOption(
@@ -190,7 +183,7 @@ test("route entrances: page fades during client navigation and visible cards cas
 			page,
 			"main div:has(> article)",
 			async () => {
-				await page.locator('[data-sidebar="menu-button"][href="/accounts"]').click()
+				await page.locator('[data-app-nav] a[href="/accounts"]').click()
 			},
 		)
 		if (test.info().project.name === "reduced-motion") expectReducedRowMovement(samples, 13)
@@ -206,16 +199,13 @@ test("Statement rules: rows enter as a cascade in the viewport", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
-	await page.goto("/records")
+	await page.goto("/settings")
 	await expect(page.locator("main h2").first()).toBeVisible()
-	if (isMobile) {
-		await openMobileSidebarFromConsumerMotion(page)
-	}
 	const selector = "main section[aria-label='Your rules'] article"
 	const samples = await sampleVisibleRowAnimations(page, selector, async () => {
 		await page
-			.getByRole("link", { name: "Rules", exact: true })
-			.filter({ visible: true })
+			.getByRole("navigation", { name: "Settings sections", exact: true })
+			.getByRole("link", { name: "Statement rules", exact: true })
 			.click()
 	})
 	const visibleCount = await page.locator(selector).evaluateAll(

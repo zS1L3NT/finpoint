@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { useSearchParams } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
@@ -60,6 +60,17 @@ export default function RecordsPage() {
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
 		usePaginatedTableState()
+
+	// `?record=` opens one over the list: the links that once led to a Record's own page.
+	const linked = searchParams.get("record")
+	useEffect(() => {
+		if (linked) void handleEdit({ id: linked })
+	}, [linked, handleEdit])
+	const closeRecord = () => {
+		setEditingRecord(null)
+		if (linked) setParams({ record: null }, { replace: true })
+	}
+
 	const updateFilters = useCallback(
 		(changes: { [key: string]: string | null }) => {
 			setParams({ ...changes, page: null })
@@ -125,16 +136,8 @@ export default function RecordsPage() {
 		() => paginateItems(records, parsePage(page), parsePageSize(pageSize)),
 		[records, page, pageSize],
 	)
-	const columns = useRecordColumns<Record>({
-		pageName: "Records",
-		onEdit: handleEdit,
-		grouped: true,
-	})
-	const mobileRow = useRecordMobileRow<Record>({
-		pageName: "Records",
-		onEdit: handleEdit,
-		grouped: true,
-	})
+	const columns = useRecordColumns<Record>({ onOpen: handleEdit, grouped: true })
+	const mobileRow = useRecordMobileRow<Record>({ onOpen: handleEdit, grouped: true })
 	const tableHeader = useMemo(
 		() => ({
 			query,
@@ -208,6 +211,7 @@ export default function RecordsPage() {
 					footer={tableFooter}
 					mobileRow={mobileRow}
 					groupBy={byDay<Record>("Record")}
+					onRowClick={handleEdit}
 					emptyMessage="No records found."
 					loading={recordsQuery === undefined}
 				/>
@@ -220,7 +224,7 @@ export default function RecordsPage() {
 					categories={categories}
 					isOpen
 					setIsOpen={isOpen => {
-						if (!isOpen) setEditingRecord(null)
+						if (!isOpen) closeRecord()
 					}}
 				/>
 			) : null}

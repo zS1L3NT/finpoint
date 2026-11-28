@@ -18,10 +18,10 @@ test("search sheets: filter, allocate, attach and reopen", async ({ page, worksp
 	void workspace
 	await test.step("Statement search sheet: filters and allocates Statements, returns to the editor with Done and cancels an unsaved Allocation", async () => {
 		void workspace
-		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		const dialog = await openEditor(page, `/records?record=${record.id}`, "Edit", "Edit Record")
 		await dialog.getByRole("button", { name: "Allocate statement", exact: true }).click()
 		const sheet = page.getByRole("dialog", {
-			name: "Allocate statements to record",
+			name: "Allocate Statements to Record",
 			exact: true,
 		})
 		await expectVisibleBackdrop(page)
@@ -30,11 +30,12 @@ test("search sheets: filter, allocate, attach and reopen", async ({ page, worksp
 		await sheet.getByRole("button", { name: "Done", exact: true }).click()
 		await expect(sheet).not.toBeVisible()
 		await expect(dialog).toContainText(imported.description)
+		// Cancel returns to the Record's preview, where the cancelled allocation never landed.
 		await dialog.getByRole("button", { name: "Cancel", exact: true }).click()
-		await expect(page.getByRole("dialog")).toHaveCount(0)
-		// The cancelled allocation was never saved to the Record.
-		await expect(page.locator("main")).not.toContainText(imported.description)
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+		const preview = page.getByRole("dialog", { name: "Record", exact: true })
+		await expect(preview).toBeVisible()
+		await expect(preview).not.toContainText(imported.description)
+		await preview.getByRole("button", { name: "Edit", exact: true }).click()
 		const reopened = page.getByRole("dialog", { name: "Edit Record" })
 		await expect(reopened).toBeVisible()
 		await expect(
@@ -132,13 +133,13 @@ test("Statement search sheet: opens with backdrop and reopens after Escape", asy
 	workspace,
 }) => {
 	void workspace
-	await page.goto(`/records/${IDS.records.partialPending}`)
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.goto(`/records?record=${IDS.records.partialPending}`)
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await expect(editor).toBeVisible()
 	await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
 	const sheet = page.getByRole("dialog", {
-		name: "Allocate statements to record",
+		name: "Allocate Statements to Record",
 		exact: true,
 	})
 	await expect(sheet).toBeVisible()
@@ -411,17 +412,19 @@ test("Statement search sheet: stays silent while held after closed time, then re
 	workspace,
 }) => {
 	expect(workspace).toBe("populated")
-	await page.goto(`/records/${IDS.records.partialPending}`)
-	await expect(page.locator("main h2").filter({ hasText: "Hawker Dinner" })).toBeVisible()
+	await page.goto(`/records?record=${IDS.records.partialPending}`)
+	await expect(page.getByRole("dialog", { name: "Record", exact: true })).toContainText(
+		"Hawker Dinner",
+	)
 	await page.waitForTimeout(600)
 	await installReadHold(page)
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await expect(editor).toBeVisible()
 	await holdReads(page, "statements")
 	await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
 	const sheet = page.getByRole("dialog", {
-		name: "Allocate statements to record",
+		name: "Allocate Statements to Record",
 		exact: true,
 	})
 	await expectSilentSheet(page, sheet, /No allocable Statements\./)
@@ -609,15 +612,17 @@ test("Statement search sheet: keeps prior rows while a held query change resolve
 	workspace,
 }) => {
 	expect(workspace).toBe("populated")
-	await page.goto(`/records/${IDS.records.partialPending}`)
-	await expect(page.locator("main h2").filter({ hasText: "Hawker Dinner" })).toBeVisible()
+	await page.goto(`/records?record=${IDS.records.partialPending}`)
+	await expect(page.getByRole("dialog", { name: "Record", exact: true })).toContainText(
+		"Hawker Dinner",
+	)
 	await installReadHold(page)
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await expect(editor).toBeVisible()
 	await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
 	const sheet = page.getByRole("dialog", {
-		name: "Allocate statements to record",
+		name: "Allocate Statements to Record",
 		exact: true,
 	})
 	await expect(sheet).toBeVisible()
@@ -705,15 +710,17 @@ test("Statement search sheet: keeps prior rows while a held filter change resolv
 			conn.close()
 		}
 	})
-	await page.goto(`/records/${IDS.records.partialPending}`)
-	await expect(page.locator("main h2").filter({ hasText: "Hawker Dinner" })).toBeVisible()
+	await page.goto(`/records?record=${IDS.records.partialPending}`)
+	await expect(page.getByRole("dialog", { name: "Record", exact: true })).toContainText(
+		"Hawker Dinner",
+	)
 	await installReadHold(page)
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await expect(editor).toBeVisible()
 	await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
 	const sheet = page.getByRole("dialog", {
-		name: "Allocate statements to record",
+		name: "Allocate Statements to Record",
 		exact: true,
 	})
 	await expect(sheet).toBeVisible()

@@ -8,6 +8,7 @@ import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
+import SettingsTabs from "@/components/settings-tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
@@ -43,6 +44,8 @@ export default function CategoriesPage() {
 	return (
 		<>
 			<PageContent>
+				<SettingsTabs active="categories" />
+
 				<PageHeader
 					title="Categories"
 					subtitle="Categories give Records meaning and supply their default treatment and monthly budget."

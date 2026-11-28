@@ -7,6 +7,16 @@ import { expect, seedWorkspace, test } from "../support/fixtures"
 
 const GOOGLE_RE = /google|gstatic|googleapis/i
 
+/** The open preview's "X of Y allocated" line, as numbers. */
+async function previewAllocation(page: Page, name: "Record" | "Statement") {
+	const line = page.getByRole("dialog", { name, exact: true }).getByText(/ of .* allocated$/)
+	await expect(line).toBeVisible()
+	const [allocated = Number.NaN, amount = Number.NaN] = (
+		(await line.textContent())?.match(/-?\$[\d,.]+/g) ?? []
+	).map(value => Number(value.replace(/[$,]/g, "")))
+	return { allocated, amount }
+}
+
 async function blockGoogle(page: Page): Promise<string[]> {
 	const attempted: string[] = []
 	await page.route(GOOGLE_RE, async route => {
@@ -137,23 +147,17 @@ test("allocator: exact Statements allocate to a new Record and persist across re
 
 	const id = await findRecordId(page, "Workflow exact supper")
 	expect(id).not.toBeNull()
-	await page.goto(`/records/${id}`)
-	await expect(page.getByText("Workflow exact supper")).toBeVisible()
-	await expect(
-		page.locator("main").getByText("STARBUCKS 4455", { exact: true }).filter({ visible: true }),
-	).toBeVisible()
-	await expect(
-		page
-			.locator("main")
-			.getByText("SHENG SIONG 9902", { exact: true })
-			.filter({ visible: true }),
-	).toBeVisible()
-	await expect(page.locator("main").getByText("Pending", { exact: true })).toHaveCount(0)
+	await page.goto(`/records?record=${id}`)
+	const record = page.getByRole("dialog", { name: "Record", exact: true })
+	await expect(record).toContainText("Workflow exact supper")
+	await expect(record.getByText("STARBUCKS 4455", { exact: true })).toBeVisible()
+	await expect(record.getByText("SHENG SIONG 9902", { exact: true })).toBeVisible()
+	await expect(record.getByText("Pending", { exact: true })).toHaveCount(0)
 
-	await page.goto("/statements/t1-s-free-1")
-	await expect(page.getByText("Fully allocated")).toBeVisible()
+	await page.goto("/statements?statement=t1-s-free-1")
+	expect(await previewAllocation(page, "Statement")).toEqual({ allocated: -6.8, amount: -6.8 })
 	await page.reload()
-	await expect(page.getByText("Fully allocated")).toBeVisible()
+	expect(await previewAllocation(page, "Statement")).toEqual({ allocated: -6.8, amount: -6.8 })
 	expect(await countStore(page, "records")).toBe(16)
 	expect(google.length).toBe(0)
 })
@@ -194,11 +198,19 @@ test("Record creator: an insufficient Allocation warns that the Record stays Pen
 
 	const id = await findRecordId(page, "Workflow short supper")
 	expect(id).not.toBeNull()
-	await page.goto(`/records/${id}`)
-	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
-	await expect(page.locator("main").getByText(/\[.*6\.80.*\]/)).toBeVisible()
+	await page.goto(`/records?record=${id}`)
+	await expect(
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("Pending", { exact: true }),
+	).toBeVisible()
+	expect((await previewAllocation(page, "Record")).allocated).toBe(-6.8)
 	await page.reload()
-	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
+	await expect(
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("Pending", { exact: true }),
+	).toBeVisible()
 })
 
 test("Record creator: an excessive Allocation is blocked with a useful message and no mutation", async ({
@@ -274,11 +286,10 @@ test("Record creator: rule autofill fills fields, notes the rule and drops the n
 	await expect(dialog).toHaveCount(0)
 	const id = await findRecordId(page, "Morning coffee, edited")
 	expect(id).not.toBeNull()
-	await page.goto(`/records/${id}`)
-	await expect(page.getByText("Morning coffee, edited", { exact: true }).first()).toBeVisible()
-	await expect(
-		page.locator("main").getByText("Dining Out", { exact: true }).first(),
-	).toBeVisible()
+	await page.goto(`/records?record=${id}`)
+	const record = page.getByRole("dialog", { name: "Record", exact: true })
+	await expect(record).toContainText("Morning coffee, edited")
+	await expect(record.locator('[data-slot="dialog-header"]')).toContainText("Dining Out")
 })
 
 test("Record creator: rule autofill of Treatment and Monthly Budget follows the analytics rules", async ({
@@ -463,17 +474,15 @@ test("Record creator: similar Statements each get a Record with the same details
 	expect(records[0]?.id).not.toBe(records[1]?.id)
 })
 
-test("Allocation bar: not, partial and fully allocated states show finite values", async ({
+test("Statement preview: not, partial and fully allocated states show finite values", async ({
 	page,
 	workspace,
 }) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
-	await page.goto("/statements/t1-s-free-2")
-	await expect(page.getByText("Not allocated")).toBeVisible()
-	const fresh = page.getByRole("progressbar")
-	await expect(fresh).toHaveAttribute("aria-valuenow", "0")
+	await page.goto("/statements?statement=t1-s-free-2")
+	expect((await previewAllocation(page, "Statement")).allocated).toBe(0)
 
 	await selectAllocatorStatements(page, [IDS.statements.unallocated[2]])
 	await expectAllocatorSelection(
@@ -491,18 +500,11 @@ test("Allocation bar: not, partial and fully allocated states show finite values
 	await dialog.getByRole("button", { name: "Create Record" }).click()
 	await expect(dialog).toHaveCount(0)
 
-	await page.goto("/statements/t1-s-free-1")
-	await expect(page.getByText("Partially allocated")).toBeVisible()
-	const partial = page.getByRole("progressbar")
-	const partialNow = Number(await partial.getAttribute("aria-valuenow"))
-	expect(Number.isFinite(partialNow)).toBe(true)
-	expect(partialNow).toBeGreaterThan(0)
-	expect(partialNow).toBeLessThan(100)
+	await page.goto("/statements?statement=t1-s-free-1")
+	expect(await previewAllocation(page, "Statement")).toEqual({ allocated: -3, amount: -6.8 })
 
-	await page.goto("/statements/t1-s-groceries")
-	await expect(page.getByText("Fully allocated")).toBeVisible()
-	const full = page.getByRole("progressbar")
-	expect(await full.getAttribute("aria-valuenow")).toBe("100")
+	await page.goto("/statements?statement=t1-s-groceries")
+	expect(await previewAllocation(page, "Statement")).toEqual({ allocated: -84.2, amount: -84.2 })
 })
 
 test("amount display: zero and negative amounts render with correct accounting", async ({
@@ -533,16 +535,20 @@ test("amount display: zero and negative amounts render with correct accounting",
 	await expect(savings.getByText("$4,787.80")).toBeVisible()
 	await expect(savings.getByText("10 Statements")).toBeVisible()
 
-	await page.goto("/records/t1-r-zero")
-	await expect(page.locator("main").getByText("$0.00").first()).toBeVisible()
-	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
+	await page.goto("/records?record=t1-r-zero")
+	await expect(
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.locator('[data-slot="dialog-header"]'),
+	).toContainText("$0.00")
+	await expect(
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("Pending", { exact: true }),
+	).toBeVisible()
 
-	await page.goto("/statements/t1-s-groceries")
-	await expect(page.locator("main").getByText("Fully allocated")).toBeVisible()
-	await expect(page.locator("main").getByText("-$84.20").first()).toBeVisible()
-	const now = Number(await page.getByRole("progressbar").getAttribute("aria-valuenow"))
-	expect(Number.isFinite(now)).toBe(true)
-	expect(now).toBe(100)
+	await page.goto("/statements?statement=t1-s-groceries")
+	expect(await previewAllocation(page, "Statement")).toEqual({ allocated: -84.2, amount: -84.2 })
 })
 
 test("Record search sheet: selected Statements allocate to a Pending Record", async ({
@@ -571,14 +577,17 @@ test("Record search sheet: selected Statements allocate to a Pending Record", as
 	await editor.getByRole("button", { name: "Save changes" }).click()
 	await expect(editor).toHaveCount(0)
 
-	await page.goto("/records/t1-r-saving")
+	await page.goto("/records?record=t1-r-saving")
 	await expect(
 		page
-			.locator("main")
-			.getByText("SHENG SIONG 9902", { exact: true })
-			.filter({ visible: true }),
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("SHENG SIONG 9902", { exact: true }),
 	).toBeVisible()
-	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
+	await expect(
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("Pending", { exact: true }),
+	).toBeVisible()
 	await page.goto("/allocator?query=SHENG+SIONG")
 	// Desktop and mobile render separate empty-state nodes; assert the visible one.
 	await expect(
@@ -596,12 +605,12 @@ test("Statement search sheet: an allocable Statement is appended in the Record e
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
-	await page.goto(`/records/${IDS.records.partialPending}`)
-	await page.getByRole("button", { name: "Edit Record" }).click()
+	await page.goto(`/records?record=${IDS.records.partialPending}`)
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit Record" })
 	await expect(editor).toBeVisible()
 	await editor.getByRole("button", { name: "Allocate statement" }).click()
-	const sheet = page.getByRole("dialog", { name: "Allocate statements to record" })
+	const sheet = page.getByRole("dialog", { name: "Allocate Statements to Record" })
 	await expect(sheet).toBeVisible()
 	await sheet.getByLabel("Search statements").fill("STARBUCKS")
 	await sheet.getByRole("button", { name: /STARBUCKS/ }).click()
@@ -613,19 +622,16 @@ test("Statement search sheet: an allocable Statement is appended in the Record e
 	await editor.getByRole("button", { name: "Save changes" }).click()
 	await expect(editor).toHaveCount(0)
 
-	await expect(
-		page.locator("main").getByText("STARBUCKS 4455", { exact: true }).filter({ visible: true }),
-	).toBeVisible()
-	await expect(
-		page
-			.locator("main")
-			.getByText("Hawker Dinner · UOB ONE 3344", { exact: true })
-			.filter({ visible: true }),
-	).toBeVisible()
-	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
+	// Save returns to the Record's preview, which shows both Allocations.
+	const preview = page.getByRole("dialog", { name: "Record", exact: true })
+	await expect(preview.getByText("STARBUCKS 4455", { exact: true })).toBeVisible()
+	await expect(preview.getByText("Hawker Dinner · UOB ONE 3344", { exact: true })).toBeVisible()
+	await expect(preview.getByText("Pending", { exact: true })).toBeVisible()
 	await page.reload()
 	await expect(
-		page.locator("main").getByText("STARBUCKS 4455", { exact: true }).filter({ visible: true }),
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("STARBUCKS 4455", { exact: true }),
 	).toBeVisible()
 })
 
@@ -636,8 +642,8 @@ test("Record editor: removing an Allocation keeps its sibling identity and persi
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
-	await page.goto(`/records/${IDS.records.split}`)
-	await page.getByRole("button", { name: "Edit Record" }).click()
+	await page.goto(`/records?record=${IDS.records.split}`)
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit Record" })
 	await expect(editor).toBeVisible()
 	const firstInput = editor.locator('input[name="statements[0].amount"]')
@@ -677,8 +683,17 @@ test("Record editor: removing an Allocation keeps its sibling identity and persi
 	await editor.getByRole("button", { name: "Save changes" }).click()
 	await expect(editor).toHaveCount(0)
 
-	await expect(page.locator("main").getByRole("heading", { name: /Uniqlo Basics/ })).toBeVisible()
-	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
+	// Save returns to the Record's preview, now Pending with one Allocation.
+	await expect(
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.locator('[data-slot="dialog-header"]'),
+	).toContainText("Uniqlo Basics")
+	await expect(
+		page
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("Pending", { exact: true }),
+	).toBeVisible()
 	await page.goto("/allocator?query=1001")
 	await expect(
 		page
@@ -726,18 +741,18 @@ test("duplicates: keep moves Allocations and the deleted Statement is gone", asy
 	await review.getByRole("button", { name: "Delete 1 Statement" }).click()
 	await expect(review).toHaveCount(0)
 
-	await page.goto(`/statements/${IDS.statements.duplicatePair[0]}`)
-	await expect(page.getByText("Statement not found.")).toBeVisible()
-	await page.goto(`/statements/${IDS.statements.duplicatePair[1]}`)
-	await expect(page.getByText("Fully allocated")).toBeVisible()
+	await page.goto(`/statements?statement=${IDS.statements.duplicatePair[0]}`)
+	await expect(page.getByText("Unable to open this Statement.", { exact: true })).toBeVisible()
+	await page.goto(`/statements?statement=${IDS.statements.duplicatePair[1]}`)
+	const kept = await previewAllocation(page, "Statement")
+	expect(kept.allocated).toBe(kept.amount)
 	const id = await findRecordId(page, "Dup allocation dinner")
 	expect(id).not.toBeNull()
-	await page.goto(`/records/${id}`)
+	await page.goto(`/records?record=${id}`)
 	await expect(
 		page
-			.locator("main")
-			.getByText("DON DON DONKI 8821 PURCHASE", { exact: true })
-			.filter({ visible: true }),
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("DON DON DONKI 8821 PURCHASE", { exact: true }),
 	).toBeVisible()
 })
 
@@ -792,17 +807,18 @@ test("pending queue: replacing a Pending Statement preserves Allocations on the 
 
 	await queue.getByPlaceholder("Search descriptions...").fill("Pasar malam")
 	await expect(page.getByText("No pending Statements", { exact: true })).toBeVisible()
-	await page.goto(`/statements/${IDS.statements.pending}`)
-	await expect(page.getByText("Statement not found.")).toBeVisible()
-	await page.goto(`/records/${IDS.records.pendingStatement}`)
+	await page.goto(`/statements?statement=${IDS.statements.pending}`)
+	await expect(page.getByText("Unable to open this Statement.", { exact: true })).toBeVisible()
+	await page.goto(`/records?record=${IDS.records.pendingStatement}`)
 	await expect(
 		page
-			.locator("main")
-			.getByText("SHENG SIONG 9902", { exact: true })
-			.filter({ visible: true }),
+			.getByRole("dialog", { name: "Record", exact: true })
+			.getByText("SHENG SIONG 9902", { exact: true }),
 	).toBeVisible()
-	await page.goto("/statements/t1-s-free-2")
-	await expect(page.locator("main").getByText("Partially allocated")).toBeVisible()
+	await page.goto("/statements?statement=t1-s-free-2")
+	const replaced = await previewAllocation(page, "Statement")
+	expect(replaced.allocated).not.toBe(0)
+	expect(replaced.allocated).not.toBe(replaced.amount)
 })
 
 const DBS_VALID = [

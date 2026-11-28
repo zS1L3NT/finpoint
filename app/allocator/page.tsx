@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
+import StatementDialog from "@/components/dialogs/statement"
 import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
@@ -100,6 +101,7 @@ export default function AllocatorPage() {
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const [isReplacingPendingStatement, setIsReplacingPendingStatement] = useState(false)
+	const [openStatement, setOpenStatement] = useState<Statement | null>(null)
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const updateFilters = (changes: { [key: string]: string | null }) => {
 		setParams({ ...changes, page: null })
@@ -137,7 +139,8 @@ export default function AllocatorPage() {
 			: null
 	const statementColumns = useStatementColumns<Statement>({
 		amount: "allocable",
-		pageName: "Allocator",
+		onOpen: setOpenStatement,
+		selectable: true,
 		grouped: true,
 	})
 	const toggleStatement = (statement: Statement) =>
@@ -148,7 +151,8 @@ export default function AllocatorPage() {
 		)
 	const statementMobileRow = useStatementMobileRow<Statement>({
 		amount: "allocable",
-		pageName: "Allocator",
+		onOpen: setOpenStatement,
+		selectable: true,
 		grouped: true,
 		leading: statement => (
 			<Checkbox
@@ -343,12 +347,23 @@ export default function AllocatorPage() {
 						),
 					]}
 					categories={categories}
+					initialMode="edit"
 					isOpen={!!editingRecord}
 					setIsOpen={isOpen => {
 						if (!isOpen) {
 							setEditingRecord(null)
 							setSelectedIds([])
 						}
+					}}
+				/>
+			) : null}
+
+			{openStatement ? (
+				<StatementDialog
+					statement={openStatement}
+					isOpen
+					setIsOpen={isOpen => {
+						if (!isOpen) setOpenStatement(null)
 					}}
 				/>
 			) : null}

@@ -1,27 +1,27 @@
-import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
+import type { ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { amountTone, formatRowTime } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { useHistory } from "@/history"
 import { cn, formatCurrency, round2 } from "@/lib/utils"
 import { pathAllocatorDuplicates, pathStatement } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
 type StatementRow = Statement & { pivot?: Allocation }
 
-type StatementTableOptions<TStatement extends StatementRow> = {
+type StatementTableOptions = {
 	amount?: "amount" | "allocable" | "allocated"
 	showAccount?: boolean
-	pageName?: string
-	onEdit?: (statement: TStatement) => void
+	/** Opens the Statement. Pass the same handler as the table's `onRowClick`, so the whole row opens it. */
+	onOpen?: (statement: Statement) => void
+	/** Row clicks select, so the title is underlined to show it opens the Statement instead. */
+	selectable?: boolean
 	/** Rows sit under day headers, so only the time is shown. */
 	grouped?: boolean
 }
 
-function StatementBadges({
+export function StatementBadges({
 	statement,
 	showUnallocated,
 }: {
@@ -63,7 +63,7 @@ function StatementAmount({
 	amount,
 }: {
 	statement: StatementRow
-	amount: StatementTableOptions<StatementRow>["amount"]
+	amount: StatementTableOptions["amount"]
 }) {
 	const allocable = round2(statement.allocable_amount)
 	return (
@@ -84,58 +84,48 @@ function StatementAmount({
 	)
 }
 
-function StatementActions<TStatement extends StatementRow>({
+/**
+ * The Statement's description. With `onOpen` it opens the Statement in place, and in selectable
+ * tables, where a row click selects, it is the way in.
+ */
+function StatementTitle({
 	statement,
-	options,
+	onOpen,
+	selectable,
 }: {
-	statement: TStatement
-	options: StatementTableOptions<TStatement>
+	statement: Statement
+	onOpen?: (statement: Statement) => void
+	selectable?: boolean
 }) {
-	const { handlePush } = useHistory()
-	const { pageName, onEdit } = options
+	// A real link, so a modified click still opens the Statement over its list in a new tab.
 	return (
-		<div className="flex shrink-0 items-center justify-end gap-0.5">
-			{onEdit && statement.is_pending ? (
-				<Button
-					variant="ghost"
-					size="icon-sm"
-					title="Edit"
-					aria-label="Edit pending statement"
-					onClick={() => onEdit(statement)}
-				>
-					<IconifyIcon icon="lucide:pencil" />
-				</Button>
-			) : null}
-			<Button variant="ghost" size="icon-sm" title="Open" asChild>
-				<Link
-					href={pathStatement(statement.id)}
-					aria-label="Open statement"
-					onClick={pageName ? handlePush(pageName) : undefined}
-				>
-					<IconifyIcon icon="lucide:chevron-right" />
-				</Link>
-			</Button>
-		</div>
+		<Link
+			href={pathStatement(statement.id)}
+			data-opens-in-place={onOpen ? true : undefined}
+			className={cn(
+				"min-w-0 truncate rounded-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+				selectable &&
+					"underline decoration-muted-foreground/60 underline-offset-4 transition-colors duration-150 ease-out hover:decoration-foreground",
+			)}
+			onClick={event => {
+				if (!onOpen || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+					return
+				event.preventDefault()
+				onOpen(statement)
+			}}
+		>
+			{statement.description || "No description"}
+		</Link>
 	)
-}
-
-function StatementActionsCell<TStatement extends StatementRow>({
-	row,
-	column,
-}: CellContext<TStatement, unknown>) {
-	const { statementActions } = column.columnDef.meta as {
-		statementActions: StatementTableOptions<TStatement>
-	}
-	return <StatementActions statement={row.original} options={statementActions} />
 }
 
 export function useStatementColumns<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
-	pageName,
-	onEdit,
+	onOpen,
+	selectable,
 	grouped = false,
-}: StatementTableOptions<TStatement>): ColumnDef<TStatement>[] {
+}: StatementTableOptions): ColumnDef<TStatement>[] {
 	return useMemo(
 		(): ColumnDef<TStatement>[] => [
 			{
@@ -143,9 +133,11 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				cell: ({ row }) => (
 					<div className="min-w-0">
 						<p className="flex items-center gap-1.5">
-							<span className="min-w-0 truncate font-medium">
-								{row.original.description || "No description"}
-							</span>
+							<StatementTitle
+								statement={row.original}
+								onOpen={onOpen}
+								selectable={selectable}
+							/>
 							<StatementBadges
 								statement={row.original}
 								showUnallocated={amount !== "allocable"}
@@ -175,27 +167,19 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				meta: { width: "w-40" },
 				cell: ({ row }) => <StatementAmount statement={row.original} amount={amount} />,
 			},
-			{
-				id: "actions",
-				meta: {
-					statementActions: { pageName, onEdit },
-					width: onEdit ? "w-24" : "w-14",
-				},
-				cell: StatementActionsCell,
-			},
 		],
-		[amount, showAccount, pageName, onEdit, grouped],
+		[amount, showAccount, onOpen, selectable, grouped],
 	)
 }
 
 export function useStatementMobileRow<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
-	pageName,
+	onOpen,
+	selectable,
 	leading,
-	onEdit,
 	grouped = false,
-}: StatementTableOptions<TStatement> & {
+}: StatementTableOptions & {
 	leading?: (statement: TStatement) => React.ReactNode
 }): (row: Row<TStatement>) => React.ReactNode {
 	return useMemo(
@@ -208,27 +192,32 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 					<div className="flex min-w-0 items-center gap-3">
 						{leading?.(statement)}
 						<div className="min-w-0 flex-1">
-							<p className="flex items-center gap-1.5">
-								<span className="min-w-0 truncate font-medium">
-									{statement.description || "No description"}
-								</span>
+							<p className="flex">
+								<StatementTitle
+									statement={statement}
+									onOpen={onOpen}
+									selectable={selectable}
+								/>
+							</p>
+							{/* Badges share the second line so the title keeps the full width. */}
+							<p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
 								<StatementBadges
 									statement={statement}
 									showUnallocated={amount !== "allocable"}
 								/>
-							</p>
-							<p className="truncate text-xs text-muted-foreground">
-								{[showAccount ? statement.account.name : null, time]
-									.filter(Boolean)
-									.join(" · ")}
+								<span className="truncate">
+									{[showAccount ? statement.account.name : null, time]
+										.filter(Boolean)
+										.join(" · ")}
+								</span>
 							</p>
 						</div>
 					</div>
 					<StatementAmount statement={statement} amount={amount} />
-					<StatementActions statement={statement} options={{ pageName, onEdit }} />
+					<span />
 				</>
 			)
 		},
-		[amount, showAccount, pageName, leading, onEdit, grouped],
+		[amount, showAccount, onOpen, selectable, leading, grouped],
 	)
 }

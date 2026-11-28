@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
-import AppHeader from "@/components/layout/app-header"
+import AppNav from "@/components/layout/app-nav"
 import { useMonthParams } from "@/hooks/use-month-params"
 import {
 	pathAccounts,
@@ -40,7 +40,7 @@ const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname.startsWith(pathTerms()), title: "Terms of Service" },
 ]
 
-/** Persistent top bar: lives above the per-route animation boundary. Also owns the tab title. */
+/** Persistent top navigation: lives above the per-route animation boundary. Also owns the tab title. */
 export default function ShellHeader() {
 	const pathname = usePathname()
 	const { date } = useMonthParams()
@@ -54,5 +54,5 @@ export default function ShellHeader() {
 		document.title = tabTitle
 	}, [tabTitle])
 
-	return <AppHeader title={title} />
+	return <AppNav title={title} />
 }

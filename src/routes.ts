@@ -11,13 +11,14 @@ export const pathAllocatorDuplicates = (query?: Record<string, string | undefine
 	withQuery("/allocator/duplicates", query)
 export const pathStatements = (query?: Record<string, string | undefined>) =>
 	withQuery("/statements", query)
-export const pathStatement = (id: string) => `/statements/${id}`
+// Statements and Records have no pages of their own: these open one in a preview over its list.
+export const pathStatement = (id: string) => pathStatements({ statement: id })
 export const pathAccounts = (query?: Record<string, string | undefined>) =>
 	withQuery("/accounts", query)
 export const pathAccount = (id: string) => `/accounts/${id}`
 export const pathRecords = (query?: Record<string, string | undefined>) =>
 	withQuery("/records", query)
-export const pathRecord = (id: string) => `/records/${id}`
+export const pathRecord = (id: string) => pathRecords({ record: id })
 export const pathBudgets = (query?: Record<string, string | undefined>) =>
 	withQuery("/budgets", query)
 export const pathBudget = (id: string) => `/budgets/${id}`

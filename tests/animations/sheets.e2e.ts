@@ -72,13 +72,13 @@ test("search sheets: every sheet animates in and out on dismissal and completion
 		)
 	})
 	await test.step("Statement search sheet: Done and Escape preserve the exit", async () => {
-		await page.goto(`/records/${record.id}`)
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+		await page.goto(`/records?record=${record.id}`)
+		await page.getByRole("button", { name: "Edit", exact: true }).click()
 		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 		const trigger = editor.getByRole("button", { name: "Allocate statement", exact: true })
 		await expectModalEntrance(page, '[data-slot="sheet-content"]', () => trigger.click())
 		const sheet = page.getByRole("dialog", {
-			name: "Allocate statements to record",
+			name: "Allocate Statements to Record",
 			exact: true,
 		})
 		await sheet.getByRole("searchbox", { name: "Search statements" }).fill(imported.description)
@@ -175,22 +175,13 @@ test("Budget Records sheet: animates in and out when closed by Escape and by its
 	)
 })
 
-test("mobile modal sheets: sidebar and amount filter animate in and out", {
+test("mobile amount filter sheet: animates in and out", {
 	tag: ["@reduced-motion"],
 }, async ({ page, workspace }) => {
 	void workspace
 	await page.setViewportSize({ width: 390, height: 844 })
 	await page.goto("/allocator")
 	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	await test.step("sidebar: trigger and Escape retain the sheet exit", async () => {
-		const trigger = page.locator('header [data-slot="sidebar-trigger"]')
-		await expectModalEntrance(page, '[data-slot="sidebar"][data-mobile="true"]', () =>
-			trigger.click(),
-		)
-		await expectModalExit(page, '[data-slot="sidebar"][data-mobile="true"]', () =>
-			page.keyboard.press("Escape"),
-		)
-	})
 	await test.step("amount filter: trigger and close retain the sheet exit", async () => {
 		const trigger = page.getByRole("button", { name: "Any amount", exact: true })
 		await expectModalEntrance(page, '[data-slot="sheet-content"]', () => trigger.click())

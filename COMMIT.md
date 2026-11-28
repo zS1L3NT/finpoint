@@ -4,6 +4,12 @@ Rules for every commit, branch, and pull request an AI agent makes in this repos
 
 <!-- setup-conventions:generated-start -->
 
+## Explicitness
+
+Branches and pull requests change what the user has to review, so act on them only when the user says so explicitly, or after you ask directly and get an explicit yes. A request to commit, push, prepare, or run CI is not a request for a new branch or pull request. When unsure, ask.
+
+Pull requests are the costlier mistake: a PR number is permanent and cannot be taken back. A wrong branch is cheap to fix, until a pull request is opened from it.
+
 ## Commits
 
 - **Signed only.** Commit with `git commit -S` using the GPG key. Before the first commit, confirm `git config gpg.format` is unset or `openpgp` and `git config user.signingkey` names a key listed by `gpg --list-secret-keys`. With no GPG key, or if signing fails, leave the changes uncommitted and tell the user. Never pass `--no-gpg-sign` or disable `commit.gpgsign`.
@@ -39,25 +45,22 @@ Common gitmojis (full list at [gitmoji.dev](https://gitmoji.dev)):
 
 - **Descriptive `ai/` name.** Name branches `ai/<short-kebab-description>` after the feature or fix, independent of the AI tool. Never leave a branch named after an issue number (such as `ai/issue-63`): if you only have the issue number when the branch is created, rename it once you load the issue into context, before pushing or opening a pull request.
 - **Rename, never fork.** When renaming a tool-named branch (`claude/`, `codex/`, `t3code/`) or an issue-number branch, rename it in place with `git branch -m ai/<short-kebab-description>` before the first push or pull request, so no extra branch is left behind. `git switch -c` or `git checkout -b` would create a second branch instead.
+- **Stay on the thread's branch.** Follow-up work in a thread is committed to that thread's branch, including work handed to delegates. Branch off it only when the user explicitly asks; otherwise ask first.
+- **Branch from `main`.** A new branch starts from `main` unless the user explicitly asks for a branch based on another one, for example a large sub-feature with its own review.
 
 ## Pull Requests
 
-- **Ask first.** Pull request numbers are permanent, so a PR is irreversible. Open one only after the user approves that specific PR in the conversation.
+- **Explicit only.** Open a pull request only when the user explicitly asks for one, or after you ask directly and the user explicitly confirms that specific PR. The same applies to closing, retargeting, or stacking one.
+- **Target `main`.** A pull request targets `main` unless the user explicitly approves a stacked PR.
 - Open it from the `ai/` branch.
 - **Title:** a plain sentence with the first letter capitalized and no emoji, for example `Add CSV export to reports page`.
 - **Body:** write it with the `/pr` skill (mattpocock's).
 - **Approval** belongs to humans. Leave reviews as comments; never approve a pull request.
 
-<!-- setup-conventions:generated-end -->
-
-## Finpoint Additions
-
-- **Assignee:** assign every pull request to its owner, `zS1L3NT`, when opening it (`gh pr create --assignee zS1L3NT`).
-
 ### PR Evidence
 
 - **UI changes** need before and after screenshots. **Motion or timing changes** also need a short before and after video.
-- **Upload evidence to GitHub.** Drop the files into the pull request's comment box in a signed-in browser, copy the `https://github.com/user-attachments/assets/…` URLs, discard the unsent comment, and put the URLs in the body.
+- **Upload evidence to GitHub.** Open the pull request first, because the upload goes through its comment box. Then upload the files and edit the body. With the `pr-evidence` skill installed, upload through it. Without it, drop the files into the pull request's comment box in a signed-in browser, copy the `https://github.com/user-attachments/assets/…` URLs, discard the unsent comment, and put the URLs in the body.
 - **Never commit evidence.** Screenshots, videos, and other assets that only the pull request needs stay out of the repository, including `.github/pr-assets/`.
 - **One block per feature.** Under `## Evidence`, add one `<details>` block for each feature or part that changed. Open the first block (`<details open>`) and leave the rest closed.
   - **Summary line:** the feature name in bold, then the tags that apply: `screenshots`, `motion`, `new` (no before state).
@@ -70,9 +73,9 @@ Repeat this block for each feature:
 
 ````markdown
 <details open>
-<summary><b>Records sheet opens from Dashboard drill</b> · screenshots · motion</summary>
+<summary><b>Settings form saves on blur</b> · screenshots · motion</summary>
 
-`/dashboard?records=1&category=food` · seeded workspace · light
+`/settings` · seeded account · light
 
 #### Screenshots
 
@@ -92,13 +95,19 @@ Repeat this block for each feature:
 
 #### Motion
 
-**Before** · tap a category bar
+**Before** · edit a field and tab away
 
 https://github.com/user-attachments/assets/…
 
-**After** · tap a category bar
+**After** · edit a field and tab away
 
 https://github.com/user-attachments/assets/…
 
 </details>
 ````
+
+<!-- setup-conventions:generated-end -->
+
+## Finpoint Additions
+
+- **Assignee:** assign every pull request to its owner, `zS1L3NT`, when opening it (`gh pr create --assignee zS1L3NT`).

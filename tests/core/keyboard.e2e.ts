@@ -2,9 +2,9 @@ import { expectPointerCursor } from "../support/assertions"
 import { IDS } from "../support/data"
 import { expect, test } from "../support/fixtures"
 
-test("chrome buttons: navigate months and create Records by keyboard, toggle the sidebar and open Account details with Enter", {
+test("chrome buttons: navigate months and create Records by keyboard, use the top navigation and open Account details with Enter", {
 	tag: ["@reduced-motion"],
-}, async ({ page, workspace, isMobile }) => {
+}, async ({ page, workspace }) => {
 	void workspace
 	await test.step("month navigation: keyboard previous-month and create Record actions work", async () => {
 		await page.goto("/?month=October&year=2026")
@@ -21,43 +21,47 @@ test("chrome buttons: navigate months and create Records by keyboard, toggle the
 		await page.keyboard.press("Escape")
 		await expect(page.getByRole("dialog")).toHaveCount(0)
 	})
-	await test.step("sidebar trigger: keyboard toggle opens and closes the sidebar", async () => {
+	await test.step("top navigation: keyboard opens a page, Settings and its sections", async () => {
 		await page.goto("/privacy")
-		const toggle = page.locator('header [data-slot="sidebar-trigger"]')
-		await expectPointerCursor(toggle)
-		await toggle.focus()
+		const nav = page.getByRole("navigation", { name: "Main", exact: true })
+		await expect(nav.getByRole("link", { name: "Finpoint", exact: true })).toBeVisible()
+		const records = nav.getByRole("link", { name: "Records", exact: true })
+		await expectPointerCursor(records)
+		await records.focus()
 		await page.keyboard.press("Enter")
-		if (isMobile) {
-			await expect(page.getByRole("dialog")).toBeVisible()
-			await expect(
-				page.getByRole("dialog").getByText("Finpoint", { exact: true }),
-			).toBeVisible()
-			await expect(
-				page.getByRole("dialog").getByText("Local-first finance", { exact: true }),
-			).toBeVisible()
-			await page.keyboard.press("Escape")
-			await expect(page.getByRole("dialog")).toHaveCount(0)
-			await expect(toggle).toBeFocused()
-		} else {
-			await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
-				"data-state",
-				"collapsed",
-			)
-			await toggle.focus()
-			await page.keyboard.press("Space")
-			await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
-				"data-state",
-				"expanded",
-			)
-			await expect(
-				page.locator('[data-slot="sidebar"]').getByText("Finpoint", { exact: true }),
-			).toBeVisible()
-			await expect(
-				page
-					.locator('[data-slot="sidebar"]')
-					.getByText("Local-first finance", { exact: true }),
-			).toBeVisible()
+		await expect(page).toHaveURL(/\/records(\?|$)/)
+		await expect(records).toHaveAttribute("data-active", "true")
+		const settings = nav.getByRole("link", { name: "Settings", exact: true })
+		await settings.focus()
+		await page.keyboard.press("Enter")
+		await expect(page).toHaveURL(/\/settings$/)
+		await expect(settings).toHaveAttribute("data-active", "true")
+		await expect(records).toHaveAttribute("data-active", "false")
+		// Every settings page keeps Settings current and offers the same sections.
+		const sections = page.getByRole("navigation", { name: "Settings sections", exact: true })
+		for (const [label, url, heading] of [
+			["Categories", /\/categories$/, "Categories"],
+			["Statement rules", /\/statement-rules$/, "Statement rules"],
+			["Importer", /\/importer$/, "Importer"],
+			["Data", /\/sync$/, "Data"],
+			["General", /\/settings$/, "General"],
+		] as const) {
+			const section = sections.getByRole("link", { name: label, exact: true })
+			await section.focus()
+			await page.keyboard.press("Enter")
+			await expect(page).toHaveURL(url)
+			await expect(page.getByRole("heading", { name: heading, level: 2 })).toBeVisible()
+			await expect(section).toHaveAttribute("data-active", "true")
+			await expect(settings).toHaveAttribute("data-active", "true")
 		}
+		// Appearance moved from the sidebar footer to Settings.
+		const appearance = page.getByRole("radiogroup", { name: "Appearance", exact: true })
+		await appearance.getByRole("radio", { name: "Light", exact: true }).focus()
+		await page.keyboard.press("Enter")
+		await expect(page.locator("html")).not.toHaveClass(/dark/)
+		await appearance.getByRole("radio", { name: "Dark", exact: true }).focus()
+		await page.keyboard.press("Space")
+		await expect(page.locator("html")).toHaveClass(/dark/)
 	})
 	await test.step("Account card: Enter opens detail while nested Rename Enter stays in its editor", async () => {
 		await page.goto("/accounts?query=One+Card")
@@ -78,26 +82,6 @@ test("chrome buttons: navigate months and create Records by keyboard, toggle the
 		await page.keyboard.press("Enter")
 		await expect(page).toHaveURL(/\/accounts\?query=One\+Card$/)
 	})
-})
-
-test("sidebar shortcut: Ctrl+B collapses and expands the sidebar with no rail handle in the shell", {
-	tag: ["@desktop-only"],
-}, async ({ page, isMobile }) => {
-	test.skip(isMobile, "The mobile Sidebar is a sheet opened by its trigger")
-	await page.goto("/records")
-	// The shortcut listener mounts in an effect; the rewritten history marker
-	// proves this document hydrated before the key press.
-	await page.evaluate(() => localStorage.removeItem("history"))
-	await page.reload()
-	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	const sidebar = page.locator('[data-slot="sidebar"]').first()
-	await expect(sidebar).toHaveAttribute("data-state", "expanded")
-	// The rail looked like a resize handle but only toggled the sidebar.
-	await expect(page.locator('[data-slot="sidebar-rail"]')).toHaveCount(0)
-	await page.keyboard.press("Control+b")
-	await expect(sidebar).toHaveAttribute("data-state", "collapsed")
-	await page.keyboard.press("Control+b")
-	await expect(sidebar).toHaveAttribute("data-state", "expanded")
 })
 
 // Allocator keyboard flows share one seed: none of them persist (dialogs and
@@ -224,9 +208,9 @@ test("pending queue: keyboard replace and confirm replace the Pending Statement"
 	await page.keyboard.press("Enter")
 	await expect(review).toHaveCount(0)
 	await expect(page.getByText("Pending Statement replaced.")).toBeVisible()
-	await page.goto(`/records/${IDS.records.pendingStatement}`)
+	await page.goto(`/records?record=${IDS.records.pendingStatement}`)
 	await expect(
-		page.locator("main").getByText("SHENG SIONG 9902").filter({ visible: true }).first(),
+		page.getByRole("dialog", { name: "Record", exact: true }).getByText("SHENG SIONG 9902"),
 	).toBeVisible()
 })
 

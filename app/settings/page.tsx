@@ -1,6 +1,8 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { motion } from "framer-motion"
+import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -10,6 +12,7 @@ import { ruleValueLabel } from "@/components/form/rule-suggestions"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import SettingsTabs from "@/components/settings-tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,7 +31,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { type Appearance, useAppearance } from "@/hooks/use-appearance"
 import { useSettings } from "@/hooks/use-settings"
+import { SPRING } from "@/lib/motion"
 import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { updateSettings } from "@/logic/settings"
@@ -55,6 +60,44 @@ function learnedSignals(field: RuleField, w: Weights) {
 		w.threshold < DEFAULT_WEIGHTS.threshold && "Loose merchant matches",
 		w.shape > DEFAULT_WEIGHTS.shape && "Similar payments for new merchants",
 	].filter(signal => typeof signal === "string")
+}
+
+const APPEARANCES: { value: Appearance; label: string; icon: typeof SunIcon }[] = [
+	{ value: "light", label: "Light", icon: SunIcon },
+	{ value: "dark", label: "Dark", icon: MoonIcon },
+	{ value: "system", label: "System", icon: MonitorIcon },
+]
+
+function AppearanceSwitch() {
+	const { appearance, updateAppearance } = useAppearance()
+	return (
+		<div
+			role="radiogroup"
+			aria-label="Appearance"
+			className="grid w-full max-w-md grid-cols-3 gap-0.5 rounded-lg bg-muted p-0.5"
+		>
+			{APPEARANCES.map(item => (
+				<button
+					key={item.value}
+					type="button"
+					role="radio"
+					aria-checked={appearance === item.value}
+					onClick={() => updateAppearance(item.value)}
+					className="relative isolate flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md text-xs text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground aria-checked:font-medium aria-checked:text-foreground"
+				>
+					{appearance === item.value ? (
+						<motion.span
+							layoutId="appearance-thumb"
+							transition={SPRING.snappy}
+							className="absolute inset-0 -z-10 rounded-md bg-background shadow-xs"
+						/>
+					) : null}
+					<item.icon className="size-3.5" />
+					{item.label}
+				</button>
+			))}
+		</div>
+	)
 }
 
 export default function SettingsPage() {
@@ -108,12 +151,26 @@ export default function SettingsPage() {
 
 	return (
 		<PageContent>
+			<SettingsTabs active="general" />
+
 			<PageHeader
-				title="Settings"
-				subtitle="Choose how Finpoint opens your everyday workspaces."
-				description="Preferences"
+				title="General"
+				subtitle="Choose how Finpoint looks and opens your everyday workspaces."
+				description="Settings"
 				icon="lucide:settings-2"
 			/>
+
+			<Card className="max-w-3xl overflow-hidden">
+				<CardHeader className="border-b">
+					<CardTitle>Appearance</CardTitle>
+					<CardDescription>
+						Light, dark, or whatever this device is set to. Saved in this browser.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<AppearanceSwitch />
+				</CardContent>
+			</Card>
 
 			<Card className="max-w-3xl overflow-hidden">
 				<CardHeader className="border-b">

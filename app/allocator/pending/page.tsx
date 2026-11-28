@@ -2,8 +2,8 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import StatementDialog from "@/components/dialogs/statement"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
 } from "@/components/dialogs/statement-replacement-review"
@@ -32,7 +32,6 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import WorkflowTabs from "@/components/workflow-tabs"
-import { useHistory } from "@/history"
 import { useUrlParams } from "@/hooks/use-url-params"
 import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
 import {
@@ -51,7 +50,6 @@ import {
 	replacementCandidates,
 	suggestedReplacementCounts,
 } from "@/logic/statements"
-import { pathStatement } from "@/routes"
 import type {
 	Paginated,
 	PendingReplacementStatement,
@@ -586,7 +584,7 @@ function CandidateResults({
 	onReview: (statement: Statement) => void
 	onPage: (page: number) => void
 }) {
-	const { handlePush } = useHistory()
+	const [openStatement, setOpenStatement] = useState<Statement | null>(null)
 	const initial = { opacity: 0, y: 6 }
 	const transition = TRANSITION.base
 	if (error)
@@ -696,15 +694,10 @@ function CandidateResults({
 									variant="ghost"
 									size="icon-sm"
 									title="Open Statement"
-									asChild
+									aria-label="Open Statement"
+									onClick={() => setOpenStatement(statement)}
 								>
-									<Link
-										href={pathStatement(statement.id)}
-										aria-label="Open Statement"
-										onClick={handlePush("Allocator")}
-									>
-										<IconifyIcon icon="lucide:external-link" />
-									</Link>
+									<IconifyIcon icon="lucide:eye" />
 								</Button>
 								<Button
 									size="sm"
@@ -744,6 +737,16 @@ function CandidateResults({
 					</Button>
 				</div>
 			</div>
+
+			{openStatement ? (
+				<StatementDialog
+					statement={openStatement}
+					isOpen
+					setIsOpen={isOpen => {
+						if (!isOpen) setOpenStatement(null)
+					}}
+				/>
+			) : null}
 		</motion.div>
 	)
 }

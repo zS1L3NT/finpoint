@@ -9,41 +9,22 @@ import {
 	poseIsIdentity,
 	sampleVisibleRowAnimations,
 } from "../support/motion"
-import { type MotionConsumer, openMobileSidebarFromConsumerMotion } from "../support/tables"
+import type { MotionConsumer } from "../support/tables"
 
-// Mobile sidebar taps race hydration: useIsMobile() starts false and flips in
-// a mount effect, so a tap before that commit toggles the invisible desktop
-// state and nothing opens. localStorage.history survives reloads and gotos,
-// so a pre-existing marker proves nothing about the current mount — clear it
-// and reload first; the rewritten marker then proves THIS document hydrated
-// (the history provider wraps the sidebar's, so both mount effects commit in
-// the same pass). Retry the tap boundedly for swallowed taps under load. A
-// permanently absent sheet still fails the dialog check below, and the
-// subsequent visible-link wait keeps its own strict proof.
-async function openMobileSidebarFromTableUpdates(page: Page) {
-	await page.evaluate(() => localStorage.removeItem("history"))
-	await page.reload()
-	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
-	for (let attempt = 0; attempt < 3; attempt++) {
-		await trigger.click()
-		await page.waitForTimeout(500)
-		if ((await page.getByRole("dialog").count()) > 0) break
-	}
-	await expect(page.getByRole("dialog")).toBeVisible()
-}
+/** Row links open the Record or Statement preview over its list. */ const rowHref = (
+	route: string,
+) => (route === "/records" ? "/records?record=" : "/statements?statement=")
 
 const recordRows =
-	'main table:has(a[href^="/records/"]) tbody tr:has(a[href^="/records/"]), main div:has(> div.grid-cols-subgrid a[href^="/records/"]) > div.grid-cols-subgrid:has(a[href^="/records/"])'
+	'main table:has(a[href^="/records?record="]) tbody tr:has(a[href^="/records?record="]), main div:has(> div.grid-cols-subgrid a[href^="/records?record="]) > div.grid-cols-subgrid:has(a[href^="/records?record="])'
 const statementRows =
-	'main table:has(a[href^="/statements/"]) tbody tr:has(a[href^="/statements/"]), main div:has(> div.grid-cols-subgrid a[href^="/statements/"]) > div.grid-cols-subgrid:has(a[href^="/statements/"])'
+	'main table:has(a[href^="/statements?statement="]) tbody tr:has(a[href^="/statements?statement="]), main div:has(> div.grid-cols-subgrid a[href^="/statements?statement="]) > div.grid-cols-subgrid:has(a[href^="/statements?statement="])'
 
 const denseRowConsumers: MotionConsumer[] = [
 	{
 		name: "Records",
 		origin: "/accounts",
-		action: "sidebar",
+		action: "nav",
 		target: "Records",
 		selector: recordRows,
 		dense: true,
@@ -51,7 +32,7 @@ const denseRowConsumers: MotionConsumer[] = [
 	{
 		name: "Statements",
 		origin: "/accounts",
-		action: "sidebar",
+		action: "nav",
 		target: "Statements",
 		selector: statementRows,
 		dense: true,
@@ -62,7 +43,7 @@ const denseRowConsumers: MotionConsumer[] = [
 		action: "sheet",
 		target: "^View Total spending Records$",
 		selector:
-			'[data-slot="sheet-content"] tbody tr:not(section *):has(a[href^="/records/"]), [data-slot="sheet-content"] div.grid-cols-subgrid:not(section *):has(a[href^="/records/"])',
+			'[data-slot="sheet-content"] tbody tr:not(section *):has(a[href^="/records?record="]), [data-slot="sheet-content"] div.grid-cols-subgrid:not(section *):has(a[href^="/records?record="])',
 		dense: true,
 	},
 	{
@@ -71,7 +52,7 @@ const denseRowConsumers: MotionConsumer[] = [
 		action: "sheet",
 		target: "^Review \\d+ future-dated Records$",
 		selector:
-			'[data-slot="sheet-content"] section tbody tr:has(a[href^="/records/"]), [data-slot="sheet-content"] section div.grid-cols-subgrid:has(a[href^="/records/"])',
+			'[data-slot="sheet-content"] section tbody tr:has(a[href^="/records?record="]), [data-slot="sheet-content"] section div.grid-cols-subgrid:has(a[href^="/records?record="])',
 		dense: true,
 		future: true,
 	},
@@ -88,7 +69,7 @@ const denseRowConsumers: MotionConsumer[] = [
 	{
 		name: "Allocate",
 		origin: "/accounts",
-		action: "sidebar",
+		action: "nav",
 		target: "Workflows",
 		selector: statementRows,
 		dense: true,
@@ -102,22 +83,6 @@ const populatedConsumers: MotionConsumer[] = [
 		action: "heading",
 		target: "Everyday Savings",
 		selector: statementRows,
-		dense: false,
-	},
-	{
-		name: "Record Statements",
-		origin: "/records",
-		action: "link",
-		target: "Open Hawker Dinner",
-		selector: statementRows,
-		dense: false,
-	},
-	{
-		name: "Statement Records",
-		origin: "/statements",
-		action: "statement",
-		target: "t1-s-pending",
-		selector: recordRows,
 		dense: false,
 	},
 	{
@@ -178,11 +143,8 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 		await setDateOnly(page, new Date("2026-09-15T12:00:00+08:00"))
 	await page.goto(consumer.origin)
 	await expect(page.locator("main h2").first()).toBeVisible()
-	if (consumer.action === "sidebar" && isMobile) {
-		await openMobileSidebarFromConsumerMotion(page)
-	}
 	const samples = await sampleVisibleRowAnimations(page, consumer.selector, async () => {
-		if (consumer.action === "sidebar")
+		if (consumer.action === "nav")
 			await page
 				.getByRole("link", { name: consumer.target, exact: true })
 				.filter({ visible: true })
@@ -196,11 +158,6 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 				.click()
 		else if (consumer.action === "heading")
 			await page.getByRole("heading", { name: consumer.target, exact: true }).click()
-		else if (consumer.action === "statement")
-			await page
-				.getByRole("link", { name: "Open statement" })
-				.and(page.locator(`[href="/statements/${consumer.target}"]`))
-				.click()
 		else if (consumer.action === "view") {
 			await page.getByRole("combobox", { name: "Duplicate view" }).click()
 			await pickOption(page.getByRole("option", { name: consumer.target, exact: true }))
@@ -210,7 +167,7 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 			await pickOption(
 				page.getByRole("option", { name: "All unallocated imports", exact: true }),
 			)
-		} else await page.getByRole("link", { name: consumer.target, exact: true }).click()
+		}
 	})
 	const visibleCount = await page.locator(consumer.selector).evaluateAll(
 		elements =>
@@ -266,12 +223,12 @@ test("table refilter: changed results enter with the row entrance", {
 					? "Search title, people, location, description..."
 					: "Search descriptions...",
 			)
-			const selector = `tbody tr:has(a[href^="${route}/"]), div.grid-cols-subgrid:has(a[href^="${route}/"])`
+			const selector = `tbody tr:has(a[href^="${rowHref(route)}"]), div.grid-cols-subgrid:has(a[href^="${rowHref(route)}"])`
 			await expect(page.locator(selector).filter({ visible: true }).first()).toBeVisible()
 			// Cross the documented entrance-settle window before changing the result set.
 			await page.waitForTimeout(1000)
 			const existing = await page
-				.locator(`${selector} a[href^="${route}/"]`)
+				.locator(`${selector} a[href^="${rowHref(route)}"]`)
 				.evaluateAll(elements => elements.map(element => element.getAttribute("href")))
 			const fresh = selector
 				.split(", ")
@@ -303,7 +260,7 @@ test("table refilter: rows interrupted mid-rise settle back in line", {
 			// routes, so narrowing to it is a pure removal that keeps the
 			// discovered rows' DOM nodes alive.
 			const narrow = "Dense Record 1"
-			const allRows = `tbody tr:has(a[href^="${route}/"]), div.grid-cols-subgrid:has(a[href^="${route}/"])`
+			const allRows = `tbody tr:has(a[href^="${rowHref(route)}"]), div.grid-cols-subgrid:has(a[href^="${rowHref(route)}"])`
 			const rowParts = (href: string) =>
 				`tbody tr:has(a[href="${href}"]), div.grid-cols-subgrid:has(a[href="${href}"])`
 			// Discover retained rows on the settled narrowed list, so they
@@ -321,7 +278,9 @@ test("table refilter: rows interrupted mid-rise settle back in line", {
 							.map(
 								element =>
 									element
-										.querySelector(`a[href^="${origin}/"]`)
+										.querySelector(
+											`a[href^="${origin}?${origin.slice(1, -1)}="]`,
+										)
 										?.getAttribute("href") ?? "",
 							),
 					route,
@@ -596,10 +555,10 @@ test("table paging: new page fades without restarting the rise", {
 	for (const route of ["/records", "/statements"] as const) {
 		await test.step(`table paging ${route}: new page fades without restarting the rise`, async () => {
 			await page.goto(`${route}?per_page=5`)
-			const rows = `tbody tr:has(a[href^="${route}/"]), div.grid-cols-subgrid:has(a[href^="${route}/"])`
+			const rows = `tbody tr:has(a[href^="${rowHref(route)}"]), div.grid-cols-subgrid:has(a[href^="${rowHref(route)}"])`
 			await expect(page.locator(rows).filter({ visible: true })).toHaveCount(5)
 			const oldLinks = await page
-				.locator(`main a[href^="${route}/"]`)
+				.locator(`main a[href^="${rowHref(route)}"]`)
 				.evaluateAll(elements => elements.map(element => element.getAttribute("href")))
 			const fresh = rows
 				.split(", ")
@@ -636,10 +595,9 @@ test("Records table: visible day headers enter with their grouped Records", {
 }, async ({ page, isMobile }) => {
 	await seedWorkspace(page, "dense")
 	await page.goto("/accounts")
-	if (isMobile) await openMobileSidebarFromTableUpdates(page)
 	const samples = await sampleVisibleRowAnimations(
 		page,
-		'tbody tr:not(:has(a[href^="/records/"])), div.grid-cols-subgrid:not(:has(a[href^="/records/"]))',
+		'tbody tr:not(:has(a[href^="/records?record="])), div.grid-cols-subgrid:not(:has(a[href^="/records?record="]))',
 		() =>
 			page
 				.getByRole("link", { name: "Records", exact: true })
@@ -669,7 +627,7 @@ test("table refilter from no results: visible results enter with an entrance", {
 			).toBeVisible()
 			const samples = await sampleVisibleRowAnimations(
 				page,
-				'tbody tr:has(a[aria-label^="Open "]), div.grid-cols-subgrid:has(a[aria-label^="Open "])',
+				`tbody tr:has(a[href^="${rowHref(route)}"]), div.grid-cols-subgrid:has(a[href^="${rowHref(route)}"])`,
 				async () => {
 					await page
 						.getByPlaceholder(
@@ -697,7 +655,7 @@ test("table rows: Records, Statements, Records sheet, future Records sheet, pend
 	}
 })
 
-test("table rows: Account Statements, Record Statements, Statement Records, duplicate groups, separate pairs and replacement candidates enter as a cascade in the viewport", {
+test("table rows: Account Statements, duplicate groups, separate pairs and replacement candidates enter as a cascade in the viewport", {
 	tag: ["@tall", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	test.setTimeout(150000)
@@ -717,7 +675,7 @@ test("Budget detail: initially visible related Records rows animate as a cascade
 	await expect(page.getByRole("heading", { name: "October Buffer", exact: true })).toBeVisible()
 	const samples = await sampleVisibleRowAnimations(
 		page,
-		'tbody tr:has(a[href^="/records/"])',
+		'tbody tr:has(a[href^="/records?record="])',
 		() => page.getByRole("heading", { name: "October Buffer", exact: true }).click(),
 	)
 	expectVisibleRowCascade(samples, 2)
@@ -753,7 +711,7 @@ test("Budget detail: remaining row does not replay its entrance after detaching"
 	void workspace
 	await page.setViewportSize({ width: 1920, height: 1440 })
 	await page.goto("/budgets/t1-b-manual")
-	const selector = 'tbody tr:has(a[href="/records/t1-r-unicode"])'
+	const selector = 'tbody tr:has(a[href="/records?record=t1-r-unicode"])'
 	const kept = page.locator(selector).filter({ visible: true })
 	await expect(kept).toHaveCSS("opacity", "1")
 	await expect(kept).toHaveCSS("transform", "none")
@@ -799,7 +757,9 @@ test("allocator: an allocated Statement fades out and the rows below slide up", 
 			if (!below) return
 			frames.push({
 				opacity: leaving?.isConnected ? Number(getComputedStyle(leaving).opacity) : null,
-				top: below.getBoundingClientRect().top,
+				// Page coordinates: on a page barely taller than the viewport, removing the row
+				// clamps the scroll, which moves the rows above instead of the rows below.
+				top: below.getBoundingClientRect().top + scrollY,
 			})
 			if (frames.length < 240) requestAnimationFrame(tick)
 		}

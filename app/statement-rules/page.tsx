@@ -9,6 +9,7 @@ import { ruleValueLabel } from "@/components/form/rule-suggestions"
 import { UiIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import SettingsTabs from "@/components/settings-tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
@@ -73,6 +74,8 @@ export default function StatementRulesPage() {
 	return (
 		<>
 			<PageContent>
+				<SettingsTabs active="rules" />
+
 				<PageHeader
 					title="Statement rules"
 					subtitle="Recognise recurring Statements by their description and prepare the Records you create from them."
@@ -102,9 +105,6 @@ export default function StatementRulesPage() {
 								“Spotify” and the Subscriptions category.
 							</p>
 						</div>
-						<Button variant="outline" size="sm" onClick={() => setDialogRule("new")}>
-							Create a rule
-						</Button>
 					</motion.div>
 				) : (
 					<section className="grid gap-2" aria-label="Your rules">
