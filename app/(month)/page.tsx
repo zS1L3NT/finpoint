@@ -482,6 +482,7 @@ function SummaryBand({
 	/** Last actual day while the month is running; trend points then cover days 1 to it. */
 	through: string | null
 }) {
+	const sheet = useRecordsSheet()
 	const sparkPeriod = through ? `days 1–${DateTime.fromISO(through).day}` : undefined
 	const surplusLabel =
 		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
@@ -498,6 +499,7 @@ function SummaryBand({
 					spark={trend.map(month => month.income)}
 					sparkColor="var(--income)"
 					sparkPeriod={sparkPeriod}
+					href={sheet.href({ effective_income: "true" })}
 				/>
 				<DashboardMetric
 					icon="lucide:receipt-text"
@@ -508,6 +510,7 @@ function SummaryBand({
 					spark={trend.map(month => month.spending)}
 					sparkColor="var(--spending)"
 					sparkPeriod={sparkPeriod}
+					href={sheet.href({ effective_spending: "true" })}
 				/>
 				<DashboardMetric
 					icon="lucide:scale"
@@ -544,20 +547,13 @@ function InvestmentRow({ summary }: { summary: AnalyticsSummary }) {
 	const rate = summary.income > 0 ? (net / summary.income) * 100 : null
 	return (
 		<section className="grid gap-4" aria-labelledby="investment-title">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<div>
-					<h3 id="investment-title" className="text-sm font-semibold">
-						Saving and investment movements
-					</h3>
-					<p className="text-xs text-muted-foreground">
-						Recorded contributions and withdrawals for this month
-					</p>
-				</div>
-				<Button variant="outline" size="sm" asChild>
-					<Link href={sheet.href({ treatment: "saving_investment" })} scroll={false}>
-						View Records
-					</Link>
-				</Button>
+			<div>
+				<h3 id="investment-title" className="text-sm font-semibold">
+					Saving and investment movements
+				</h3>
+				<p className="text-xs text-muted-foreground">
+					Recorded contributions and withdrawals for this month
+				</p>
 			</div>
 			<MetricGrid>
 				<DashboardMetric
@@ -565,12 +561,14 @@ function InvestmentRow({ summary }: { summary: AnalyticsSummary }) {
 					label="Contributions"
 					value={formatCurrency(summary.contributions)}
 					detail="Money put into savings and investments"
+					href={sheet.href({ effective_contributions: "true" })}
 				/>
 				<DashboardMetric
 					icon="lucide:arrow-down-left"
 					label="Withdrawals"
 					value={formatCurrency(summary.withdrawals)}
 					detail="Money taken out of savings and investments"
+					href={sheet.href({ effective_withdrawals: "true" })}
 				/>
 				<DashboardMetric
 					icon="lucide:scale"

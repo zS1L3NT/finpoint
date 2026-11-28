@@ -762,8 +762,8 @@ test.describe("pinned 15 October 2026 date", () => {
 		const heading = await page
 			.getByRole("heading", { name: "October 2026", exact: true })
 			.elementHandle()
-		await page.getByRole("link", { name: "View Records", exact: true }).click()
-		const sheet = page.getByRole("dialog", { name: "Saving / investment", exact: true })
+		await page.getByRole("link", { name: "View Contributions Records", exact: true }).click()
+		const sheet = page.getByRole("dialog", { name: "Contributions", exact: true })
 		await expect(sheet).toContainText("October 2026")
 		await expect.poll(() => heading?.evaluate(node => node.isConnected)).toBe(true)
 		await page.keyboard.press("Escape")

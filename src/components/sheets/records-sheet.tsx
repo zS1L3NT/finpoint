@@ -86,6 +86,9 @@ export default function RecordsSheet() {
 			data?.monthlyBudget?.name,
 			shown?.show_unbudgeted === "true" ? "Unbudgeted" : null,
 			shown?.treatment ? treatmentLabel(shown.treatment as AnalyticsTreatment) : null,
+			shown?.effective_income === "true" ? "Income" : null,
+			shown?.effective_contributions === "true" ? "Contributions" : null,
+			shown?.effective_withdrawals === "true" ? "Withdrawals" : null,
 			shown?.is_allocated === "false" ? "Pending" : null,
 		]
 			.filter(Boolean)
@@ -180,7 +183,10 @@ export default function RecordsSheet() {
 								is_allocated: shown?.is_allocated,
 								monthly_budget_id: shown?.monthly_budget_id,
 								show_unbudgeted: shown?.show_unbudgeted,
+								effective_income: shown?.effective_income,
 								effective_spending: shown?.effective_spending,
+								effective_contributions: shown?.effective_contributions,
+								effective_withdrawals: shown?.effective_withdrawals,
 								treatment: shown?.treatment,
 							})}
 						>

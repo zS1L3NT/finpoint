@@ -43,8 +43,8 @@ Common gitmojis (full list at [gitmoji.dev](https://gitmoji.dev)):
 
 ## Branches
 
-- Name new branches `ai/<short-kebab-description>`, independent of the AI tool.
-- **Rename, never fork.** When working on a tool-named branch (`claude/`, `codex/`, `t3code/`), rename it in place with `git branch -m ai/<short-kebab-description>` before the first push or pull request, so no tool-named branch is left behind. `git switch -c` or `git checkout -b` would create a second branch instead.
+- **Descriptive `ai/` name.** Name branches `ai/<short-kebab-description>` after the feature or fix, independent of the AI tool. Never leave a branch named after an issue number (such as `ai/issue-63`): if you only have the issue number when the branch is created, rename it once you load the issue into context, before pushing or opening a pull request.
+- **Rename, never fork.** When renaming a tool-named branch (`claude/`, `codex/`, `t3code/`) or an issue-number branch, rename it in place with `git branch -m ai/<short-kebab-description>` before the first push or pull request, so no extra branch is left behind. `git switch -c` or `git checkout -b` would create a second branch instead.
 - **Stay on the thread's branch.** Follow-up work in a thread is committed to that thread's branch, including work handed to delegates. Branch off it only when the user explicitly asks; otherwise ask first.
 - **Branch from `main`.** A new branch starts from `main` unless the user explicitly asks for a branch based on another one, for example a large sub-feature with its own review.
 

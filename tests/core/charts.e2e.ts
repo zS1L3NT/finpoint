@@ -558,6 +558,43 @@ test.describe("pinned overview date", () => {
 				page.getByRole("link", { name: "Open Monthly Salary", exact: true }),
 			).toHaveCount(0)
 		})
+		await test.step("summary tiles: income, spending and contributions open their Records", async () => {
+			await page.goto(overview)
+			await page.getByRole("link", { name: "View Total income Records", exact: true }).click()
+			await expect(page).toHaveURL(/effective_income=true/)
+			const income = page.getByRole("dialog", { name: "Income", exact: true })
+			await expect(
+				income.getByRole("link", { name: "Open Monthly Salary", exact: true }),
+			).toBeVisible()
+			await expect(
+				income.getByRole("link", { name: "Open FairPrice Run", exact: true }),
+			).toHaveCount(0)
+			await page.keyboard.press("Escape")
+			await expect(income).toHaveCount(0)
+			await page
+				.getByRole("link", { name: "View Total spending Records", exact: true })
+				.click()
+			await expect(page).toHaveURL(/effective_spending=true/)
+			const spending = page.getByRole("dialog", { name: "Records", exact: true })
+			await expect(
+				spending.getByRole("link", { name: "Open FairPrice Run", exact: true }),
+			).toBeVisible()
+			await expect(
+				spending.getByRole("link", { name: "Open Monthly Salary", exact: true }),
+			).toHaveCount(0)
+			await page.keyboard.press("Escape")
+			await expect(spending).toHaveCount(0)
+			await expect(page.getByRole("link", { name: "View Records", exact: true })).toHaveCount(
+				0,
+			)
+			await page
+				.getByRole("link", { name: "View Contributions Records", exact: true })
+				.click()
+			await expect(page).toHaveURL(/effective_contributions=true/)
+			await expect(
+				page.getByRole("dialog", { name: "Contributions", exact: true }),
+			).toBeVisible()
+		})
 		await test.step("biggest changes: Category change title and drilldown reconcile with the previous month", async () => {
 			await page.goto(overview)
 			const housing = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })

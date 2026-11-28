@@ -1,3 +1,4 @@
+import Link from "next/link"
 import Sparkline from "@/components/charts/sparkline"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import ValueSwap from "@/components/value-swap"
@@ -35,6 +36,7 @@ export function Metric({
 	spark,
 	sparkColor,
 	sparkPeriod,
+	href,
 }: {
 	icon: string
 	label: string
@@ -46,6 +48,8 @@ export function Metric({
 	sparkColor?: string
 	/** What each sparkline point covers, when not the whole month (e.g. "days 1–8"). */
 	sparkPeriod?: string
+	/** Makes the whole tile a link, e.g. to the Records behind its value. */
+	href?: string
 }) {
 	return (
 		<div
@@ -55,8 +59,20 @@ export function Metric({
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
 				tone === "positive" && "before:bg-creative",
 				tone === "negative" && "before:bg-red-500",
+				// The grid's hairlines are its background showing through, so the tint stays opaque.
+				href &&
+					"transition-colors duration-150 ease-out has-[>a:hover]:bg-[color-mix(in_oklab,var(--muted)_60%,var(--card))] has-[>a:active]:bg-muted",
 			)}
 		>
+			{/* Stretched over the tile, so the whole tile opens it while its text stays plain. */}
+			{href ? (
+				<Link
+					href={href}
+					scroll={false}
+					aria-label={`View ${label} Records`}
+					className="absolute inset-0 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+				/>
+			) : null}
 			{/* min-h matches the delta chip, so tiles with and without one keep values level. */}
 			<div className="flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground">
 				<span className="hidden size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs sm:grid">
