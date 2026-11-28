@@ -79,7 +79,7 @@ export default function DatetimeField({
 	return (
 		<div
 			className={cn(
-				"grid w-full min-w-0 grid-cols-1 items-start gap-x-2 gap-y-4 sm:grid-cols-[minmax(0,1fr)_8.5rem]",
+				"grid w-full min-w-0 grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-start gap-x-2 gap-y-4 sm:grid-cols-[minmax(0,1fr)_8.5rem]",
 				className,
 			)}
 		>
