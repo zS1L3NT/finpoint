@@ -190,10 +190,11 @@ test("version five upgrade preserves financial rows and clean or dirty Drive bas
 		const backup = await exportData()
 		const tables: Record<string, unknown[]> = { ...backup.tables }
 		delete tables.statement_rules
+		delete tables.record_files
 		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
 		const schema = Object.fromEntries(
 			db.tables
-				.filter(t => !["statement_rules"].includes(t.name))
+				.filter(t => !["statement_rules", "record_files", "file_blobs"].includes(t.name))
 				.map(t => [
 					t.name,
 					[t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(","),
@@ -246,12 +247,15 @@ test("version six upgrade turns suggest-mode actions into autofill and keeps the
 			},
 		}
 		const tables: Record<string, unknown[]> = { ...backup.tables, statement_rules: [rule] }
+		delete tables.record_files
 		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
 		const schema = Object.fromEntries(
-			db.tables.map(t => [
-				t.name,
-				[t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(","),
-			]),
+			db.tables
+				.filter(t => !["record_files", "file_blobs"].includes(t.name))
+				.map(t => [
+					t.name,
+					[t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(","),
+				]),
 		)
 		await db.delete()
 		const old = new Dexie("finpoint")

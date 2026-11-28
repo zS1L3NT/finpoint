@@ -181,9 +181,10 @@ test("upgrades remove retired budget metadata and preserve Drive baselines", asy
 	for (const clean of [true, false]) {
 		const rows = ["daily", "recurring", "none"].map((pace, i) => ({ id: String(i), name: pace, color: "#123456", group: "core", display_order: i * 10, archived: i === 2, [legacyPaceKey]: pace }))
 		const backup = await exportData()
-		const tables = { ...backup.tables, monthly_budgets: rows }
+		const { record_files: _, ...current } = backup.tables
+		const tables = { ...current, monthly_budgets: rows }
 		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
-		const schema = Object.fromEntries(db.tables.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
+		const schema = Object.fromEntries(db.tables.filter(t => !["record_files", "file_blobs"].includes(t.name)).map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
 		await db.delete()
 		const old = new Dexie("finpoint")
 		old.version(8).stores(schema)
@@ -191,7 +192,7 @@ test("upgrades remove retired budget metadata and preserve Drive baselines", asy
 		await old.table("meta").put({ key: "drive_last_hash", value: baseline })
 		old.close()
 		await db.open()
-		expect(db.verno).toBe(10)
+		expect(db.verno).toBe(11)
 		expect(await db.monthly_budgets.toArray()).toEqual(rows.map(({ [legacyPaceKey]: _, group: _group, ...row }) => row))
 		expect((await db.meta.get("drive_last_hash"))?.value).toBe(clean ? await hashSnapshot(await exportData()) : baseline)
 	}
@@ -204,7 +205,7 @@ test("old backup import removes retired budget metadata and exports current fiel
 	for (const version of [6, 7, 8]) {
 		await importData({ ...backup, version, tables: { ...backup.tables, monthly_budgets: [{ ...budget, group: "core", [legacyPaceKey]: "daily" }] } })
 		expect(await db.monthly_budgets.get(budget.id)).toEqual(budget)
-		expect((await exportData()).version).toBe(8)
+		expect((await exportData()).version).toBe(9)
 		expect((await exportData()).tables.monthly_budgets).toEqual([budget])
 	}
 })

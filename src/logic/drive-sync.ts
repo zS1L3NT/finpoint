@@ -1,22 +1,26 @@
 // Plaintext snapshot sync to the user's own Google Drive appDataFolder. Manual JSON
 // backup/restore stays untouched.
 
-import { db } from "@/data/db"
+import { db, type RecordFileRow } from "@/data/db"
 import { exportData, importData, parseImportFile } from "@/data/export-import"
 import {
 	completeDriveRedirect,
 	type DriveAction,
 	disconnectDrive,
 	downloadBackupFile,
+	downloadRecordFile,
 	ensureDriveToken,
 	findBackupFile,
 	getClockSkewMs,
 	getFileMeta,
 	isDriveConfigured,
+	listRecordFileIds,
 	uploadBackupFile,
+	uploadRecordFile,
 } from "@/data/google-drive"
 import { SEED_HASH_KEY } from "@/data/seed"
 import { hashSnapshot } from "@/data/snapshot-hash"
+import { pullRecordFiles, pushRecordFiles, type RecordFileStore } from "@/logic/record-file-sync"
 import { isRemoteNewer } from "@/logic/shared"
 
 export {
@@ -126,6 +130,10 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 		) {
 			return { outcome: "empty" }
 		}
+		await pushRecordFiles(
+			driveFileStore(token),
+			snapshot.tables.record_files as RecordFileRow[],
+		)
 		const uploaded = await uploadBackupFile(token, JSON.stringify(snapshot), null)
 		const now = new Date().toISOString()
 		await Promise.all([
@@ -162,6 +170,7 @@ export async function pushDrive(): Promise<void> {
 	const storedFileId = await metaGet(FILE_ID_KEY)
 	let fileId = storedFileId
 	if (!fileId) fileId = (await findBackupFile(token))?.id ?? null
+	await pushRecordFiles(driveFileStore(token), snapshot.tables.record_files as RecordFileRow[])
 	const uploaded = await uploadBackupFile(token, JSON.stringify(snapshot), fileId)
 	const meta = await getFileMeta(token, uploaded.id).catch(() => null)
 	const now = new Date().toISOString()
@@ -181,10 +190,11 @@ export async function pullDrive(): Promise<void> {
 	const fileId = storedFileId ?? (await findBackupFile(token))?.id
 	if (!fileId) throw new Error("No backup found in Google Drive yet.")
 
-	const text = await downloadBackupFile(token, fileId)
+	const remote = parseImportFile(await downloadBackupFile(token, fileId))
+	await pullRecordFiles(driveFileStore(token), remote.tables.record_files as RecordFileRow[])
 	// Hash what the restore stored, not a later read: an edit made while the rest of this
 	// function runs must still differ from the baseline and be pushed.
-	const localHash = await hashSnapshot(await importData(parseImportFile(text)))
+	const localHash = await hashSnapshot(await importData(remote))
 	const meta = await getFileMeta(token, fileId).catch(() => null)
 	const now = new Date().toISOString()
 	await Promise.all([
@@ -220,4 +230,12 @@ export async function disconnectDriveSync(): Promise<void> {
 		db.meta.delete(REMOTE_TIME_KEY),
 		db.meta.delete(PAUSED_KEY),
 	])
+}
+
+function driveFileStore(token: string): RecordFileStore {
+	return {
+		list: () => listRecordFileIds(token),
+		upload: (sha256, data, type) => uploadRecordFile(token, sha256, data, type),
+		download: id => downloadRecordFile(token, id),
+	}
 }

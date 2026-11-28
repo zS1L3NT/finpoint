@@ -220,12 +220,13 @@ test("dismissal migration preserves clean and dirty Drive baselines", async () =
 		const tables: Record<string, unknown[]> = { ...backup.tables }
 		delete tables.duplicate_dismissals
 		delete tables.statement_rules
+		delete tables.record_files
 		const baseline = clean
 			? await hashSnapshot({ settings: backup.settings, tables })
 			: "unsynced-baseline"
 		const schemas = Object.fromEntries(
 			db.tables
-				.filter(t => !["duplicate_dismissals", "statement_rules"].includes(t.name))
+				.filter(t => !["duplicate_dismissals", "statement_rules", "record_files", "file_blobs"].includes(t.name))
 				.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 		)
 		await db.delete()

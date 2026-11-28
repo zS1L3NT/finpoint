@@ -713,6 +713,46 @@ test.describe("pinned 15 October 2026 date", () => {
 			}
 		})
 	}
+	test("Record files: add an image and a PDF, preview, download and delete", async ({ page }) => {
+		await seedWorkspace(page)
+		await page.goto(`/records/${IDS.records.zero}`)
+		const files = page.getByRole("list").filter({ has: page.getByRole("button") })
+		await expect(page.getByText("No files yet.", { exact: true })).toBeVisible()
+
+		await page.getByLabel("Add files").setInputFiles([
+			{
+				name: "receipt.png",
+				mimeType: "image/png",
+				// 1×1 PNG: too small for re-encoding to shrink, so it is stored as given.
+				buffer: Buffer.from(
+					"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+					"base64",
+				),
+			},
+			{ name: "invoice.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%%EOF") },
+		])
+		await expect(page.getByText("2 files added.")).toBeVisible()
+		const receipt = files.getByRole("button", { name: "receipt.png" })
+		await expectPointerCursor(receipt)
+		await expect(files.getByRole("button", { name: "invoice.pdf" })).toBeVisible()
+
+		await receipt.click()
+		const dialog = page.getByRole("dialog")
+		await expect(dialog.getByRole("heading", { name: "receipt.png" })).toBeVisible()
+		await expect(dialog.getByRole("img", { name: "receipt.png" })).toBeVisible()
+		await expect(dialog.getByRole("link", { name: "Download" })).toHaveAttribute(
+			"download",
+			"receipt.png",
+		)
+		await dialog.getByRole("button", { name: "Delete" }).click()
+		await dialog.getByRole("button", { name: "Yes, delete file" }).click()
+		await expect(dialog).toHaveCount(0)
+		await expect(files.getByRole("button", { name: "receipt.png" })).toHaveCount(0)
+
+		await page.reload()
+		await expect(page.getByRole("button", { name: "invoice.pdf" })).toBeVisible()
+		await expect(page.getByRole("button", { name: "receipt.png" })).toHaveCount(0)
+	})
 	test("detail pages: related rows render real content for Account, Statement and Budget details", async ({
 		page,
 	}) => {
