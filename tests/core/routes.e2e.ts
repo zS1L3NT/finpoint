@@ -206,7 +206,9 @@ test("Statement rules page: empty, populated and paused rules show conditions, a
 	await seedWorkspace(page, "empty")
 	await page.goto("/statement-rules")
 	await expect(page.getByText("No rules yet", { exact: true })).toBeVisible()
-	await page.getByRole("button", { name: "Create a rule", exact: true }).click()
+	// The empty state explains rules; the header's New rule is the one way to add one.
+	await expect(page.getByRole("button", { name: "Create a rule", exact: true })).toHaveCount(0)
+	await page.getByRole("button", { name: "New rule", exact: true }).click()
 	await expect(page.getByRole("dialog", { name: "New rule", exact: true })).toBeVisible()
 	await page.keyboard.press("Escape")
 

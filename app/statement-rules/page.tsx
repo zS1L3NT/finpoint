@@ -105,9 +105,6 @@ export default function StatementRulesPage() {
 								“Spotify” and the Subscriptions category.
 							</p>
 						</div>
-						<Button variant="outline" size="sm" onClick={() => setDialogRule("new")}>
-							Create a rule
-						</Button>
 					</motion.div>
 				) : (
 					<section className="grid gap-2" aria-label="Your rules">

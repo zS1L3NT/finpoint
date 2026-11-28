@@ -154,9 +154,9 @@ export default function SettingsPage() {
 			<SettingsTabs active="general" />
 
 			<PageHeader
-				title="Settings"
-				subtitle="Choose how Finpoint opens your everyday workspaces."
-				description="Preferences"
+				title="General"
+				subtitle="Choose how Finpoint looks and opens your everyday workspaces."
+				description="Settings"
 				icon="lucide:settings-2"
 			/>
 

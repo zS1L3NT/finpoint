@@ -159,7 +159,7 @@ export default function ImporterPage() {
 				/>
 
 				<form
-					className="grid max-w-3xl gap-6"
+					className="grid max-w-5xl gap-6"
 					onSubmit={event => {
 						event.preventDefault()
 						void form.handleSubmit()

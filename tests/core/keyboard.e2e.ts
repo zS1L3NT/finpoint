@@ -44,7 +44,7 @@ test("chrome buttons: navigate months and create Records by keyboard, use the to
 			["Statement rules", /\/statement-rules$/, "Statement rules"],
 			["Importer", /\/importer$/, "Importer"],
 			["Data", /\/sync$/, "Data"],
-			["General", /\/settings$/, "Settings"],
+			["General", /\/settings$/, "General"],
 		] as const) {
 			const section = sections.getByRole("link", { name: label, exact: true })
 			await section.focus()
