@@ -2,8 +2,10 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { useSearchParams } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
+import StatementDialog from "@/components/dialogs/statement"
 import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
@@ -18,11 +20,7 @@ import {
 } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { byDay } from "@/components/table/row-groups"
-import {
-	useOpenStatement,
-	useStatementColumns,
-	useStatementMobileRow,
-} from "@/components/table/statement-columns"
+import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { SelectItem } from "@/components/ui/select"
 import { useHistory } from "@/history"
@@ -30,7 +28,7 @@ import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { listStatements, parseStatementFilters } from "@/logic/statements"
+import { getStatement, listStatements, parseStatementFilters } from "@/logic/statements"
 import type { Statement } from "@/types"
 
 export default function StatementsPage() {
@@ -47,6 +45,27 @@ export default function StatementsPage() {
 
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
 		usePaginatedTableState()
+
+	// `?statement=` opens one over the list: the links that once led to a Statement's own page.
+	const [openStatement, setOpenStatement] = useState<Statement | null>(null)
+	const linked = searchParams.get("statement")
+	useEffect(() => {
+		if (!linked) return
+		// A link changed or left before the read settled is not opened.
+		let current = true
+		getStatement(linked).then(
+			statement => current && setOpenStatement(statement),
+			() => current && toast.error("Unable to open this Statement."),
+		)
+		return () => {
+			current = false
+		}
+	}, [linked])
+	const closeStatement = () => {
+		setOpenStatement(null)
+		if (linked) setParams({ statement: null }, { replace: true })
+	}
+
 	const updateFilters = (changes: { [key: string]: string | null }) => {
 		setParams({ ...changes, page: null })
 	}
@@ -82,15 +101,13 @@ export default function StatementsPage() {
 		[statements, page, pageSize],
 	)
 	const columns = useStatementColumns<Statement>({
-		pageName: "Statements",
+		onOpen: setOpenStatement,
 		grouped: true,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
-		pageName: "Statements",
+		onOpen: setOpenStatement,
 		grouped: true,
 	})
-
-	const openStatement = useOpenStatement("Statements")
 
 	if (accounts === undefined || statementsQuery === undefined) return null
 
@@ -137,7 +154,7 @@ export default function StatementsPage() {
 								>
 									<SelectItem value="all">Any status</SelectItem>
 									<SelectItem value="true">Pending</SelectItem>
-									<SelectItem value="false">Imported</SelectItem>
+									<SelectItem value="false">Confirmed</SelectItem>
 								</FilterSelect>
 								<FilterSelect
 									name="allocation"
@@ -205,11 +222,21 @@ export default function StatementsPage() {
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}
-					onRowClick={openStatement}
+					onRowClick={setOpenStatement}
 					emptyMessage="No statements found."
 					loading={statementsQuery === undefined}
 				/>
 			</PageContent>
+
+			{openStatement ? (
+				<StatementDialog
+					statement={openStatement}
+					isOpen
+					setIsOpen={isOpen => {
+						if (!isOpen) closeStatement()
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

@@ -107,7 +107,7 @@ export default function Icon({
 }) {
 	return (
 		<div
-			className="flex justify-center items-center rounded"
+			className="flex shrink-0 justify-center items-center rounded"
 			style={{ width: size * 2, height: size * 2, backgroundColor: themeColor(color) }}
 		>
 			<UiIcon

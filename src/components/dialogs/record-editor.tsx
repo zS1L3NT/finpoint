@@ -2,10 +2,17 @@ import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
-import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AllocationMismatch } from "@/components/allocate-bar"
+import {
+	AllocationList,
+	allocatedOf,
+	PreviewHeader,
+	PreviewItem,
+	PreviewSection,
+} from "@/components/dialogs/item-preview"
+import StatementDialog from "@/components/dialogs/statement"
 import AmountField from "@/components/form/amount-field"
 import CategoryField from "@/components/form/category-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -30,10 +37,7 @@ import {
 	Dialog,
 	DialogBody,
 	DialogContent,
-	DialogDescription,
 	DialogFooter,
-	DialogHeader,
-	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import {
@@ -46,8 +50,6 @@ import {
 } from "@/components/ui/empty"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
@@ -64,7 +66,6 @@ import {
 	updateRecord,
 } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { pathRecord, pathRecords } from "@/routes"
 import type { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 
 type RecordStatement = Statement & { pivot?: Allocation }
@@ -82,6 +83,7 @@ export default function RecordEditorDialog({
 	trigger,
 	container,
 	initialMode = "view",
+	nested = false,
 }: {
 	record: Record
 	statements: RecordStatement[]
@@ -92,6 +94,8 @@ export default function RecordEditorDialog({
 	/** Where the dialog mounts: the sheet it was opened from, when there is one. */
 	container?: HTMLElement | null
 	initialMode?: "view" | "edit"
+	/** Opened from a Statement preview, so its Statements do not open another level. */
+	nested?: boolean
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const [mode, setMode] = useState(initialMode)
@@ -104,7 +108,8 @@ export default function RecordEditorDialog({
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 	// The preview follows saves, from this form or another tab, as they land.
 	const live = useLiveQuery(() => getRecord(record.id).catch(() => null), [record.id])
-	const current = live ? live : { ...record, statements }
+	const current = live ?? { ...record, statements }
+	const [openStatement, setOpenStatement] = useState<Statement | null>(null)
 
 	const edit = () => {
 		setHasEdited(true)
@@ -125,7 +130,7 @@ export default function RecordEditorDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			{monthlyBudgets === undefined ? null : (
+			{monthlyBudgets === undefined || live === undefined ? null : (
 				<DialogContent
 					container={container}
 					// The preview opens on Edit, so Enter goes straight to the form.
@@ -138,6 +143,7 @@ export default function RecordEditorDialog({
 							editButton={editButton}
 							focusEdit={hasEdited}
 							onEdit={edit}
+							onOpenStatement={nested ? undefined : setOpenStatement}
 						/>
 					) : (
 						<RecordEditForm
@@ -154,6 +160,18 @@ export default function RecordEditorDialog({
 							onDone={finishEditing}
 						/>
 					)}
+
+					{openStatement ? (
+						<StatementDialog
+							statement={openStatement}
+							isOpen
+							setIsOpen={isOpen => {
+								if (!isOpen) setOpenStatement(null)
+							}}
+							container={container}
+							nested
+						/>
+					) : null}
 				</DialogContent>
 			)}
 		</Dialog>
@@ -183,7 +201,6 @@ function RecordEditForm({
 	/** Saved or cancelled: back to the preview, or closed when there was none. */
 	onDone: () => void
 }) {
-	const { navigateBack } = useHistory()
 	const defaultFilterStartDate = useDefaultFilterStartDate()
 	const defaultFilterEndDateToday = useDefaultFilterEndDateToday()
 	const defaultFilterEndDate = defaultFilterEndDateToday
@@ -270,7 +287,7 @@ function RecordEditForm({
 						setSubmitError(
 							"Unable to save this Record. Refresh the page and try again.",
 						)
-						toast.error("Unable to save this record.")
+						toast.error("Unable to save this Record.")
 					}
 					return false
 				}
@@ -287,24 +304,10 @@ function RecordEditForm({
 			try {
 				await deleteRecord(record.id)
 				close()
-
-				if (location.pathname === pathRecord(record.id)) {
-					navigateBack({
-						name: "Records",
-						url: pathRecords(
-							defaultFilterStartDate || defaultFilterEndDate
-								? {
-										start_date: defaultFilterStartDate ?? undefined,
-										end_date: defaultFilterEndDate,
-									}
-								: undefined,
-						),
-					})
-				}
 				return true
 			} catch {
 				setArmed(false)
-				toast.error("Unable to delete this record.")
+				toast.error("Unable to delete this Record.")
 				return false
 			}
 		})
@@ -333,7 +336,8 @@ function RecordEditForm({
 			onClick={handleDelete}
 			className={className}
 		>
-			<IconifyIcon icon="lucide:trash-2" /> {armed ? "Yes, delete Record" : "Delete"}
+			<IconifyIcon icon="lucide:trash-2" data-icon="inline-start" />
+			{armed ? "Yes, delete Record" : "Delete"}
 		</Button>
 	)
 
@@ -346,15 +350,9 @@ function RecordEditForm({
 		})
 	const attachStatementsSheet = (
 		<StatementSearchSheet
-			title="Allocate statements to record"
-			placeholder="Search statements with amounts available to allocate..."
-			target={
-				Math.round(
-					(Number(analytics.amount) -
-						formStatements.reduce((sum, s) => sum + Number(s.amount), 0)) *
-						100,
-				) / 100
-			}
+			title="Allocate Statements to Record"
+			placeholder="Search Statements with amounts available to allocate..."
+			target={round2(mismatch.amount - mismatch.allocated)}
 			filters={{
 				is_allocable: true,
 				exclude_ids: formStatements.map(s => s.id),
@@ -378,7 +376,7 @@ function RecordEditForm({
 			}}
 			trigger={
 				<Button variant="outline" className="w-fit">
-					<IconifyIcon icon="lucide:link-2" />
+					<IconifyIcon icon="lucide:link-2" data-icon="inline-start" />
 					Allocate statement
 				</Button>
 			}
@@ -387,26 +385,28 @@ function RecordEditForm({
 
 	return (
 		<>
-			<RecordDialogHeader record={record} title="Edit Record">
-				{/* Narrow screens stack the sections, so these jump past the details. */}
-				<div className="flex gap-2 lg:hidden">
+			<RecordDialogHeader record={record} label="Edit Record">
+				{/* Analytics sits under the details, and narrow screens stack the allocations under it. */}
+				<div className="flex gap-2">
 					<Button
 						type="button"
 						variant="outline"
 						size="sm"
 						onClick={() => jump(analyticsSection.current)}
 					>
-						<IconifyIcon icon="lucide:arrow-down" />
+						<IconifyIcon icon="lucide:arrow-down" data-icon="inline-start" />
 						Analytics
 					</Button>
 					<Button
 						type="button"
 						variant="outline"
 						size="sm"
+						className="lg:hidden"
 						onClick={() => jump(allocationsSection.current)}
 					>
-						<IconifyIcon icon="lucide:arrow-down" />
-						Allocations · {formStatements.length}
+						<IconifyIcon icon="lucide:arrow-down" data-icon="inline-start" />
+						Allocations <span aria-hidden="true">·</span>{" "}
+						<span className="tabular-nums">{formStatements.length}</span>
 					</Button>
 				</div>
 			</RecordDialogHeader>
@@ -415,183 +415,200 @@ function RecordEditForm({
 				<form
 					id="record-editor-form"
 					ref={formElement}
-					className="grid gap-8 lg:grid-cols-2 lg:grid-rows-[auto_1fr]"
+					// From the preview, the form fades in where the preview was; a popup opening straight
+					// to the form enters as a whole.
+					className={cn(
+						"grid gap-8 lg:grid-cols-2",
+						focusFirstField && "fade-in animate-in duration-150 ease-out",
+					)}
 					onSubmit={event => {
 						event.preventDefault()
 						void form.handleSubmit()
 					}}
 				>
-					<div className="flex flex-col gap-4 lg:row-span-2">
-						<p className="text-sm font-semibold">Record Information</p>
-
-						<FieldGroup>
-							<form.Field name="title">
-								{field => (
-									<TextField
-										id={field.name}
-										label="Title"
-										value={field.state.value}
-										suggestions={completions?.titles ?? []}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="people">
-								{field => (
-									<TextField
-										id={field.name}
-										label="People"
-										value={field.state.value}
-										suggestions={completions?.peoples ?? []}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="location">
-								{field => (
-									<TextField
-										id={field.name}
-										label="Location"
-										value={field.state.value}
-										suggestions={completions?.locations ?? []}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="datetime">
-								{field => (
-									<DatetimeField
-										id={field.name}
-										value={field.state.value}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="amount">
-								{field => (
-									<AmountField
-										id={field.name}
-										label="Amount"
-										value={field.state.value}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<AnimatePresence initial={false}>
-								{isPendingAmount && (
-									<motion.div
-										className="overflow-hidden"
-										{...FIELD_NOTE_COLLAPSE_MOTION}
-									>
-										<AllocationMismatch
-											allocated={mismatch.allocated}
-											onUseAllocated={() => {
-												form.setFieldValue("amount", mismatch.allocated)
-												clearApiError("amount")
+					<div className="flex min-w-0 flex-col gap-8">
+						<PreviewSection title="Record information">
+							<FieldGroup>
+								<form.Field name="title">
+									{field => (
+										<TextField
+											id={field.name}
+											label="Title"
+											value={field.state.value}
+											suggestions={completions?.titles ?? []}
+											errors={mergeErrors(
+												field.state.meta.errors,
+												field.name,
+											)}
+											onChange={value => {
+												field.handleChange(value)
+												clearApiError(field.name)
 											}}
 										/>
-									</motion.div>
-								)}
-							</AnimatePresence>
-							<form.Field name="category_id">
-								{field => (
-									<CategoryField
-										id={field.name}
-										label="Category"
-										value={field.state.value}
-										categories={categories}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value?.id ?? "")
-											if (
-												form.getFieldValue("monthly_budget_source") ===
-												"category"
-											) {
-												form.setFieldValue(
-													"monthly_budget_id",
-													value?.default_monthly_budget_id ?? "",
-												)
-											}
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="description">
-								{field => (
-									<TextareaField
-										id={field.name}
-										label="Description"
-										value={field.state.value}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-						</FieldGroup>
-					</div>
+									)}
+								</form.Field>
+								<form.Field name="people">
+									{field => (
+										<TextField
+											id={field.name}
+											label="People"
+											value={field.state.value}
+											suggestions={completions?.peoples ?? []}
+											errors={mergeErrors(
+												field.state.meta.errors,
+												field.name,
+											)}
+											onChange={value => {
+												field.handleChange(value)
+												clearApiError(field.name)
+											}}
+										/>
+									)}
+								</form.Field>
+								<form.Field name="location">
+									{field => (
+										<TextField
+											id={field.name}
+											label="Location"
+											value={field.state.value}
+											suggestions={completions?.locations ?? []}
+											errors={mergeErrors(
+												field.state.meta.errors,
+												field.name,
+											)}
+											onChange={value => {
+												field.handleChange(value)
+												clearApiError(field.name)
+											}}
+										/>
+									)}
+								</form.Field>
+								<form.Field name="datetime">
+									{field => (
+										<DatetimeField
+											id={field.name}
+											value={field.state.value}
+											errors={mergeErrors(
+												field.state.meta.errors,
+												field.name,
+											)}
+											onChange={value => {
+												field.handleChange(value)
+												clearApiError(field.name)
+											}}
+										/>
+									)}
+								</form.Field>
+								<form.Field name="amount">
+									{field => (
+										<AmountField
+											id={field.name}
+											label="Amount"
+											value={field.state.value}
+											errors={mergeErrors(
+												field.state.meta.errors,
+												field.name,
+											)}
+											onChange={value => {
+												field.handleChange(value)
+												clearApiError(field.name)
+											}}
+										/>
+									)}
+								</form.Field>
+								<AnimatePresence initial={false}>
+									{isPendingAmount && (
+										<motion.div
+											className="overflow-hidden"
+											{...FIELD_NOTE_COLLAPSE_MOTION}
+										>
+											<AllocationMismatch
+												allocated={mismatch.allocated}
+												onUseAllocated={() => {
+													form.setFieldValue("amount", mismatch.allocated)
+													clearApiError("amount")
+												}}
+											/>
+										</motion.div>
+									)}
+								</AnimatePresence>
+								<form.Field name="category_id">
+									{field => (
+										<CategoryField
+											id={field.name}
+											label="Category"
+											value={field.state.value}
+											categories={categories}
+											errors={mergeErrors(
+												field.state.meta.errors,
+												field.name,
+											)}
+											onChange={value => {
+												field.handleChange(value?.id ?? "")
+												if (
+													form.getFieldValue("monthly_budget_source") ===
+													"category"
+												) {
+													form.setFieldValue(
+														"monthly_budget_id",
+														value?.default_monthly_budget_id ?? "",
+													)
+												}
+												clearApiError(field.name)
+											}}
+										/>
+									)}
+								</form.Field>
+								<form.Field name="description">
+									{field => (
+										<TextareaField
+											id={field.name}
+											label="Description"
+											value={field.state.value}
+											errors={mergeErrors(
+												field.state.meta.errors,
+												field.name,
+											)}
+											onChange={value => {
+												field.handleChange(value)
+												clearApiError(field.name)
+											}}
+										/>
+									)}
+								</form.Field>
+							</FieldGroup>
+						</PreviewSection>
 
-					{/* Wide screens set Analytics under the allocations, so the shorter column fills. */}
-					<div
-						ref={analyticsSection}
-						className="scroll-mt-2 lg:col-start-2 lg:row-start-2"
-					>
-						<RecordAnalyticsFields
-							treatment={analytics.treatment}
-							categoryTreatment={analyticsCategory?.analytics_treatment}
-							amount={analytics.amount}
-							monthlyBudgetId={analytics.monthlyBudgetId}
-							monthlyBudgetSource={analytics.monthlyBudgetSource}
-							categoryMonthlyBudgetId={analyticsCategory?.default_monthly_budget_id}
-							monthlyBudgets={monthlyBudgets}
-							onTreatmentChange={value =>
-								form.setFieldValue("analytics_treatment", value)
-							}
-							onMonthlyBudgetChange={(value, source) => {
-								form.setFieldValue("monthly_budget_id", value)
-								form.setFieldValue("monthly_budget_source", source)
-							}}
-						/>
-					</div>
-
-					<div
-						ref={allocationsSection}
-						className="flex scroll-mt-2 flex-col gap-4 lg:col-start-2 lg:row-start-1"
-					>
-						<div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-							<AllocationsHeading
-								allocated={mismatch.allocated}
-								amount={mismatch.amount}
+						{/* Analytics follows the details; the allocations take the other column. */}
+						<div ref={analyticsSection} className="scroll-mt-2">
+							<RecordAnalyticsFields
+								treatment={analytics.treatment}
+								categoryTreatment={analyticsCategory?.analytics_treatment}
+								amount={analytics.amount}
+								monthlyBudgetId={analytics.monthlyBudgetId}
+								monthlyBudgetSource={analytics.monthlyBudgetSource}
+								categoryMonthlyBudgetId={
+									analyticsCategory?.default_monthly_budget_id
+								}
+								monthlyBudgets={monthlyBudgets}
+								onTreatmentChange={value =>
+									form.setFieldValue("analytics_treatment", value)
+								}
+								onMonthlyBudgetChange={(value, source) => {
+									form.setFieldValue("monthly_budget_id", value)
+									form.setFieldValue("monthly_budget_source", source)
+								}}
 							/>
-
-							{!!formStatements.length && attachStatementsSheet}
 						</div>
+					</div>
 
-						<div className="flex flex-col gap-2">
-							<ScrollArea className="h-fit max-h-200">
+					<div ref={allocationsSection} className="min-w-0 scroll-mt-2">
+						<PreviewSection
+							title="Statement allocations"
+							description={allocatedOf(mismatch.allocated, mismatch.amount)}
+							action={!!formStatements.length && attachStatementsSheet}
+						>
+							<div className="flex flex-col gap-2">
 								<div className="relative flex flex-col gap-2">
 									<AnimatePresence initial={false} mode="popLayout">
 										{formStatements.map(({ id }, index) => (
@@ -640,13 +657,14 @@ function RecordEditForm({
 															<Card
 																className={cn(
 																	errors.length
-																		? "border-destructive/50"
+																		? "ring-destructive/50"
 																		: null,
 																)}
 															>
 																<CardHeader>
 																	<CardTitle className="text-sm leading-5">
-																		{statement.description}
+																		{statement.description ||
+																			"No description"}
 																	</CardTitle>
 																	<CardDescription>
 																		{statement.account.name} ·{" "}
@@ -654,11 +672,12 @@ function RecordEditForm({
 																			statement.datetime,
 																		)}
 																	</CardDescription>
-																	<CardAction className="text-sm font-semibold">
+																	<CardAction>
 																		<Button
 																			type="button"
 																			variant="destructive"
-																			aria-label={`Remove ${statement.description}`}
+																			size="icon"
+																			aria-label={`Remove ${statement.description || "No description"}`}
 																			onClick={() => {
 																				form.setFieldValue(
 																					"statements",
@@ -674,7 +693,7 @@ function RecordEditForm({
 																				)
 																			}}
 																		>
-																			<IconifyIcon icon="lucide:trash" />
+																			<IconifyIcon icon="lucide:trash-2" />
 																		</Button>
 																	</CardAction>
 																</CardHeader>
@@ -699,7 +718,7 @@ function RecordEditForm({
 																		className={cn(
 																			"transition-colors duration-150 ease-out",
 																			percent > 100
-																				? "text-red-400"
+																				? "text-destructive"
 																				: null,
 																		)}
 																	/>
@@ -712,40 +731,40 @@ function RecordEditForm({
 										))}
 									</AnimatePresence>
 								</div>
-							</ScrollArea>
 
-							<AnimatePresence initial={false}>
-								{!formStatements.length && (
-									<motion.div
-										key="empty"
-										initial={{ opacity: 0, y: 6 }}
-										animate={{
-											opacity: 1,
-											y: 0,
-											transition: TRANSITION.base,
-										}}
-										exit={{
-											opacity: 0,
-											scale: 0.98,
-											transition: TRANSITION.fast,
-										}}
-									>
-										<Empty className="border border-dashed">
-											<EmptyHeader>
-												<EmptyMedia variant="icon">
-													<IconifyIcon icon="lucide:credit-card" />
-												</EmptyMedia>
-												<EmptyTitle>No Statements</EmptyTitle>
-												<EmptyDescription>
-													No statements selected for allocation.
-												</EmptyDescription>
-											</EmptyHeader>
-											<EmptyContent>{attachStatementsSheet}</EmptyContent>
-										</Empty>
-									</motion.div>
-								)}
-							</AnimatePresence>
-						</div>
+								<AnimatePresence initial={false}>
+									{!formStatements.length && (
+										<motion.div
+											key="empty"
+											initial={{ opacity: 0, y: 6 }}
+											animate={{
+												opacity: 1,
+												y: 0,
+												transition: TRANSITION.base,
+											}}
+											exit={{
+												opacity: 0,
+												scale: 0.98,
+												transition: TRANSITION.fast,
+											}}
+										>
+											<Empty className="rounded-lg border border-dashed">
+												<EmptyHeader>
+													<EmptyMedia variant="icon">
+														<IconifyIcon icon="lucide:credit-card" />
+													</EmptyMedia>
+													<EmptyTitle>No Statements</EmptyTitle>
+													<EmptyDescription>
+														No Statements selected for allocation.
+													</EmptyDescription>
+												</EmptyHeader>
+												<EmptyContent>{attachStatementsSheet}</EmptyContent>
+											</Empty>
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+						</PreviewSection>
 					</div>
 
 					{/* Phones end the form with Delete, so the footer is just Cancel and Save. */}
@@ -753,8 +772,14 @@ function RecordEditForm({
 				</form>
 			</DialogBody>
 
-			<DialogFooter className="flex-row flex-wrap items-center">
-				<div className="mr-auto flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+			<DialogFooter className="sm:items-center">
+				{/* Phones keep Delete in the form, so this holds only an error there. */}
+				<div
+					className={cn(
+						"mr-auto flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center",
+						!submitError && "max-sm:hidden",
+					)}
+				>
 					{deleteButton("max-sm:hidden")}
 					{submitError ? (
 						<p
@@ -768,7 +793,7 @@ function RecordEditForm({
 				<Button type="button" variant="outline" onClick={onDone}>
 					Cancel
 				</Button>
-				<Button type="button" disabled={locked} onClick={() => void form.handleSubmit()}>
+				<Button type="submit" form="record-editor-form" disabled={locked}>
 					Save changes
 				</Button>
 			</DialogFooter>
@@ -779,72 +804,27 @@ function RecordEditForm({
 /** The Record's icon, title and status, with its amount and time beneath, above either mode. */
 function RecordDialogHeader({
 	record,
-	title,
+	label,
 	children,
 }: {
 	record: Record
-	/** Names the dialog, as a small label over the Record's own title. */
-	title: string
+	label: string
 	children?: React.ReactNode
 }) {
 	return (
-		<DialogHeader className="-mx-4 gap-3 border-b px-4 pr-12 pb-4">
-			<div className="flex min-w-0 items-start gap-3">
-				<Icon {...record.category} size={18} />
-				<div className="grid min-w-0 gap-0.5">
-					<DialogTitle className="text-xs font-medium text-muted-foreground">
-						{title}
-					</DialogTitle>
-					<p className="flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight">
-						<span className="truncate">{record.title}</span>
-						<PendingBadge record={record} />
-					</p>
-					<DialogDescription className="flex min-w-0 flex-wrap items-center gap-x-1.5">
-						<span className="flex items-center gap-x-1.5">
-							<RecordAmount record={record} showAccumulated={false} />·{" "}
-							{formatDatetime(record.datetime)}
-						</span>
-						{/* Phones give the Category its own line, so no separator starts a line. */}
-						<span className="max-sm:basis-full">
-							<span className="max-sm:hidden">· </span>
-							{record.category.name}
-						</span>
-					</DialogDescription>
-				</div>
-			</div>
+		<PreviewHeader
+			media={<Icon {...record.category} size={18} />}
+			label={label}
+			title={record.title}
+			badge={<PendingBadge record={record} />}
+			details={[
+				<RecordAmount key="amount" record={record} showAccumulated={false} />,
+				formatDatetime(record.datetime),
+				record.category.name,
+			]}
+		>
 			{children}
-		</DialogHeader>
-	)
-}
-
-/** Both modes total the Allocations under this heading; the form's total follows its inputs. */
-function AllocationsHeading({ allocated, amount }: { allocated: number; amount: number }) {
-	return (
-		<div className="grid gap-0.5">
-			<p className="text-sm font-semibold">Statement allocations</p>
-			<p className="text-xs text-muted-foreground tabular-nums">
-				{formatCurrency(allocated)} of {formatCurrency(amount)} allocated
-			</p>
-		</div>
-	)
-}
-
-function PreviewItem({
-	label,
-	className,
-	children,
-}: {
-	label: string
-	className?: string
-	children: React.ReactNode
-}) {
-	return (
-		<div className={cn("grid min-w-0 content-start gap-1", className)}>
-			<dt className="text-xs text-muted-foreground">{label}</dt>
-			<dd className="min-w-0 text-sm break-words">
-				{children || <span className="text-muted-foreground">—</span>}
-			</dd>
-		</div>
+		</PreviewHeader>
 	)
 }
 
@@ -854,12 +834,14 @@ function RecordPreview({
 	editButton,
 	focusEdit,
 	onEdit,
+	onOpenStatement,
 }: {
 	record: Record & { statements: RecordStatement[] }
 	editButton: React.RefObject<HTMLButtonElement | null>
 	/** Back from the form: Edit takes focus again, where the Save or Cancel press left off. */
 	focusEdit: boolean
 	onEdit: () => void
+	onOpenStatement?: (statement: RecordStatement) => void
 }) {
 	useEffect(() => {
 		if (focusEdit) editButton.current?.focus()
@@ -869,102 +851,96 @@ function RecordPreview({
 
 	return (
 		<>
-			<RecordDialogHeader record={record} title="Record" />
+			<RecordDialogHeader record={record} label="Record" />
 
 			<DialogBody>
 				{/* Sections sit where the form puts them, so Edit swaps values for fields in place. */}
-				<div className="fade-in grid animate-in gap-8 duration-150 ease-out lg:grid-cols-2 lg:grid-rows-[auto_1fr]">
-					<div className="flex flex-col gap-4 lg:row-span-2">
+				{/* Back from the form, the preview fades in where it was; opening, the popup enters whole. */}
+				<div
+					className={cn(
+						"grid gap-8 lg:grid-cols-2",
+						focusEdit && "fade-in animate-in duration-150 ease-out",
+					)}
+				>
+					<div className="flex min-w-0 flex-col gap-8">
 						{/* The header already carries the amount, time and Category. */}
-						<p className="text-sm font-semibold">Record Information</p>
-						<dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-							<PreviewItem label="People">{record.people}</PreviewItem>
-							<PreviewItem label="Location">{record.location}</PreviewItem>
-							<PreviewItem label="Description" className="col-span-2">
-								{record.description ? (
-									<span className="whitespace-pre-wrap">
-										{record.description}
-									</span>
-								) : null}
-							</PreviewItem>
-						</dl>
-					</div>
-
-					<div className="grid content-start gap-4 rounded-lg border p-4 lg:col-start-2 lg:row-start-2">
-						<p className="text-sm font-semibold">Analytics</p>
-						<dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-							<PreviewItem label="Treatment">
-								<span className="grid gap-0.5">
-									{treatmentLabel(record.analytics_treatment)}
-									{record.analytics_treatment_source === "category" ? (
-										<span className="text-xs text-muted-foreground">
-											Set by {record.category.name}
+						<PreviewSection title="Record information">
+							<dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+								<PreviewItem label="People">{record.people}</PreviewItem>
+								<PreviewItem label="Location">{record.location}</PreviewItem>
+								<PreviewItem label="Description" className="col-span-2">
+									{record.description ? (
+										<span className="whitespace-pre-wrap">
+											{record.description}
 										</span>
 									) : null}
-								</span>
-							</PreviewItem>
-							<PreviewItem label="Monthly budget">
-								{usesMonthlyBudget ? (
-									<MonthlyBudgetBadge
-										name={record.monthly_budget?.name ?? "Unbudgeted"}
-										color={record.monthly_budget?.color}
-									/>
-								) : (
-									<span className="text-muted-foreground">Not counted</span>
-								)}
-							</PreviewItem>
-						</dl>
+								</PreviewItem>
+							</dl>
+						</PreviewSection>
+
+						<PreviewSection title="Analytics" className="rounded-lg border p-4">
+							<dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+								<PreviewItem label="Treatment">
+									<span className="grid gap-0.5">
+										{treatmentLabel(record.analytics_treatment)}
+										{record.analytics_treatment_source === "category" ? (
+											<span className="text-xs text-muted-foreground">
+												Set by {record.category.name}
+											</span>
+										) : null}
+									</span>
+								</PreviewItem>
+								<PreviewItem label="Monthly budget">
+									{usesMonthlyBudget ? (
+										<span className="grid justify-items-start gap-0.5">
+											<MonthlyBudgetBadge
+												name={record.monthly_budget?.name ?? "Unbudgeted"}
+												color={record.monthly_budget?.color}
+											/>
+											{record.monthly_budget_choice.kind === "category" ? (
+												<span className="text-xs text-muted-foreground">
+													Set by {record.category.name}
+												</span>
+											) : null}
+										</span>
+									) : (
+										<span className="text-muted-foreground">Not counted</span>
+									)}
+								</PreviewItem>
+							</dl>
+						</PreviewSection>
 					</div>
 
-					<div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-1">
-						<AllocationsHeading
-							allocated={record.allocated_amount}
-							amount={record.amount}
+					<PreviewSection
+						title="Statement allocations"
+						description={allocatedOf(record.allocated_amount, record.amount)}
+					>
+						<AllocationList
+							items={record.statements}
+							empty={{
+								icon: "lucide:credit-card",
+								title: "No Statements",
+								description: "Edit the Record to allocate a Statement.",
+							}}
+							render={statement => ({
+								title: statement.description || "No description",
+								details: [
+									statement.account.name,
+									formatDatetime(statement.datetime),
+								],
+								allocated: statement.pivot?.amount ?? 0,
+								amount: statement.amount,
+							})}
+							onOpen={onOpenStatement}
 						/>
-						{record.statements.length ? (
-							<ul className="divide-y rounded-lg border">
-								{record.statements.map(statement => (
-									<li
-										key={statement.id}
-										className="flex min-w-0 items-center justify-between gap-4 px-3 py-2.5"
-									>
-										<div className="grid min-w-0 gap-0.5">
-											<span className="truncate text-sm font-medium">
-												{statement.description || "No description"}
-											</span>
-											<span className="truncate text-xs text-muted-foreground">
-												{statement.account.name} ·{" "}
-												{formatDatetime(statement.datetime)}
-											</span>
-										</div>
-										<span className="grid shrink-0 justify-items-end gap-0.5 text-sm tabular-nums">
-											{formatCurrency(statement.pivot?.amount ?? 0)}
-											<span className="text-xs text-muted-foreground">
-												of {formatCurrency(statement.amount)}
-											</span>
-										</span>
-									</li>
-								))}
-							</ul>
-						) : (
-							<p className="rounded-lg border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
-								No Statements allocated. Edit the Record to allocate one.
-							</p>
-						)}
-					</div>
+					</PreviewSection>
 				</div>
 			</DialogBody>
 
-			<DialogFooter className="flex-row items-center">
-				{/* Secondary navigation, quieter than Edit; the corner X and Escape close. */}
-				<Button variant="ghost" className="mr-auto text-muted-foreground" asChild>
-					<Link href={pathRecord(record.id)}>
-						Full page
-						<IconifyIcon icon="lucide:arrow-up-right" />
-					</Link>
-				</Button>
+			{/* The corner X and Escape close. */}
+			<DialogFooter>
 				<Button ref={editButton} type="button" onClick={onEdit}>
-					<IconifyIcon icon="lucide:pencil" />
+					<IconifyIcon icon="lucide:pencil" data-icon="inline-start" />
 					Edit
 				</Button>
 			</DialogFooter>

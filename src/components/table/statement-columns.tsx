@@ -1,11 +1,9 @@
 import type { ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { amountTone, formatRowTime } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
-import { useHistory } from "@/history"
 import { cn, formatCurrency, round2 } from "@/lib/utils"
 import { pathAllocatorDuplicates, pathStatement } from "@/routes"
 import type { Allocation, Statement } from "@/types"
@@ -15,15 +13,15 @@ type StatementRow = Statement & { pivot?: Allocation }
 type StatementTableOptions = {
 	amount?: "amount" | "allocable" | "allocated"
 	showAccount?: boolean
-	/** Names this page on the Statement page's Back button. */
-	pageName?: string
+	/** Opens the Statement. Pass the same handler as the table's `onRowClick`, so the whole row opens it. */
+	onOpen?: (statement: Statement) => void
 	/** Row clicks select, so the title is underlined to show it opens the Statement instead. */
 	selectable?: boolean
 	/** Rows sit under day headers, so only the time is shown. */
 	grouped?: boolean
 }
 
-function StatementBadges({
+export function StatementBadges({
 	statement,
 	showUnallocated,
 }: {
@@ -86,39 +84,35 @@ function StatementAmount({
 	)
 }
 
-/** Opens a Statement's page from a row click. Pass it as the table's `onRowClick`. */
-export function useOpenStatement(pageName?: string) {
-	const router = useRouter()
-	const { handlePush } = useHistory()
-	return (statement: Statement) => {
-		if (pageName) handlePush(pageName)()
-		router.push(pathStatement(statement.id))
-	}
-}
-
 /**
- * The Statement's description, linking to its page. In selectable tables a row click selects,
- * so the title is the way in.
+ * The Statement's description. With `onOpen` it opens the Statement in place, and in selectable
+ * tables, where a row click selects, it is the way in.
  */
 function StatementTitle({
 	statement,
-	pageName,
+	onOpen,
 	selectable,
 }: {
 	statement: Statement
-	pageName?: string
+	onOpen?: (statement: Statement) => void
 	selectable?: boolean
 }) {
-	const { handlePush } = useHistory()
+	// A real link, so a modified click still opens the Statement over its list in a new tab.
 	return (
 		<Link
 			href={pathStatement(statement.id)}
+			data-opens-in-place={onOpen ? true : undefined}
 			className={cn(
 				"min-w-0 truncate rounded-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
 				selectable &&
 					"underline decoration-muted-foreground/60 underline-offset-4 transition-colors duration-150 ease-out hover:decoration-foreground",
 			)}
-			onClick={pageName ? handlePush(pageName) : undefined}
+			onClick={event => {
+				if (!onOpen || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+					return
+				event.preventDefault()
+				onOpen(statement)
+			}}
 		>
 			{statement.description || "No description"}
 		</Link>
@@ -128,7 +122,7 @@ function StatementTitle({
 export function useStatementColumns<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
-	pageName,
+	onOpen,
 	selectable,
 	grouped = false,
 }: StatementTableOptions): ColumnDef<TStatement>[] {
@@ -141,7 +135,7 @@ export function useStatementColumns<TStatement extends StatementRow>({
 						<p className="flex items-center gap-1.5">
 							<StatementTitle
 								statement={row.original}
-								pageName={pageName}
+								onOpen={onOpen}
 								selectable={selectable}
 							/>
 							<StatementBadges
@@ -174,14 +168,14 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				cell: ({ row }) => <StatementAmount statement={row.original} amount={amount} />,
 			},
 		],
-		[amount, showAccount, pageName, selectable, grouped],
+		[amount, showAccount, onOpen, selectable, grouped],
 	)
 }
 
 export function useStatementMobileRow<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
-	pageName,
+	onOpen,
 	selectable,
 	leading,
 	grouped = false,
@@ -201,7 +195,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 							<p className="flex">
 								<StatementTitle
 									statement={statement}
-									pageName={pageName}
+									onOpen={onOpen}
 									selectable={selectable}
 								/>
 							</p>
@@ -224,6 +218,6 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 				</>
 			)
 		},
-		[amount, showAccount, pageName, selectable, leading, grouped],
+		[amount, showAccount, onOpen, selectable, leading, grouped],
 	)
 }

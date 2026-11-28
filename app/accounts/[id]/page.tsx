@@ -3,17 +3,14 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useMemo, useState } from "react"
 import AccountDialog from "@/components/dialogs/account"
+import StatementDialog from "@/components/dialogs/statement"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Metric, MetricGrid } from "@/components/metric"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { byDay } from "@/components/table/row-groups"
-import {
-	useOpenStatement,
-	useStatementColumns,
-	useStatementMobileRow,
-} from "@/components/table/statement-columns"
+import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
@@ -27,6 +24,7 @@ import type { Statement } from "@/types"
 export default function AccountPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = use(params)
 	const [isEditingAccount, setIsEditingAccount] = useState(false)
+	const [openStatement, setOpenStatement] = useState<Statement | null>(null)
 
 	const { page, pageSize } = usePaginatedTableState()
 
@@ -40,16 +38,14 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 
 	const columns = useStatementColumns<Statement>({
 		showAccount: false,
-		pageName: `Account ${account?.name ?? ""}`,
+		onOpen: setOpenStatement,
 		grouped: true,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
 		showAccount: false,
-		pageName: `Account ${account?.name ?? ""}`,
+		onOpen: setOpenStatement,
 		grouped: true,
 	})
-
-	const openStatement = useOpenStatement(`Account ${account?.name ?? ""}`)
 
 	// undefined means the live query is still resolving; only null is genuinely missing.
 	if (account === undefined) return null
@@ -135,10 +131,20 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}
-					onRowClick={openStatement}
+					onRowClick={setOpenStatement}
 					emptyMessage="No statements found."
 				/>
 			</PageContent>
+
+			{openStatement ? (
+				<StatementDialog
+					statement={openStatement}
+					isOpen
+					setIsOpen={isOpen => {
+						if (!isOpen) setOpenStatement(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

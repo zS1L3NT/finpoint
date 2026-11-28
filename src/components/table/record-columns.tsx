@@ -38,7 +38,7 @@ function pendingReason(record: Record) {
 	if (record.allocated_amount === 0) return "No statements allocated yet"
 	if (record.allocated_amount !== record.amount)
 		return `${formatCurrency(record.allocated_amount)} of ${formatCurrency(record.amount)} allocated`
-	if (record.pending_statement_count) return "Awaiting the imported bank statement"
+	if (record.pending_statement_count) return "Awaiting confirmation of a Pending Statement"
 	return "Pending"
 }
 

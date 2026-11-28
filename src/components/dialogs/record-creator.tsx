@@ -384,7 +384,7 @@ export default function RecordCreatorDialog({
 							}}
 						>
 							<div className="flex flex-col gap-4">
-								<p className="text-sm font-semibold">Record Information</p>
+								<h3 className="text-sm font-semibold">Record information</h3>
 
 								<FieldGroup>
 									<form.Field name="title">
@@ -597,7 +597,7 @@ export default function RecordCreatorDialog({
 							</div>
 
 							<div className="flex flex-col gap-4">
-								<p className="text-sm font-semibold">Statement allocations</p>
+								<h3 className="text-sm font-semibold">Statement allocations</h3>
 
 								<ScrollArea className="h-fit max-h-200">
 									<div className="relative flex flex-col gap-2">
@@ -644,15 +644,18 @@ export default function RecordCreatorDialog({
 																<Card
 																	className={cn(
 																		errors.length
-																			? "border-destructive/50"
+																			? "ring-destructive/50"
 																			: null,
 																	)}
 																>
 																	<CardHeader>
 																		<CardTitle className="text-sm leading-5">
-																			{statement.description}
+																			{statement.description ||
+																				"No description"}
 																		</CardTitle>
 																		<CardDescription>
+																			{statement.account.name}{" "}
+																			·{" "}
 																			{formatDatetime(
 																				statement.datetime,
 																			)}
@@ -681,7 +684,7 @@ export default function RecordCreatorDialog({
 																			className={cn(
 																				"transition-colors duration-150 ease-out",
 																				percent > 100
-																					? "text-red-400"
+																					? "text-destructive"
 																					: null,
 																			)}
 																		/>
@@ -711,14 +714,14 @@ export default function RecordCreatorDialog({
 													transition: TRANSITION.fast,
 												}}
 											>
-												<Empty className="border border-dashed">
+												<Empty className="rounded-lg border border-dashed">
 													<EmptyHeader>
 														<EmptyMedia variant="icon">
 															<IconifyIcon icon="lucide:credit-card" />
 														</EmptyMedia>
 														<EmptyTitle>No Statements</EmptyTitle>
 														<EmptyDescription>
-															No statements selected for allocation.
+															No Statements selected for allocation.
 														</EmptyDescription>
 													</EmptyHeader>
 												</Empty>
