@@ -40,7 +40,10 @@ export type RecordFilters = {
 	category_ids?: string[] | null
 	monthly_budget_id?: string | null
 	show_unbudgeted?: boolean
+	effective_income?: boolean
 	effective_spending?: boolean
+	effective_contributions?: boolean
+	effective_withdrawals?: boolean
 	treatment?: string | null
 }
 
@@ -58,7 +61,10 @@ export function parseRecordFilters(params: ParamSource): RecordFilters {
 		category_ids: listParam(params.get("category_ids")),
 		monthly_budget_id: textParam(params.get("monthly_budget_id")),
 		show_unbudgeted: looseFlagParam(params.get("show_unbudgeted")),
+		effective_income: looseFlagParam(params.get("effective_income")),
 		effective_spending: looseFlagParam(params.get("effective_spending")),
+		effective_contributions: looseFlagParam(params.get("effective_contributions")),
+		effective_withdrawals: looseFlagParam(params.get("effective_withdrawals")),
 		treatment: textParam(params.get("treatment")),
 	}
 }
@@ -154,8 +160,15 @@ export async function listRecords(filters: RecordFilters = {}) {
 				canUseMonthlyBudget(r.analytics_treatment, r.amount) &&
 				r.monthly_budget_id === null,
 		)
-	if (filters.effective_spending)
-		rows = rows.filter(r => contribution(r.analytics_treatment, r.amount).spending !== 0)
+	// Each `effective_*` flag keeps the Records that count towards that Dashboard total.
+	const totals = (["income", "spending", "contributions", "withdrawals"] as const).filter(
+		total => filters[`effective_${total}`],
+	)
+	if (totals.length)
+		rows = rows.filter(r => {
+			const counted = contribution(r.analytics_treatment, r.amount)
+			return totals.every(total => counted[total] !== 0)
+		})
 	if (filters.treatment) rows = rows.filter(r => r.analytics_treatment === filters.treatment)
 	if (filters.exclude_budget_id) {
 		const attached = new Set(

@@ -60,7 +60,7 @@ const denseRowConsumers: MotionConsumer[] = [
 		name: "Records sheet",
 		origin: "/?month=October&year=2026",
 		action: "sheet",
-		target: "^View Records$",
+		target: "^View Total spending Records$",
 		selector:
 			'[data-slot="sheet-content"] tbody tr:not(section *):has(a[href^="/records/"]), [data-slot="sheet-content"] div.grid-cols-subgrid:not(section *):has(a[href^="/records/"])',
 		dense: true,
