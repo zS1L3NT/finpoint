@@ -475,8 +475,8 @@ export default function AllocatorPendingPage() {
 									exit={{ opacity: 0, y: -4, transition: TRANSITION.fast }}
 									transition={TRANSITION.base}
 								>
-									<Empty className="items-start p-4 text-left">
-										<EmptyHeader className="items-start">
+									<Empty className="border">
+										<EmptyHeader>
 											<EmptyMedia variant="icon">
 												<IconifyIcon icon="lucide:replace" />
 											</EmptyMedia>
