@@ -79,7 +79,10 @@ export default function RecordsPage() {
 				monthly_budget_id: null,
 				show_unbudgeted: null,
 				treatment: null,
+				effective_income: null,
 				effective_spending: null,
+				effective_contributions: null,
+				effective_withdrawals: null,
 				page: null,
 			}),
 		[setParams],
@@ -92,7 +95,10 @@ export default function RecordsPage() {
 		categoryIds.length ? "categories" : null,
 		monthlyBudgetId ?? (showUnbudgeted ? "unbudgeted" : null),
 		treatment,
+		filters.effective_income ? "income" : null,
 		filters.effective_spending ? "spending" : null,
+		filters.effective_contributions ? "contributions" : null,
+		filters.effective_withdrawals ? "withdrawals" : null,
 	].filter(Boolean).length
 
 	const recordsQuery = useLiveQuery(
@@ -108,7 +114,10 @@ export default function RecordsPage() {
 			monthlyBudgetId,
 			showUnbudgeted,
 			treatment,
+			filters.effective_income,
 			filters.effective_spending,
+			filters.effective_contributions,
+			filters.effective_withdrawals,
 		],
 	)
 	const records = recordsQuery ?? []
