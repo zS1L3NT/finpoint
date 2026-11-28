@@ -136,8 +136,10 @@ export default function AllocatorPendingPage() {
 	const selectionMissing =
 		!!pendingStatementId && allPending !== undefined && !selectedPendingStatement
 
-	const candidates = useLiveQuery(
-		(): Promise<{ data: CandidatePage | null; error: string | null }> =>
+	// A live query keeps its last result while the next one loads, so each result names its
+	// pending Statement: a newly selected one never flashes the previous one's imports.
+	const candidateResult = useLiveQuery(
+		(): Promise<{ pendingId?: string; data: CandidatePage | null; error: string | null }> =>
 			selectedPendingStatement
 				? replacementCandidates(selectedPendingStatement.id, {
 						query: candidateQuery || undefined,
@@ -145,8 +147,9 @@ export default function AllocatorPendingPage() {
 						page: candidatePage,
 						per_page: 25,
 					}).then(
-						data => ({ data, error: null }),
+						data => ({ pendingId: selectedPendingStatement.id, data, error: null }),
 						cause => ({
+							pendingId: selectedPendingStatement.id,
 							data: null,
 							error:
 								cause instanceof Error ? cause.message : "Unable to load imports.",
@@ -155,6 +158,8 @@ export default function AllocatorPendingPage() {
 				: Promise.resolve({ data: null, error: null }),
 		[selectedPendingStatement?.id, candidateQuery, candidateScope, candidatePage],
 	)
+	const candidates =
+		candidateResult?.pendingId === selectedPendingStatement?.id ? candidateResult : undefined
 
 	const selectPending = (statement: PendingReplacementStatement | null) => {
 		setReviewStatement(null)
