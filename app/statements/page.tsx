@@ -36,7 +36,6 @@ import type { Statement } from "@/types"
 export default function StatementsPage() {
 	const { latest } = useHistory()
 	const [isCreatingStatement, setIsCreatingStatement] = useState(false)
-	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 	const searchParams = useSearchParams()
 	const accountId = searchParams.get("account_id") ?? "all"
 	const isPending = searchParams.get("is_pending")
@@ -84,12 +83,10 @@ export default function StatementsPage() {
 	)
 	const columns = useStatementColumns<Statement>({
 		pageName: "Statements",
-		onEdit: setEditingStatement,
 		grouped: true,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
 		pageName: "Statements",
-		onEdit: setEditingStatement,
 		grouped: true,
 	})
 
@@ -213,17 +210,6 @@ export default function StatementsPage() {
 					loading={statementsQuery === undefined}
 				/>
 			</PageContent>
-
-			{editingStatement ? (
-				<PendingStatementDialog
-					statement={editingStatement}
-					accounts={accounts}
-					isOpen
-					setIsOpen={open => {
-						if (!open) setEditingStatement(null)
-					}}
-				/>
-			) : null}
 		</>
 	)
 }

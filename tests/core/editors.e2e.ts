@@ -1851,7 +1851,7 @@ test("archived Monthly Budgets: a Category default and a rule action that point 
 	})
 })
 
-test("Pending Statement editor: deleting from an Account page stays on that page", async ({
+test("Pending Statement editor: deleting a Statement opened from an Account page returns to that page", async ({
 	page,
 }) => {
 	const { tables } = getScenario("populated")
@@ -1859,12 +1859,10 @@ test("Pending Statement editor: deleting from an Account page stays on that page
 		statements: [...tables.statements, { ...pending, id: "free-pending" }],
 	})
 	await page.goto(`/accounts/${pending.account_id}`)
-	await page
-		.locator('main a[href="/statements/free-pending"]')
-		.filter({ visible: true })
-		.locator('xpath=ancestor::*[self::tr or contains(@class,"grid-cols-subgrid")][1]')
-		.getByRole("button", { name: "Edit pending statement", exact: true })
-		.click()
+	// Statement rows open the Statement page, where a pending Statement is edited.
+	await page.locator('main a[href="/statements/free-pending"]').filter({ visible: true }).click()
+	await expect(page).toHaveURL(/\/statements\/free-pending$/)
+	await page.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
 	await page
 		.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
 		.getByRole("button", { name: "Delete", exact: true })

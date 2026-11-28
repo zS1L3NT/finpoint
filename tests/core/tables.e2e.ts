@@ -406,16 +406,13 @@ test("Statements table: signed same-day subtotal and Account rows distinguish pe
 		).toBeVisible()
 		const pending = statementRow(page, IDS.statements.pending)
 		await expect(pending.getByText("Pending", { exact: true })).toBeVisible()
-		await expect(
-			pending.getByRole("button", { name: "Edit pending statement", exact: true }),
-		).toBeVisible()
 		const imported = statementRow(page, "t1-s-salary")
 		await expect(imported).toContainText("Monthly Salary")
 		await expect(imported.getByText("Pending", { exact: true })).toHaveCount(0)
-		await expect(
-			imported.getByRole("button", { name: "Edit pending statement", exact: true }),
-		).toHaveCount(0)
-		await pending.getByRole("button", { name: "Edit pending statement", exact: true }).click()
+		// Rows carry no edit button: the pending Statement's page offers the editor.
+		await expect(pending.getByRole("button")).toHaveCount(0)
+		await pending.locator(`a[href="/statements/${IDS.statements.pending}"]`).click()
+		await page.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
 		await expect(
 			page.getByRole("dialog", { name: "Edit Pending Statement", exact: true }),
 		).toBeVisible()

@@ -33,7 +33,6 @@ const routeReady: Record<string, string> = {
 	"/accounts": "Rename Everyday Savings",
 	"/budgets": "Edit October Buffer",
 	"/categories": "Edit Groceries",
-	"/statements": "Edit pending statement",
 	"/allocator/pending": "Pasar malam snacks",
 	"/allocator/duplicates": "Review deletion",
 	"/accounts/t1-acc-dbs": "Edit Account",
@@ -84,12 +83,16 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 
 async function expectRouteButtons(page: Page, route: string) {
 	await expect(page.locator("main h2").first()).toBeVisible()
-	// Record rows carry no button of their own: the title link opens the Record.
+	// Record and Statement rows carry no button of their own: the title link opens the item.
 	if (route === "/records")
 		await expect(
 			page
 				.getByRole("link", { name: "Open FairPrice Run", exact: true })
 				.filter({ visible: true }),
+		).toBeVisible()
+	if (route === "/statements")
+		await expect(
+			page.locator('main a[href="/statements/t1-s-pending"]').filter({ visible: true }),
 		).toBeVisible()
 	if (routeReady[route])
 		await expect(

@@ -3,7 +3,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useState } from "react"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
-import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
@@ -21,7 +20,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { canUseMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
-import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
 import { getRecord } from "@/logic/records"
 import { pathRecords } from "@/routes"
@@ -30,26 +28,22 @@ import type { Allocation, Statement } from "@/types"
 export default function RecordPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = use(params)
 	const data = useLiveQuery(() => (id ? getRecord(id).catch(() => null) : null), [id])
-	const accounts = useLiveQuery(() => listAccounts(), [])
 	const categories = useLiveQuery(() => listCategories(), []) ?? []
 
 	const [isEditingRecord, setIsEditingRecord] = useState(false)
-	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 	const columns = useStatementColumns<Statement & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Record ${data?.id ?? ""}`,
-		onEdit: setEditingStatement,
 	})
 	const mobileRow = useStatementMobileRow<Statement & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Record ${data?.id ?? ""}`,
-		onEdit: setEditingStatement,
 	})
 
 	const openStatement = useOpenStatement(`Record ${data?.id ?? ""}`)
 
 	// undefined means the live query is still resolving; only null is genuinely missing.
-	if (data === undefined || accounts === undefined) return null
+	if (data === undefined) return null
 
 	if (!data) {
 		return (
@@ -161,17 +155,6 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					</CardContent>
 				</Card>
 			</PageContent>
-
-			{editingStatement ? (
-				<PendingStatementDialog
-					statement={editingStatement}
-					accounts={accounts}
-					isOpen
-					setIsOpen={open => {
-						if (!open) setEditingStatement(null)
-					}}
-				/>
-			) : null}
 		</>
 	)
 }

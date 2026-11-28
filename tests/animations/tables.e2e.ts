@@ -84,8 +84,8 @@ const populatedConsumers: MotionConsumer[] = [
 	{
 		name: "Record Statements",
 		origin: "/records",
-		action: "link",
-		target: "Open Hawker Dinner",
+		action: "router",
+		target: `/records/${IDS.records.partialPending}`,
 		selector: statementRows,
 		dense: false,
 	},
@@ -174,6 +174,7 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 			await page
 				.locator('a[href^="/statements/"]')
 				.and(page.locator(`[href="/statements/${consumer.target}"]`))
+				.filter({ visible: true })
 				.click()
 		else if (consumer.action === "view") {
 			await page.getByRole("combobox", { name: "Duplicate view" }).click()
@@ -184,7 +185,17 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 			await pickOption(
 				page.getByRole("option", { name: "All unallocated imports", exact: true }),
 			)
-		} else await page.getByRole("link", { name: consumer.target, exact: true }).click()
+		}
+		// Record rows open the editor in place, so no link leads to a Record page:
+		// navigate on the client through Next's router, as a link would.
+		else
+			await page.evaluate(
+				href =>
+					(
+						window as unknown as { next: { router: { push(href: string): void } } }
+					).next.router.push(href),
+				consumer.target,
+			)
 	})
 	const visibleCount = await page.locator(consumer.selector).evaluateAll(
 		elements =>
@@ -642,7 +653,7 @@ test("table refilter from no results: visible results enter with an entrance", {
 			).toBeVisible()
 			const samples = await sampleVisibleRowAnimations(
 				page,
-				'tbody tr:has(a[aria-label^="Open "]), div.grid-cols-subgrid:has(a[aria-label^="Open "])',
+				`tbody tr:has(a[href^="${route}/"]), div.grid-cols-subgrid:has(a[href^="${route}/"])`,
 				async () => {
 					await page
 						.getByPlaceholder(
@@ -772,7 +783,9 @@ test("allocator: an allocated Statement fades out and the rows below slide up", 
 			if (!below) return
 			frames.push({
 				opacity: leaving?.isConnected ? Number(getComputedStyle(leaving).opacity) : null,
-				top: below.getBoundingClientRect().top,
+				// Page coordinates: on a page barely taller than the viewport, removing the row
+				// clamps the scroll, which moves the rows above instead of the rows below.
+				top: below.getBoundingClientRect().top + scrollY,
 			})
 			if (frames.length < 240) requestAnimationFrame(tick)
 		}

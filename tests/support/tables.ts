@@ -3,7 +3,7 @@ import { expect, type Locator, type Page } from "@playwright/test"
 export type MotionConsumer = {
 	name: string
 	origin: string
-	action: "nav" | "sheet" | "workflow" | "heading" | "link" | "statement" | "view" | "pending"
+	action: "nav" | "sheet" | "workflow" | "heading" | "statement" | "view" | "pending" | "router"
 	target: string
 	selector: string
 	dense: boolean
