@@ -424,8 +424,8 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		const editor = await page.context().newPage()
 		try {
 			await setDateOnly(editor, new Date("2026-10-15T12:00:00+08:00"))
-			await editor.goto("/records/t1-r-groceries")
-			await editor.getByRole("button", { name: "Edit Record", exact: true }).click()
+			await editor.goto("/records?record=t1-r-groceries")
+			await editor.getByRole("button", { name: "Edit", exact: true }).click()
 			const dialog = editor.getByRole("dialog", { name: "Edit Record", exact: true })
 			await expect(dialog).toBeVisible()
 			await dialog.locator("#amount").fill("-142.75")

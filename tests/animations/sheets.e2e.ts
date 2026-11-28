@@ -72,13 +72,13 @@ test("search sheets: every sheet animates in and out on dismissal and completion
 		)
 	})
 	await test.step("Statement search sheet: Done and Escape preserve the exit", async () => {
-		await page.goto(`/records/${record.id}`)
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+		await page.goto(`/records?record=${record.id}`)
+		await page.getByRole("button", { name: "Edit", exact: true }).click()
 		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 		const trigger = editor.getByRole("button", { name: "Allocate statement", exact: true })
 		await expectModalEntrance(page, '[data-slot="sheet-content"]', () => trigger.click())
 		const sheet = page.getByRole("dialog", {
-			name: "Allocate statements to record",
+			name: "Allocate Statements to Record",
 			exact: true,
 		})
 		await sheet.getByRole("searchbox", { name: "Search statements" }).fill(imported.description)

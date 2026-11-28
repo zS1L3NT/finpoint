@@ -3,7 +3,7 @@ import { expect, type Locator, type Page } from "@playwright/test"
 export type MotionConsumer = {
 	name: string
 	origin: string
-	action: "nav" | "sheet" | "workflow" | "heading" | "statement" | "view" | "pending" | "router"
+	action: "nav" | "sheet" | "workflow" | "heading" | "view" | "pending"
 	target: string
 	selector: string
 	dense: boolean
@@ -54,7 +54,7 @@ export async function fits(page: Page, element: Locator) {
 
 export function statementRow(page: Page, id: string) {
 	return page
-		.locator(`main a[href="/statements/${id}"]`)
+		.locator(`main a[href="/statements?statement=${id}"]`)
 		.filter({ visible: true })
 		.locator('xpath=ancestor::*[self::tr or contains(@class,"grid-cols-subgrid")][1]')
 }

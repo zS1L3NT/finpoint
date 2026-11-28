@@ -5,6 +5,10 @@ import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import { fits, patchRows, statementRow } from "../support/tables"
 
+/** Row links open the Record or Statement preview over its list. */
+const rowHref = (route: "/records" | "/statements") =>
+	route === "/records" ? "/records?record=" : "/statements?statement="
+
 test("Records table: rendered Records keep zero, negative amounts and pending reasons", async ({
 	page,
 }) => {
@@ -42,7 +46,7 @@ test("table refilter: settled search results keep their query in the URL", {
 					? "Search title, people, location, description..."
 					: "Search descriptions...",
 			)
-			const selector = `tbody tr:has(a[href^="${route}/"]), div.grid-cols-subgrid:has(a[href^="${route}/"])`
+			const selector = `tbody tr:has(a[href^="${rowHref(route)}"]), div.grid-cols-subgrid:has(a[href^="${rowHref(route)}"])`
 			await expect(page.locator(selector).filter({ visible: true }).first()).toBeVisible()
 			await search.fill(query.replace("1", "2"))
 			await expect(page).toHaveURL(/query=Dense\+.*\+2/)
@@ -57,7 +61,7 @@ test("table paging: first page shows five rows and next page moves the URL to pa
 	for (const route of ["/records", "/statements"] as const) {
 		await test.step(`table paging ${route}: first page shows five rows and next page moves the URL to page 2`, async () => {
 			await page.goto(`${route}?per_page=5`)
-			const rows = `tbody tr:has(a[href^="${route}/"]), div.grid-cols-subgrid:has(a[href^="${route}/"])`
+			const rows = `tbody tr:has(a[href^="${rowHref(route)}"]), div.grid-cols-subgrid:has(a[href^="${rowHref(route)}"])`
 			await expect(page.locator(rows).filter({ visible: true })).toHaveCount(5)
 			await page.getByRole("link", { name: "Go to next page" }).click()
 			await expect(page).toHaveURL(/page=2/)
@@ -141,7 +145,7 @@ test("Budget detail: detaching a Record keeps the remaining row node and persist
 	void workspace
 	await page.setViewportSize({ width: 1920, height: 1440 })
 	await page.goto("/budgets/t1-b-manual")
-	const selector = 'tbody tr:has(a[href="/records/t1-r-unicode"])'
+	const selector = 'tbody tr:has(a[href="/records?record=t1-r-unicode"])'
 	const kept = page.locator(selector).filter({ visible: true })
 	const original = await kept.elementHandle()
 	if (!original) throw new Error("Expected the retained budget Record")
@@ -184,7 +188,7 @@ test.describe("pinned 15 October 2026 date", () => {
 					page.getByRole("link", { name: "Go to previous page" }),
 				).toHaveAttribute("aria-disabled", "true")
 				const rowLink = page
-					.locator(`a[href^="/${noun}s/"]`)
+					.locator(`a[href^="/${noun}s?${noun}="]`)
 					.filter({ visible: true })
 					.first()
 				const first = await rowLink.getAttribute("href")
@@ -375,12 +379,14 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 		await fits(page, editor.getByRole("button", { name: "Save changes", exact: true }))
 		await page.reload()
 		await expect(row).toContainText(title)
-		await page.goto(`/records/${IDS.records.unicode}`)
-		await expect(page.locator("main h2")).toContainText(title)
+		await page.goto(`/records?record=${IDS.records.unicode}`)
+		const reloaded = page.getByRole("dialog", { name: "Record", exact: true })
+		const header = reloaded.locator('[data-slot="dialog-header"]')
+		await expect(header).toContainText(title)
 		for (const value of [people, location, description])
-			await expect(page.locator("main")).toContainText(value)
-		await fits(page, page.locator("main h2"))
-		await fits(page, page.getByRole("button", { name: "Edit Record", exact: true }))
+			await expect(reloaded).toContainText(value)
+		await fits(page, header)
+		await fits(page, reloaded.getByRole("button", { name: "Edit", exact: true }))
 	})
 })
 
@@ -417,8 +423,8 @@ test("Statements table: signed same-day subtotal and Account rows distinguish pe
 		await expect(imported.getByText("Pending", { exact: true })).toHaveCount(0)
 		// Rows carry no edit button: the pending Statement's page offers the editor.
 		await expect(pending.getByRole("button")).toHaveCount(0)
-		await pending.locator(`a[href="/statements/${IDS.statements.pending}"]`).click()
-		await page.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		await pending.locator(`a[href="/statements?statement=${IDS.statements.pending}"]`).click()
+		await page.getByRole("button", { name: "Edit", exact: true }).click()
 		await expect(
 			page.getByRole("dialog", { name: "Edit Pending Statement", exact: true }),
 		).toBeVisible()
@@ -495,8 +501,8 @@ test("Statement cells: retain pending, Allocation, zero and signed amount meanin
 		const statement = added[id] ?? data.statements.find(row => row.id === id)
 		if (!statement) throw new Error(`Missing fixture ${id}`)
 		const link = page
-			.locator('a[href^="/statements/"]')
-			.and(page.locator(`[href="/statements/${id}"]`))
+			.locator('a[href^="/statements?statement="]')
+			.and(page.locator(`[href="/statements?statement=${id}"]`))
 			.filter({ visible: true })
 		const row = link.locator(
 			'xpath=ancestor::*[self::tr or contains(@class,"grid-cols-subgrid")][1]',

@@ -136,12 +136,12 @@ test("browser traversal: rejects malformed snapshot URLs and retains the valid f
 	void workspace
 	const errors: string[] = []
 	page.on("pageerror", error => errors.push(error.message))
-	await gotoReady(page, "/statements?query=FairPrice")
+	await gotoReady(page, "/accounts?query=Everyday")
 	const origin = page.url()
-	await page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }).click()
-	await expect(page).toHaveURL(/\/statements\/t1-s-groceries$/)
+	await page.getByRole("heading", { name: "Everyday Savings", exact: true }).click()
+	await expect(page).toHaveURL(/\/accounts\/t1-acc-dbs$/)
 	const detail = page.url()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
 	await page.evaluate(origin => {
 		const url = new URL(origin)
 		history.replaceState(
@@ -149,7 +149,7 @@ test("browser traversal: rejects malformed snapshot URLs and retains the valid f
 				...history.state,
 				finpointHistory: [
 					{ name: "Invalid", url: "//[" },
-					{ name: "Statements", url: url.pathname + url.search },
+					{ name: "Accounts", url: url.pathname + url.search },
 				],
 			},
 			"",
@@ -159,13 +159,13 @@ test("browser traversal: rejects malformed snapshot URLs and retains the valid f
 	await expect(page).toHaveURL(origin)
 	await page.goForward()
 	await expect(page).toHaveURL(detail)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
-	await page.getByRole("button", { name: "Back to Statements", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
+	await page.getByRole("button", { name: "Back to Accounts", exact: true }).click()
 	await expect(page).toHaveURL(origin)
 	expect(errors).toEqual([])
 })
 
-test("nested drill: browser Back and Forward restore filtered drill with usable exact Back controls", async ({
+test("drill: browser Back and Forward restore a filtered drill, and a Statement opens over its Account", async ({
 	page,
 	workspace,
 }) => {
@@ -175,30 +175,23 @@ test("nested drill: browser Back and Forward restore filtered drill with usable 
 	await page.getByRole("heading", { name: "Everyday Savings", exact: true }).click()
 	await expect(page).toHaveURL(/\/accounts\/t1-acc-dbs$/)
 	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
-	const records = page.url()
-	await page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }).click()
-	await expect(page).toHaveURL(/\/statements\/t1-s-groceries$/)
 	const detail = page.url()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Account Everyday Savings")
-	await page.goBack()
-	await expect(page).toHaveURL(records)
+	// A Statement opens in a preview over the Account, so the drill stack still ends here.
+	await page
+		.locator('a[href="/statements?statement=t1-s-groceries"]')
+		.filter({ visible: true })
+		.click()
+	const preview = page.getByRole("dialog", { name: "Statement", exact: true })
+	await expect(preview).toBeVisible()
+	await expect(page).toHaveURL(detail)
+	await page.keyboard.press("Escape")
+	await expect(preview).toHaveCount(0)
 	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
-	await expect(
-		page.getByRole("button", { name: "Back to Account Everyday Savings", exact: true }),
-	).toHaveCount(0)
 	await page.goBack()
 	await expect(page).toHaveURL(origin)
 	await expectNoBack(page)
 	await page.goForward()
-	await expect(page).toHaveURL(records)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
-	await page.goForward()
 	await expect(page).toHaveURL(detail)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Account Everyday Savings")
-	await page
-		.getByRole("button", { name: "Back to Account Everyday Savings", exact: true })
-		.click()
-	await expect(page).toHaveURL(records)
 	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
 	await page.getByRole("button", { name: "Back to Accounts", exact: true }).click()
 	await expect(page).toHaveURL(origin)
@@ -211,22 +204,23 @@ test("browser traversal: distinguishes the same detail URL entered from two filt
 }) => {
 	void workspace
 	// Starting a search pushes an entry; refining an existing query replaces
-	// it. Keep the first origin category-only so both browser entries exist.
-	await gotoReady(page, "/statements?account_id=t1-acc-dbs")
+	// it. Keep the first origin unsearched so both browser entries exist.
+	await gotoReady(page, "/accounts")
 	const firstOrigin = page.url()
-	await page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }).click()
-	await expect(page).toHaveURL(/\/statements\/t1-s-groceries$/)
+	const open = () => page.getByRole("heading", { name: "Everyday Savings", exact: true }).click()
+	await open()
+	await expect(page).toHaveURL(/\/accounts\/t1-acc-dbs$/)
 	const detail = page.url()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
-	await page.getByRole("button", { name: "Back to Statements", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
+	await page.getByRole("button", { name: "Back to Accounts", exact: true }).click()
 	await expect(page).toHaveURL(firstOrigin)
-	await page.getByPlaceholder("Search descriptions...").fill("FairPrice Run")
-	await expect(page).toHaveURL(/query=FairPrice\+Run/)
+	await page.getByPlaceholder("Search accounts...").fill("Everyday")
+	await expect(page).toHaveURL(/query=Everyday/)
 	const secondOrigin = page.url()
 	expect(secondOrigin).not.toBe(firstOrigin)
-	await page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }).click()
+	await open()
 	await expect(page).toHaveURL(detail)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
 	await page.goBack()
 	await expect(page).toHaveURL(secondOrigin)
 	await expectNoBack(page)
@@ -234,15 +228,15 @@ test("browser traversal: distinguishes the same detail URL entered from two filt
 	await expect(page).toHaveURL(firstOrigin)
 	await page.goBack()
 	await expect(page).toHaveURL(detail)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
 	await page.goForward()
 	await expect(page).toHaveURL(firstOrigin)
 	await page.goForward()
 	await expect(page).toHaveURL(secondOrigin)
 	await page.goForward()
 	await expect(page).toHaveURL(detail)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
-	await page.getByRole("button", { name: "Back to Statements", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
+	await page.getByRole("button", { name: "Back to Accounts", exact: true }).click()
 	await expect(page).toHaveURL(secondOrigin)
 	// Return to the first detail entry again and use its Back, rather than
 	// merely accepting the label shared by both origins.
@@ -254,8 +248,8 @@ test("browser traversal: distinguishes the same detail URL entered from two filt
 	await expect(page).toHaveURL(firstOrigin)
 	await page.goBack()
 	await expect(page).toHaveURL(detail)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
-	await page.getByRole("button", { name: "Back to Statements", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Accounts")
+	await page.getByRole("button", { name: "Back to Accounts", exact: true }).click()
 	await expect(page).toHaveURL(firstOrigin)
 })
 
@@ -456,40 +450,41 @@ test("stored history: valid entries survive alongside invalid ones", async ({ pa
 
 test("reloaded detail: keeps its Back origin", async ({ page, workspace }) => {
 	void workspace
-	await gotoReady(page, "/statements")
-	await page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }).click()
+	await gotoReady(page, "/accounts")
+	await page.getByRole("heading", { name: "Everyday Savings", exact: true }).click()
 	// Reload only after the detail URL commits, or the reload lands on the list.
-	await expect(page).toHaveURL(/\/statements\/t1-s-groceries$/)
-	await expect(
-		page.getByRole("button", { name: "Back to Statements", exact: true }),
-	).toBeVisible()
+	await expect(page).toHaveURL(/\/accounts\/t1-acc-dbs$/)
+	await expect(page.getByRole("button", { name: "Back to Accounts", exact: true })).toBeVisible()
 	await page.reload()
-	await expect(
-		page.getByRole("button", { name: "Back to Statements", exact: true }),
-	).toBeVisible()
-	await page.getByRole("button", { name: "Back to Statements", exact: true }).click()
-	await expect(page).toHaveURL(/\/statements(\?|$)/)
+	await expect(page.getByRole("button", { name: "Back to Accounts", exact: true })).toBeVisible()
+	await page.getByRole("button", { name: "Back to Accounts", exact: true }).click()
+	await expect(page).toHaveURL(/\/accounts(\?|$)/)
 })
 
-test("multifilter Unicode origin: returns exactly after reload", async ({ page, workspace }) => {
+test("multifilter Unicode origin: a Statement preview keeps the exact filtered list across reload", async ({
+	page,
+	workspace,
+}) => {
 	void workspace
 	await gotoReady(
 		page,
 		"/statements?query=K%C5%8Dpi&account_id=t1-acc-revolut&start_date=2026-10-01&end_date=2026-10-31",
 	)
 	const origin = page.url()
-	await page.locator('a[href="/statements/t1-s-unicode"]').filter({ visible: true }).click()
-	await expect(page).toHaveURL(/\/statements\/t1-s-/)
-	await expect(
-		page.getByRole("button", { name: "Back to Statements", exact: true }),
-	).toBeVisible()
-	await page.reload()
-	await expect(
-		page.getByRole("button", { name: "Back to Statements", exact: true }),
-	).toBeVisible()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Statements")
-	await page.getByRole("button", { name: "Back to Statements", exact: true }).click()
+	await page
+		.locator('a[href="/statements?statement=t1-s-unicode"]')
+		.filter({ visible: true })
+		.click()
+	// The preview opens over the list: the filtered URL is untouched, so nothing can be lost.
+	const preview = page.getByRole("dialog", { name: "Statement", exact: true })
+	await expect(preview).toContainText("Kōpi")
 	await expect(page).toHaveURL(origin)
+	await page.reload()
+	await expect(page).toHaveURL(origin)
+	await expect(
+		page.locator('a[href="/statements?statement=t1-s-unicode"]').filter({ visible: true }),
+	).toBeVisible()
+	await expectNoBack(page)
 })
 
 test("rapid Back clicks: pop exactly once while navigation is pending", async ({
@@ -498,30 +493,17 @@ test("rapid Back clicks: pop exactly once while navigation is pending", async ({
 }) => {
 	void workspace
 	await gotoReady(page, "/accounts?query=Everyday")
+	const origin = page.url()
 	await page.getByRole("heading", { name: "Everyday Savings", exact: true }).click()
 	await expect(page).toHaveURL(/\/accounts\/t1-acc-dbs$/)
-	await expect(page.getByRole("button", { name: "Back to Accounts", exact: true })).toBeVisible()
-	const origin = page.url()
-	await page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }).click()
-	await expect(page).toHaveURL(/\/statements\/t1-s-groceries$/)
-	await expect(
-		page.getByRole("button", { name: "Back to Account Everyday Savings", exact: true }),
-	).toBeVisible()
 	// Two synchronous activations: the second lands while the first
 	// navigation is still pending and must be ignored.
-	await page
-		.getByRole("button", { name: "Back to Account Everyday Savings", exact: true })
-		.evaluate(back => {
-			back.dispatchEvent(
-				new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }),
-			)
-			back.dispatchEvent(
-				new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }),
-			)
-		})
+	await page.getByRole("button", { name: "Back to Accounts", exact: true }).evaluate(back => {
+		back.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
+		back.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
+	})
 	await expect(page).toHaveURL(origin)
-	await expect(page.getByRole("button", { name: "Back to Accounts", exact: true })).toBeVisible()
-	await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(1)
+	await expectNoBack(page)
 })
 
 test("detail fallback: keeps Back above its heading", async ({ page, workspace }) => {
@@ -529,8 +511,6 @@ test("detail fallback: keeps Back above its heading", async ({ page, workspace }
 	for (const [route, backName] of [
 		["/accounts/t1-acc-dbs", "Back to Accounts"],
 		["/budgets/t1-b-manual", "Back to Budgets"],
-		["/records/t1-r-partial", "Back to Records"],
-		["/statements/t1-s-pending", "Back to Statements"],
 	] as const) {
 		await gotoReady(page, route)
 		await expectBackAboveHeadingFromHistoryRegressions(page, backName)
@@ -546,7 +526,7 @@ test("encoded URL: Back pops an equivalent URL without becoming stuck disabled",
 	// Exercise the runtime equal-target guard through a validated traversal
 	// snapshot; fresh loads now discard their trailing self entries earlier.
 	await expect(
-		page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }),
+		page.locator('a[href="/statements?statement=t1-s-groceries"]').filter({ visible: true }),
 	).toBeVisible()
 	await page.evaluate(() => {
 		window.dispatchEvent(
@@ -621,7 +601,7 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await expect(page).toHaveURL(origin)
 		await expect(open).toBeFocused()
 	})
-	await test.step("Statements list: keyboard filtered list to detail to Back keeps exact origin", async () => {
+	await test.step("Statements list: keyboard opens the Statement preview over the filtered list", async () => {
 		const origin =
 			"/statements?query=STARBUCKS&page=1&per_page=5&start_date=2026-10-01&end_date=2026-10-31&min_amount=-10&max_amount=0"
 		await reset(origin)
@@ -630,12 +610,21 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await expect(
 			page.locator("main").getByText("STARBUCKS 4455").filter({ visible: true }).first(),
 		).toBeVisible()
-		const open = page.locator('a[href^="/statements/"]').filter({ visible: true }).first()
+		const open = page
+			.locator('a[href^="/statements?statement="]')
+			.filter({ visible: true })
+			.first()
 		await expect(open).toBeVisible()
 		await open.focus()
 		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/statements\/t1-s-free-1/)
-		await keyboardBack(page, "Back to Statements", origin)
+		// The Statement opens over its list: nothing navigates, so there is no origin to lose.
+		const preview = page.getByRole("dialog", { name: "Statement", exact: true })
+		await expect(preview).toContainText("STARBUCKS 4455")
+		await expect(page).toHaveURL(origin)
+		await page.keyboard.press("Escape")
+		await expect(preview).toHaveCount(0)
+		await expect(page).toHaveURL(origin)
+		await expect(open).toBeFocused()
 	})
 	await test.step("Account card: keyboard card to detail to Back keeps exact origin", async () => {
 		const origin = "/accounts?query=One+Card"
@@ -726,8 +715,6 @@ test("navigation history: Budget drill, fallbacks and static links preserve hist
 	for (const [route, name, fallback] of [
 		["/accounts/t1-acc-dbs", "Accounts", "/accounts"],
 		["/budgets/t1-b-manual", "Budgets", "/budgets"],
-		["/records/t1-r-partial", "Records", "/records"],
-		["/statements/t1-s-pending", "Statements", "/statements"],
 	] as const) {
 		await test.step(`direct ${name} detail: has a working fallback`, async () => {
 			await resetHistory(page, route)
@@ -815,26 +802,25 @@ test("history clearing: cancelled links, top navigation and chart drills clear o
 	})
 })
 
-test("Back button: returns to its origin when pressed as soon as a drilled Statement appears", async ({
+test("Back button: returns to its origin when pressed as soon as a drilled Account appears", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await gotoReady(page, "/statements?account_id=t1-acc-dbs")
+	await resetHistory(page, "/accounts?query=Everyday")
 	const origin = page.url()
-	await expect(
-		page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }),
-	).toBeVisible()
+	await expect(page.getByRole("heading", { name: "Everyday Savings", exact: true })).toBeVisible()
 	// Click Back from inside the page on the first frame it exists, before the drill's URL
 	// commits: the drill must not override the back navigation.
 	await page.evaluate(() => {
-		const link = document.querySelector('a[href="/statements/t1-s-groceries"]')
-		if (!(link instanceof HTMLElement))
-			throw new Error("Expected the FairPrice Run Statement link")
-		link.click()
+		const card = [...document.querySelectorAll("main h3")].find(
+			heading => heading.textContent === "Everyday Savings",
+		)
+		if (!(card instanceof HTMLElement)) throw new Error("Expected the Everyday Savings card")
+		card.click()
 		const pressBack = () => {
 			const back = [...document.querySelectorAll("button")].find(button =>
-				button.textContent?.trim().startsWith("Back to Statements"),
+				button.textContent?.trim().startsWith("Back to Accounts"),
 			)
 			if (!back) {
 				requestAnimationFrame(pressBack)
@@ -845,91 +831,11 @@ test("Back button: returns to its origin when pressed as soon as a drilled State
 		}
 		requestAnimationFrame(pressBack)
 	})
-	// The origin URL holds before the drill commits too: prove Back was pressed first.
 	await expect.poll(() => page.evaluate(() => Reflect.get(window, "__pressedBack"))).toBe(true)
 	await expect(page).toHaveURL(origin)
 	await page.waitForTimeout(1000)
 	await expect(page).toHaveURL(origin)
-	await expect(
-		page.locator('a[href="/statements/t1-s-groceries"]').filter({ visible: true }),
-	).toBeVisible()
-})
-
-test("Back button: the outgoing page's Back cancels a drill link that is still loading", async ({
-	page,
-	workspace,
-}) => {
-	void workspace
-	await resetHistory(page, "/accounts?query=Everyday")
-	const origin = page.url()
-	await page.getByRole("heading", { name: "Everyday Savings", exact: true }).click()
-	await expect(page).toHaveURL(/\/accounts\/t1-acc-dbs$/)
-	const back = page.getByRole("button", { name: "Back to Accounts", exact: true })
-	await expect(back).toBeEnabled()
-	// Hold the Statement route so the drill is still loading when Back is pressed.
-	const { promise: held, resolve: release } = Promise.withResolvers<void>()
-	let requested = false
-	await page.route(/\/statements\/t1-s-groceries/, async route => {
-		requested = true
-		await held
-		await route.continue()
-	})
-	await page
-		.locator('a[href="/statements/t1-s-groceries"]')
-		.filter({ visible: true })
-		.click({ noWaitAfter: true })
-	await expect.poll(() => requested).toBe(true)
-	await back.click()
-	release()
-	await expect(page).toHaveURL(origin)
 	await expect(page.getByRole("heading", { name: "Everyday Savings", exact: true })).toBeVisible()
-	await page.unrouteAll({ behavior: "wait" })
-	await expect(page).toHaveURL(origin)
-	await expect(page.getByRole("heading", { name: "FairPrice Run" })).toHaveCount(0)
-})
-
-test("Back button: a history restore while a drill link loads keeps its restored entries", async ({
-	page,
-	workspace,
-}) => {
-	void workspace
-	await resetHistory(page, "/accounts?query=Everyday")
-	await page.getByRole("heading", { name: "Everyday Savings", exact: true }).click()
-	await expect(page).toHaveURL(/\/accounts\/t1-acc-dbs$/)
-	const records = new URL(page.url())
-	const { promise: held, resolve: release } = Promise.withResolvers<void>()
-	let requested = false
-	await page.route(/\/statements\/t1-s-groceries/, async route => {
-		requested = true
-		await held
-		await route.continue()
-	})
-	await page
-		.locator('a[href="/statements/t1-s-groceries"]')
-		.filter({ visible: true })
-		.click({ noWaitAfter: true })
-	await expect.poll(() => requested).toBe(true)
-	// A same-URL restore lands while the drill is pending: its equivalent-URL entry is
-	// visible and must consume exactly one Back click, like any restored entry.
-	await page.evaluate(self => {
-		window.dispatchEvent(
-			new PopStateEvent("popstate", {
-				state: {
-					...history.state,
-					finpointHistory: [
-						{ name: "Privacy Policy", url: "/privacy" },
-						{ name: "Records", url: self },
-					],
-				},
-			}),
-		)
-	}, records.pathname + records.search)
-	await page.getByRole("button", { name: "Back to Records", exact: true }).click()
-	await expect(
-		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
-	).toBeVisible()
-	release()
-	await page.unrouteAll({ behavior: "wait" })
 })
 
 test("month navigation: two fast clicks on Next month advance two months", async ({

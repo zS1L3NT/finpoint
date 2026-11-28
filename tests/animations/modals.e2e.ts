@@ -46,8 +46,12 @@ test("app modal surfaces: animate popup entrances and fades", {
 		)
 	})
 	await test.step("Record editor: opens with initial content already laid out", async () => {
-		await page.goto(`/records/${IDS.records.partialPending}`, { waitUntil: "domcontentloaded" })
-		const trigger = page.getByRole("button", { name: "Edit Record", exact: true })
+		// A row opens the Record in its preview, the popup the editor then swaps into.
+		await page.goto("/records", { waitUntil: "domcontentloaded" })
+		const trigger = page
+			.getByRole("link", { name: "Open Hawker Dinner", exact: true })
+			.filter({ visible: true })
+			.first()
 		await expect(trigger).toBeVisible()
 		await expectPopupEntrance(page, () => trigger.click())
 	})

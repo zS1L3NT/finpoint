@@ -89,8 +89,9 @@ const editors = [
 	},
 	{
 		name: "Pending Statement editor",
-		route: `/statements/${pending.id}`,
-		trigger: "Edit Pending Statement",
+		route: "/statements",
+		preview: { name: "Statement", href: `/statements?statement=${pending.id}` },
+		trigger: "Edit",
 		title: "Edit Pending Statement",
 		field: "Description",
 		value: pending.description,
@@ -105,8 +106,9 @@ const editors = [
 	},
 	{
 		name: "Record editor",
-		route: `/records/${record.id}`,
-		trigger: "Edit Record",
+		route: "/records",
+		preview: { name: "Record", href: `/records?record=${record.id}` },
+		trigger: "Edit",
 		title: "Edit Record",
 		field: "Title",
 		value: record.title,
@@ -128,6 +130,20 @@ const editors = [
 		value: "Starbucks coffee",
 	},
 ]
+
+type Editor = (typeof editors)[number]
+
+/**
+ * A Record or Statement editor is its preview's Edit: the form swaps in place, so the popup
+ * that enters and exits is the preview's, opened from its row.
+ */
+function previewOf(editor: Editor) {
+	return "preview" in editor ? editor.preview : undefined
+}
+
+async function openPreview(page: Page, href: string) {
+	await page.locator(`main a[href="${href}"]`).filter({ visible: true }).first().click()
+}
 
 async function sampleWarningCollapse(page: Page, dialog: Locator) {
 	await expect(
@@ -178,6 +194,19 @@ test("editor popups: every create and update dialog enters as a whole", {
 		await test.step(`${editor.name}: popup enters as a whole`, async () => {
 			void workspace
 			await page.goto(editor.route)
+			const preview = previewOf(editor)
+			if (preview) {
+				await expectPopupEntrance(page, () => openPreview(page, preview.href))
+				const edit = page.getByRole("button", { name: editor.trigger, exact: true })
+				await expectPointerCursor(edit)
+				await edit.click()
+				await expect(
+					page
+						.getByRole("dialog", { name: editor.title, exact: true })
+						.getByLabel(editor.field, { exact: true }),
+				).toHaveValue(editor.value)
+				return
+			}
 			const trigger = page.getByRole("button", { name: editor.trigger, exact: true })
 			await expectPointerCursor(trigger)
 			const children = await sampleVisibleRowAnimations(
@@ -464,6 +493,34 @@ test("editor popups: every create and update dialog exits before removal and reo
 			await seedWorkspace(page, "populated", { statement_rules: statementRules() })
 		await test.step(`${editor.name}: Cancel and Escape animate popup and backdrop exits`, async () => {
 			await page.goto(editor.route)
+			const preview = previewOf(editor)
+			if (preview) {
+				const edit = page.getByRole("button", { name: editor.trigger, exact: true })
+				await openPreview(page, preview.href)
+				await edit.click()
+				await page
+					.getByRole("dialog", { name: editor.title, exact: true })
+					.getByRole("button", { name: "Cancel", exact: true })
+					.click()
+				await expect(
+					page.getByRole("dialog", { name: preview.name, exact: true }),
+				).toBeVisible()
+				await expect(page.locator('[data-slot="dialog-content"]')).toHaveCount(1)
+				await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+					page.keyboard.press("Escape"),
+				)
+				await expectPopupEntrance(page, () => openPreview(page, preview.href))
+				await edit.click()
+				await expect(
+					page
+						.getByRole("dialog", { name: editor.title, exact: true })
+						.getByLabel(editor.field, { exact: true }),
+				).toHaveValue(editor.value)
+				await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+					page.keyboard.press("Escape"),
+				)
+				return
+			}
 			const trigger = page.getByRole("button", { name: editor.trigger, exact: true })
 			await trigger.click()
 			const dialog = page.getByRole("dialog", { name: editor.title, exact: true })
@@ -496,12 +553,24 @@ test("editor popups: saving every existing editor preserves its popup and backdr
 			await seedWorkspace(page, "populated", { statement_rules: statementRules() })
 		await test.step(`${editor.name}: successful save animates before removal`, async () => {
 			await page.goto(editor.route)
+			const preview = previewOf(editor)
+			if (preview) await openPreview(page, preview.href)
 			await page.getByRole("button", { name: editor.trigger, exact: true }).click()
 			const dialog = page.getByRole("dialog", { name: editor.title, exact: true })
 			await expect(dialog).toBeVisible()
 			await expect(dialog.getByLabel(editor.field, { exact: true })).toHaveValue(editor.value)
 			await dialog.getByLabel(editor.field, { exact: true }).fill(`${editor.value} motion`)
 			await dialog.getByLabel(editor.field, { exact: true }).press("Tab")
+			if (preview) {
+				await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+				const shown = page.getByRole("dialog", { name: preview.name, exact: true })
+				await expect(shown).toContainText(`${editor.value} motion`)
+				await expect(page.locator('[data-slot="dialog-content"]')).toHaveCount(1)
+				await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+					page.keyboard.press("Escape"),
+				)
+				return
+			}
 			await expectModalExit(page, '[data-slot="dialog-content"]', () =>
 				dialog.getByRole("button", { name: "Save changes", exact: true }).click(),
 			)

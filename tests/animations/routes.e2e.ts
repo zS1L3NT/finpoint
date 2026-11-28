@@ -90,11 +90,6 @@ test("card grids: Accounts, Budgets and Categories enter as a cascade in the vie
 						.click()
 				else if (consumer.action === "heading")
 					await page.getByRole("heading", { name: consumer.target, exact: true }).click()
-				else if (consumer.action === "statement")
-					await page
-						.locator('a[href^="/statements/"]')
-						.and(page.locator(`[href="/statements/${consumer.target}"]`))
-						.click()
 				else if (consumer.action === "view") {
 					await page.getByRole("combobox", { name: "Duplicate view" }).click()
 					await pickOption(

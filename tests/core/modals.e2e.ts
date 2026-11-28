@@ -36,8 +36,10 @@ test("app modal surfaces: show backdrops, restore focus and reopen after Escape"
 		}
 	})
 	await test.step("Record editor: pending warning content and Escape close work", async () => {
-		await page.goto(`/records/${IDS.records.partialPending}`, { waitUntil: "domcontentloaded" })
-		const trigger = page.getByRole("button", { name: "Edit Record", exact: true })
+		await page.goto(`/records?record=${IDS.records.partialPending}`, {
+			waitUntil: "domcontentloaded",
+		})
+		const trigger = page.getByRole("button", { name: "Edit", exact: true })
 		await expect(trigger).toBeVisible()
 		await trigger.click()
 		await expect(page.getByRole("dialog")).toBeVisible()

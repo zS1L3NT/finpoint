@@ -208,9 +208,9 @@ test("pending queue: keyboard replace and confirm replace the Pending Statement"
 	await page.keyboard.press("Enter")
 	await expect(review).toHaveCount(0)
 	await expect(page.getByText("Pending Statement replaced.")).toBeVisible()
-	await page.goto(`/records/${IDS.records.pendingStatement}`)
+	await page.goto(`/records?record=${IDS.records.pendingStatement}`)
 	await expect(
-		page.locator("main").getByText("SHENG SIONG 9902").filter({ visible: true }).first(),
+		page.getByRole("dialog", { name: "Record", exact: true }).getByText("SHENG SIONG 9902"),
 	).toBeVisible()
 })
 

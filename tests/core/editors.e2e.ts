@@ -84,8 +84,8 @@ const editors = [
 	},
 	{
 		name: "Pending Statement editor",
-		route: `/statements/${pending.id}`,
-		trigger: "Edit Pending Statement",
+		route: `/statements?statement=${pending.id}`,
+		trigger: "Edit",
 		title: "Edit Pending Statement",
 		field: "Description",
 		value: pending.description,
@@ -100,8 +100,8 @@ const editors = [
 	},
 	{
 		name: "Record editor",
-		route: `/records/${record.id}`,
-		trigger: "Edit Record",
+		route: `/records?record=${record.id}`,
+		trigger: "Edit",
 		title: "Edit Record",
 		field: "Title",
 		value: record.title,
@@ -175,6 +175,8 @@ test("editor popups: values, cursors, fit and keyboard reopen work", async ({
 			}
 			await page.keyboard.press("Escape")
 			await expect(dialog).not.toBeVisible()
+			// Escape closes a preview's form with the preview, so its Edit comes back with it.
+			if (editor.trigger === "Edit") await page.goto(editor.route)
 			await trigger.focus()
 			await page.keyboard.press("Enter")
 			await expect(dialog).toBeVisible()
@@ -464,13 +466,8 @@ test("Pending Statement editors: validate creation and persist edits", async ({
 	})
 	await test.step("Pending Statement editor: prepopulates its description, protects Allocations, rejects zero and persists a negative amount", async () => {
 		void workspace
-		const route = `/statements/${pending.id}`
-		const dialog = await openEditor(
-			page,
-			route,
-			"Edit Pending Statement",
-			"Edit Pending Statement",
-		)
+		const route = `/statements?statement=${pending.id}`
+		const dialog = await openEditor(page, route, "Edit", "Edit Pending Statement")
 		await expect(dialog.getByLabel("Description", { exact: true })).toHaveValue(
 			pending.description,
 		)
@@ -490,7 +487,7 @@ test("Pending Statement editors: validate creation and persist edits", async ({
 		await dialog.getByRole("button", { name: "Save changes" }).click()
 		await expect(dialog).not.toBeVisible()
 		await page.reload()
-		await page.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		await page.getByRole("button", { name: "Edit", exact: true }).click()
 		await expect(page.getByRole("dialog").getByLabel("Amount", { exact: true })).toHaveValue(
 			"-14.51",
 		)
@@ -777,7 +774,7 @@ test("Record editor: null optional fields, long title, sign and penny keyboard s
 	workspace,
 }) => {
 	void workspace
-	const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+	const dialog = await openEditor(page, `/records?record=${record.id}`, "Edit", "Edit Record")
 	await expect(dialog.getByLabel("Title", { exact: true })).toHaveValue(record.title)
 	await expect(dialog.getByLabel("People", { exact: true })).toHaveValue(record.people ?? "")
 	await expect(dialog.getByLabel("Location", { exact: true })).toHaveValue(record.location ?? "")
@@ -791,7 +788,7 @@ test("Record editor: null optional fields, long title, sign and penny keyboard s
 	await dialog.getByRole("button", { name: "Save changes" }).click()
 	await expect(dialog).not.toBeVisible()
 	await page.reload()
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	await expect(page.getByRole("dialog").getByLabel("Title", { exact: true })).toHaveValue(
 		longText.trim(),
 	)
@@ -863,8 +860,13 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 			})
 		})
 		expect(archived).toBe(true)
-		await page.goto(`/records/${IDS.records.unicode}`)
-		await expect(page.getByText(/Monthly budget ·/)).toContainText("Daily")
+		await page.goto(`/records?record=${IDS.records.unicode}`)
+		await expect(
+			page
+				.getByRole("dialog", { name: "Record", exact: true })
+				.getByText("Monthly budget", { exact: true })
+				.locator("xpath=following-sibling::dd"),
+		).toContainText("Daily")
 	})
 	await test.step("archived Monthly Budget assignment: badge, total and disabled editor option are retained", async () => {
 		await page.evaluate(async () => {
@@ -889,9 +891,14 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 					})
 			})
 		})
-		await page.goto(`/records/${IDS.records.unicode}`)
-		await expect(page.getByText(/Monthly budget ·/)).toContainText("Travel")
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+		await page.goto(`/records?record=${IDS.records.unicode}`)
+		await expect(
+			page
+				.getByRole("dialog", { name: "Record", exact: true })
+				.getByText("Monthly budget", { exact: true })
+				.locator("xpath=following-sibling::dd"),
+		).toContainText("Travel")
+		await page.getByRole("button", { name: "Edit", exact: true }).click()
 		const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
 		const budget = dialog.getByRole("combobox").filter({ hasText: "Travel" })
 		await expect(budget).toBeVisible()
@@ -1100,15 +1107,80 @@ test("Record preview: a row opens it read-only, Edit swaps in the form and Cance
 	await expect(preview).not.toContainText("Not saved")
 	await expect(preview.getByRole("button", { name: "Edit", exact: true })).toBeFocused()
 
-	// Full page leads to the Record's own page, whose Edit Record opens straight to the form.
-	await preview.getByRole("link", { name: "Full page", exact: true }).click()
-	await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	// A Statement row opens its preview over this one, one level deep; Escape closes only it.
+	await preview
+		.getByRole("button", { name: "Open FairPrice Run · SGD 4412", exact: true })
+		.click()
+	const statement = page.getByRole("dialog", { name: "Statement", exact: true })
+	await expect(statement).toContainText("FairPrice Run · SGD 4412")
+	await expect(statement.getByRole("button", { name: /^Open / })).toHaveCount(0)
+	await page.keyboard.press("Escape")
+	await expect(statement).toHaveCount(0)
+	await expect(preview).toBeVisible()
+
+	// The Record's old page address opens the same preview over the Records list.
+	await page.goto("/records/t1-r-groceries")
+	await expect(page).toHaveURL(/\/records\?record=t1-r-groceries$/)
+	await expect(page.getByRole("dialog", { name: "Record", exact: true })).toContainText(
+		"FairPrice Run",
+	)
+})
+
+test("Statement preview: a row opens it with its Records, and a Pending one edits in place", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/statements")
+	await page
+		.locator(`main a[href="/statements?statement=${IDS.statements.splitPair[0]}"]`)
+		.filter({ visible: true })
+		.click()
+	const preview = page.getByRole("dialog", { name: "Statement", exact: true })
+	await expect(preview).toContainText("Uniqlo Basics · Contactless 1001")
+	// Imported Statements are read-only: no fields and no Edit.
+	await expect(preview.getByRole("textbox")).toHaveCount(0)
+	await expect(preview.getByRole("button", { name: "Edit", exact: true })).toHaveCount(0)
+
+	// A Record row opens that Record's preview over this one; Escape closes only it.
+	const open = preview.getByRole("button", { name: "Open Uniqlo Basics", exact: true })
+	await expectPointerCursor(open)
+	await open.click()
+	const record = page.getByRole("dialog", { name: "Record", exact: true })
+	await expect(record).toContainText("-$100.00 of -$100.00 allocated")
+	await expect(record.getByRole("button", { name: /^Open / })).toHaveCount(0)
+	await page.keyboard.press("Escape")
+	await expect(record).toHaveCount(0)
+	await expect(preview).toBeVisible()
+	await page.keyboard.press("Escape")
+	await expect(preview).toHaveCount(0)
+
+	// A Pending Statement's Edit swaps the same modal to its form; Save returns to the preview.
+	await page.goto(`/statements?statement=${IDS.statements.pending}`)
+	const pending = page.getByRole("dialog", { name: "Statement", exact: true })
+	await pending.getByRole("button", { name: "Edit", exact: true }).click()
+	const editor = page.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+	// Its Records stay beside the form, read-only, and Delete waits until none are left.
+	await expect(editor).toContainText("Pasar Malam")
+	await expect(editor.getByRole("button", { name: "Open Pasar Malam", exact: true })).toHaveCount(
+		0,
+	)
 	await expect(
-		page
-			.getByRole("dialog", { name: "Edit Record", exact: true })
-			.getByLabel("Title", { exact: true }),
-	).toHaveValue("FairPrice Run")
+		editor.getByRole("button", { name: "Delete", exact: true }).filter({ visible: true }),
+	).toBeDisabled()
+	await expect(
+		editor
+			.getByText("Remove this Statement from its Records before deleting.", { exact: true })
+			.filter({ visible: true }),
+	).toBeVisible()
+	await editor.getByLabel("Description", { exact: true }).fill("Pasar malam snacks and drinks")
+	await editor.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(pending).toContainText("Pasar malam snacks and drinks")
+	await expect(pending.getByRole("button", { name: "Edit", exact: true })).toBeFocused()
+	await page.reload()
+	await expect(page.getByRole("dialog", { name: "Statement", exact: true })).toContainText(
+		"Pasar malam snacks and drinks",
+	)
 })
 
 test("Record editor: inherited budget hides an ineligible Category default", async ({ page }) => {
@@ -1133,8 +1205,8 @@ test("Record editor: inherited budget hides an ineligible Category default", asy
 			},
 		],
 	})
-	await page.goto(`/records/${record.id}`)
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.goto(`/records?record=${record.id}`)
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
 		"Category default · Unbudgeted",
@@ -1148,7 +1220,7 @@ test("Record editor: inherited budget hides an ineligible Category default", asy
 	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
 	await expect(dialog).not.toBeVisible()
 	await page.reload()
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
 		"Category default · Unbudgeted",
 	)
@@ -1551,12 +1623,14 @@ test.describe("dialog lifecycle", () => {
 		})
 		const dialog = await openEditor(
 			page,
-			"/statements/free-pending",
-			"Edit Pending Statement",
+			"/statements?statement=free-pending",
+			"Edit",
 			"Edit Pending Statement",
 		)
+		// The first click arms Delete, as in the Record editor; the confirmation is what repeats.
+		await dialog.getByRole("button", { name: "Delete", exact: true }).click()
 		await dialog
-			.getByRole("button", { name: "Delete", exact: true })
+			.getByRole("button", { name: "Yes, delete Pending Statement", exact: true })
 			.evaluate((button: HTMLButtonElement) => {
 				for (let i = 0; i < 3; i++) button.click()
 			})
@@ -1614,8 +1688,8 @@ test.describe("dialog lifecycle", () => {
 		})
 		const dialog = await openEditor(
 			page,
-			"/statements/free-pending",
-			"Edit Pending Statement",
+			"/statements?statement=free-pending",
+			"Edit",
 			"Edit Pending Statement",
 		)
 		const description = dialog.getByLabel("Description", { exact: true })
@@ -1696,21 +1770,24 @@ test.describe("dialog lifecycle", () => {
 		await expect(bar.getByText("2 selected · -$30.00")).toBeVisible()
 
 		const other = await page.context().newPage()
-		await other.goto("/statements/sel-a")
-		await other.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		await other.goto("/statements?statement=sel-a")
+		await other.getByRole("button", { name: "Edit", exact: true }).click()
 		const editor = other.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
 		await editor.getByLabel("Amount", { exact: true }).fill("-15")
 		await editor.getByRole("button", { name: "Save changes", exact: true }).click()
 		await expect(editor).not.toBeVisible()
 		await expect(bar.getByText("2 selected · -$35.00")).toBeVisible()
 
-		await other.goto("/statements/sel-b")
-		await other.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		await other.goto("/statements?statement=sel-b")
+		await other.getByRole("button", { name: "Edit", exact: true }).click()
 		const otherEditor = other.getByRole("dialog", {
 			name: "Edit Pending Statement",
 			exact: true,
 		})
 		await otherEditor.getByRole("button", { name: "Delete", exact: true }).click()
+		await otherEditor
+			.getByRole("button", { name: "Yes, delete Pending Statement", exact: true })
+			.click()
 		await expect(otherEditor).not.toBeVisible()
 		await other.close()
 
@@ -1780,7 +1857,7 @@ test.describe("dialog lifecycle", () => {
 		workspace,
 	}) => {
 		void workspace
-		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		const dialog = await openEditor(page, `/records?record=${record.id}`, "Edit", "Edit Record")
 		await dialog.getByLabel("Title", { exact: true }).fill("Saved during delete")
 		await page.evaluate(async () => {
 			const buttons = [...document.querySelectorAll('[role="dialog"] button')]
@@ -1801,14 +1878,14 @@ test.describe("dialog lifecycle", () => {
 		workspace,
 	}) => {
 		void workspace
-		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		const dialog = await openEditor(page, `/records?record=${record.id}`, "Edit", "Edit Record")
 		await dialog.getByLabel("Title", { exact: true }).fill("From the first tab")
 		// Leave the Title so its suggestions close and the dialog is reachable again.
 		await dialog.getByLabel("Title", { exact: true }).press("Tab")
 
 		const other = await page.context().newPage()
-		await other.goto(`/records/${record.id}`)
-		await other.getByRole("button", { name: "Edit Record", exact: true }).click()
+		await other.goto(`/records?record=${record.id}`)
+		await other.getByRole("button", { name: "Edit", exact: true }).click()
 		const otherDialog = other.getByRole("dialog", { name: "Edit Record", exact: true })
 		await otherDialog.getByLabel("Title", { exact: true }).fill("From the second tab")
 		await otherDialog.getByLabel("Title", { exact: true }).press("Tab")
@@ -1831,13 +1908,13 @@ test.describe("dialog lifecycle", () => {
 		void workspace
 		const dialog = await openEditor(
 			page,
-			`/records/${IDS.records.partialPending}`,
-			"Edit Record",
+			`/records?record=${IDS.records.partialPending}`,
+			"Edit",
 			"Edit Record",
 		)
 		await dialog.getByRole("button", { name: "Allocate statement", exact: true }).click()
 		const sheet = page.getByRole("dialog", {
-			name: "Allocate statements to record",
+			name: "Allocate Statements to Record",
 			exact: true,
 		})
 		await sheet.getByRole("button").filter({ hasText: /\$/ }).first().click()
@@ -1911,13 +1988,23 @@ test("Pending Statement editor: deleting a Statement opened from an Account page
 		statements: [...tables.statements, { ...pending, id: "free-pending" }],
 	})
 	await page.goto(`/accounts/${pending.account_id}`)
-	// Statement rows open the Statement page, where a pending Statement is edited.
-	await page.locator('main a[href="/statements/free-pending"]').filter({ visible: true }).click()
-	await expect(page).toHaveURL(/\/statements\/free-pending$/)
-	await page.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+	// Statement rows open the Statement's preview over the Account page, where a pending one is edited.
 	await page
-		.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+		.locator('main a[href="/statements?statement=free-pending"]')
+		.filter({ visible: true })
+		.click()
+	await page
+		.getByRole("dialog", { name: "Statement", exact: true })
+		.getByRole("button", { name: "Edit", exact: true })
+		.click()
+	const editor = page.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+	await editor
 		.getByRole("button", { name: "Delete", exact: true })
+		.filter({ visible: true })
+		.click()
+	await editor
+		.getByRole("button", { name: "Yes, delete Pending Statement", exact: true })
+		.filter({ visible: true })
 		.click()
 	await expect(page.getByRole("dialog")).toHaveCount(0)
 	await expect
@@ -1943,7 +2030,7 @@ test("Record editor: Delete asks for a second click, and closing the dialog disa
 	workspace,
 }) => {
 	void workspace
-	const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+	const dialog = await openEditor(page, `/records?record=${record.id}`, "Edit", "Edit Record")
 	await dialog.getByRole("button", { name: "Delete", exact: true }).click()
 	await expect(
 		dialog.getByRole("button", { name: "Yes, delete Record", exact: true }),
@@ -1952,7 +2039,8 @@ test("Record editor: Delete asks for a second click, and closing the dialog disa
 
 	await page.keyboard.press("Escape")
 	await expect(dialog).not.toBeVisible()
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await page.goto(`/records?record=${record.id}`)
+	await page.getByRole("button", { name: "Edit", exact: true }).click()
 	await expect(dialog.getByRole("button", { name: "Delete", exact: true })).toBeVisible()
 
 	await dialog.getByRole("button", { name: "Delete", exact: true }).click()
@@ -1981,8 +2069,8 @@ test("Pending Statement editor: the Account option names the bank, not its raw c
 	})
 	const dialog = await openEditor(
 		page,
-		`/statements/${pending.id}`,
-		"Edit Pending Statement",
+		`/statements?statement=${pending.id}`,
+		"Edit",
 		"Edit Pending Statement",
 	)
 	await expect(dialog.getByLabel("Account", { exact: true })).toContainText("· DBS")
