@@ -111,7 +111,12 @@ async function expectRouteButtons(page: Page, route: string) {
 	const candidates = page.locator(
 		'button:visible, [role="button"]:visible, a[data-slot="button"]:visible',
 	)
-	expect(await candidates.count(), `${route}: inspect actual enabled controls`).toBeGreaterThan(0)
+	// Static pages have only links on desktop, now that the top navigation has no sidebar toggle.
+	if (!["/privacy", "/terms"].includes(route))
+		expect(
+			await candidates.count(),
+			`${route}: inspect actual enabled controls`,
+		).toBeGreaterThan(0)
 	const failures = await page
 		.locator('button:visible, [role="button"]:visible, a[data-slot="button"]:visible')
 		.evaluateAll(elements =>
