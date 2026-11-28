@@ -350,6 +350,39 @@ test("delayed navigation: ordinary navigation survives an intervening modified c
 	await expectNoBack(page)
 })
 
+test("scroll strip: on phones the chevrons reveal hidden pages and keep the active one in view", {
+	tag: ["@mobile-only"],
+}, async ({ page, workspace }) => {
+	void workspace
+	await gotoReady(page, "/budgets")
+	const nav = page.getByRole("navigation", { name: "Main" })
+	await expect(nav.getByRole("link", { name: "Budgets", exact: true })).toBeInViewport({
+		ratio: 0.95,
+	})
+	const earlier = nav.getByRole("button", { name: "Show earlier items", exact: true })
+	const later = nav.getByRole("button", { name: "Show later items", exact: true })
+	await expect(later).toBeHidden()
+	const dashboard = nav.getByRole("link", { name: "Dashboard", exact: true })
+	await expect(dashboard).not.toBeInViewport()
+	// Each press scrolls part of the strip; keep pressing until the start is reached.
+	await expect(async () => {
+		if (await earlier.isVisible()) await earlier.click()
+		await expect(dashboard).toBeInViewport({ ratio: 0.95, timeout: 500 })
+	}).toPass()
+	await expect(earlier).toBeHidden()
+	await expect(later).toBeVisible()
+	await test.step("Settings sections: the active section stays in view", async () => {
+		await gotoReady(page, "/sync")
+		const sections = page.getByRole("navigation", { name: "Settings sections" })
+		await expect(sections.getByRole("link", { name: "Data", exact: true })).toBeInViewport({
+			ratio: 0.95,
+		})
+		await expect(
+			sections.getByRole("button", { name: "Show earlier items", exact: true }),
+		).toBeVisible()
+	})
+})
+
 test("workflow tabs: do not capture history", async ({ page }) => {
 	await gotoReady(page, "/allocator")
 	await expectNoBack(page)

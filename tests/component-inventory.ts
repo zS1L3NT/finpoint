@@ -1782,6 +1782,27 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
+		path: "src/components/scroll-strip.tsx",
+		owner: "team3",
+		routes: [
+			"/",
+			"/records",
+			"/statements",
+			"/accounts",
+			"/budgets",
+			"/allocator",
+			"/settings",
+			"/categories",
+			"/statement-rules",
+			"/importer",
+			"/sync",
+		],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/settings-tabs.tsx",
 		owner: "team3",
 		routes: ["/settings", "/categories", "/statement-rules", "/importer", "/sync"],
@@ -2145,6 +2166,8 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Back control is above destination heading and restores exact category/record origin URLs",
 	"src/components/tab-nav.tsx#display.interaction":
 		"Keyboard Enter on a tab changes the page and marks that tab active, in both the Workflow views and the Settings sections",
+	"src/components/scroll-strip.tsx#display.interaction":
+		"On phones the earlier and later chevrons show only on the side that hides more and scroll hidden pages into view, and the active page or Settings section is fully visible",
 	"src/components/settings-tabs.tsx#display.interaction":
 		"Keyboard Enter opens General, Categories, Statement rules, Importer and Data from the Settings sections, each marked active while Settings stays current in the top navigation",
 	"src/components/workflow-tabs.tsx#display.interaction":
@@ -3656,6 +3679,15 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/tab-nav.tsx#display.interaction": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/scroll-strip.tsx#export.default.behaviour": [
+		"scroll strip: on phones the chevrons reveal hidden pages and keep the active one in view",
+	],
+	"src/components/scroll-strip.tsx#display.values": [
+		"scroll strip: on phones the chevrons reveal hidden pages and keep the active one in view",
+	],
+	"src/components/scroll-strip.tsx#display.interaction": [
+		"scroll strip: on phones the chevrons reveal hidden pages and keep the active one in view",
 	],
 	"src/components/settings-tabs.tsx#export.default.behaviour": [
 		"top navigation: keyboard opens a page, Settings and its sections",

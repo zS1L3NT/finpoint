@@ -4,7 +4,7 @@ import { SettingsIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useRef } from "react"
+import ScrollStrip from "@/components/scroll-strip"
 import { useHistory } from "@/history"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { useSyncStatus } from "@/hooks/use-sync-status"
@@ -137,37 +137,26 @@ export default function AppNav({ title }: { title: string }) {
 	]
 	const active = items.find(item => item.active)?.label
 
-	// Narrow screens scroll the page links sideways; keep the current page in view.
-	const links = useRef<HTMLDivElement>(null)
-	useEffect(() => {
-		if (!active) return
-		links.current
-			?.querySelector('[data-active="true"]')
-			?.scrollIntoView({ block: "nearest", inline: "center" })
-	}, [active])
-
 	return (
 		<header className="top-0 z-30 border-b bg-background/85 backdrop-blur-md lg:sticky">
 			<h1 className="sr-only">{title}</h1>
 			<nav
 				data-app-nav
 				aria-label="Main"
-				className="container mx-auto grid grid-cols-[1fr_auto] items-center gap-x-4 px-4 md:px-8 lg:flex lg:h-14 lg:gap-x-6"
+				className="container mx-auto flex h-12 items-center gap-1 px-4 md:px-8 lg:h-14 lg:gap-6"
 			>
 				<Link
 					href={pathDashboard()}
 					onClick={handleClear}
-					className="flex h-12 w-fit items-center gap-2 text-base font-semibold tracking-tight lg:h-auto"
+					className="flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight"
 				>
 					<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
 						<img src="/favicon.svg" alt="" className="size-5" />
 					</span>
-					Finpoint
+					<span className="max-sm:sr-only">Finpoint</span>
 				</Link>
-				<div
-					ref={links}
-					className="order-last col-span-full -mx-4 flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:-mx-8 md:px-8 lg:order-none lg:mx-0 lg:flex-1 lg:p-0"
-				>
+				{/* Narrow screens scroll the links sideways. */}
+				<ScrollStrip active={active} className="gap-1">
 					{items.map(item => (
 						<Link
 							key={item.label}
@@ -179,16 +168,16 @@ export default function AppNav({ title }: { title: string }) {
 							{item.label}
 						</Link>
 					))}
-				</div>
+				</ScrollStrip>
 				<Link
 					href={pathSettings()}
 					data-active={SETTINGS_PATHS.some(path => pathname.startsWith(path))}
 					onClick={handleClear}
-					className={cn(LINK_CLASS, "-mr-2 lg:mr-0")}
+					className={cn(LINK_CLASS, "-mr-2 max-sm:px-2.5 lg:mr-0")}
 				>
 					<SyncDot />
 					<SettingsIcon className="size-4" />
-					Settings
+					<span className="max-sm:sr-only">Settings</span>
 				</Link>
 			</nav>
 		</header>
