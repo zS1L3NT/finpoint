@@ -345,6 +345,7 @@ export default function AllocatorPage() {
 						),
 					]}
 					categories={categories}
+					initialMode="edit"
 					isOpen={!!editingRecord}
 					setIsOpen={isOpen => {
 						if (!isOpen) {

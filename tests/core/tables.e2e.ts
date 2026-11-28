@@ -334,7 +334,7 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 		await future.focus()
 		await page.keyboard.press("Enter")
 		// The Record opens over the sheet it is listed in.
-		await expect(page.getByRole("dialog", { name: "Edit Record", exact: true })).toBeVisible()
+		await expect(page.getByRole("dialog", { name: "Record", exact: true })).toBeVisible()
 		await expect(page).toHaveURL(/month=November&year=2026&records=1$/)
 	})
 	await test.step("Records table: long title and optional Record values survive list drill and reload", async () => {
@@ -356,6 +356,12 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 		await expect(row).toContainText(title)
 		await expect(row).toContainText("-$33.33")
 		await open.focus()
+		await page.keyboard.press("Enter")
+		const preview = page.getByRole("dialog", { name: "Record", exact: true })
+		await expect(preview).toContainText(title)
+		for (const value of [people, location, description])
+			await expect(preview).toContainText(value)
+		await fits(page, preview.getByRole("button", { name: "Edit", exact: true }))
 		await page.keyboard.press("Enter")
 		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 		await expect(editor).toContainText(title)

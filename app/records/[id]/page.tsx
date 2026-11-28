@@ -88,6 +88,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 							categories={categories}
 							isOpen={isEditingRecord}
 							setIsOpen={setIsEditingRecord}
+							initialMode="edit"
 							trigger={
 								<Button className="w-full sm:w-auto">
 									<IconifyIcon icon="lucide:pencil" /> Edit Record

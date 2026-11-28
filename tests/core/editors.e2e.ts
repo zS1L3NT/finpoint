@@ -721,6 +721,10 @@ test("Record creator: validates required fields, applies Category defaults and p
 				.getByRole("link", { name: `Open ${text.trim()}`, exact: true })
 				.filter({ visible: true })
 				.click()
+			// The row opens the preview; the stored values show there before Edit.
+			const preview = page.getByRole("dialog", { name: "Record", exact: true })
+			await expect(preview).toContainText(longText.trim())
+			await preview.getByRole("button", { name: "Edit", exact: true }).click()
 			const update = page.getByRole("dialog", { name: "Edit Record" })
 			await expect(update.getByLabel("Amount", { exact: true }).first()).toHaveValue(amount)
 			await expect(update.getByLabel("Description", { exact: true })).toHaveValue(
@@ -1046,17 +1050,65 @@ test("Records sheet: a Record saved from the sheet shows in it and survives relo
 		.getByRole("link", { name: "Open FairPrice Run", exact: true })
 		.filter({ visible: true })
 		.click()
+	const preview = page.getByRole("dialog", { name: "Record", exact: true })
+	await preview.getByRole("button", { name: "Edit", exact: true }).click()
 	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await dialog.getByLabel("Title", { exact: true }).fill("Updated groceries")
 	await dialog.getByLabel("Title", { exact: true }).press("Escape")
 	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
-	await expect(dialog).not.toBeVisible()
+	// Saving returns to the preview, which shows the saved title, with Edit focused again.
+	await expect(preview).toContainText("Updated groceries")
+	await expect(preview.getByRole("button", { name: "Edit", exact: true })).toBeFocused()
+	await page.keyboard.press("Escape")
+	await expect(preview).not.toBeVisible()
 	const updated = sheet
 		.getByRole("link", { name: "Open Updated groceries", exact: true })
 		.filter({ visible: true })
 	await expect(updated).toBeVisible()
 	await page.reload()
 	await expect(updated).toBeVisible()
+})
+
+test("Record preview: a row opens it read-only, Edit swaps in the form and Cancel returns", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/records")
+	const open = page
+		.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		.filter({ visible: true })
+		.first()
+	await open.click()
+	const preview = page.getByRole("dialog", { name: "Record", exact: true })
+	await expect(preview).toContainText("FairPrice Run")
+	// Read-only: no field to type into until Edit.
+	await expect(preview.getByRole("textbox")).toHaveCount(0)
+	await expect(preview.getByRole("button", { name: "Save changes", exact: true })).toHaveCount(0)
+
+	await preview.getByRole("button", { name: "Edit", exact: true }).click()
+	// The same modal swaps to the form; nothing stacks over the preview.
+	const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+	await expect(editor.getByLabel("Title", { exact: true })).toHaveValue("FairPrice Run")
+	await expect(page.getByRole("dialog", { name: /Record$/ })).toHaveCount(1)
+	await editor.getByLabel("Title", { exact: true }).fill("Not saved")
+	await editor.getByLabel("Title", { exact: true }).press("Escape")
+	await editor.getByRole("button", { name: "Cancel", exact: true }).click()
+
+	// Cancel goes back to the unchanged preview, not out of the modal.
+	await expect(preview).toContainText("FairPrice Run")
+	await expect(preview).not.toContainText("Not saved")
+	await expect(preview.getByRole("button", { name: "Edit", exact: true })).toBeFocused()
+
+	// Full page leads to the Record's own page, whose Edit Record opens straight to the form.
+	await preview.getByRole("link", { name: "Full page", exact: true }).click()
+	await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await expect(
+		page
+			.getByRole("dialog", { name: "Edit Record", exact: true })
+			.getByLabel("Title", { exact: true }),
+	).toHaveValue("FairPrice Run")
 })
 
 test("Record editor: inherited budget hides an ineligible Category default", async ({ page }) => {

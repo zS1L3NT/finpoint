@@ -2533,6 +2533,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record editor: backdrop, values, cursors, fit and keyboard reopen work",
 		"Record editor: popup enters as a whole",
 		"Record editor: null optional fields, long title, sign and penny keyboard steps persist",
+		"Record preview: a row opens it read-only, Edit swaps in the form and Cancel returns",
 	],
 	"src/components/dialogs/record-editor.tsx#editor.validation": [
 		"Record editor: null optional fields, long title, sign and penny keyboard steps persist",

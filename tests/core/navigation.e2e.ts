@@ -610,9 +610,11 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await open.focus()
 		await page.keyboard.press("Enter")
 		// The Record opens over its list: nothing navigates, so there is no origin to lose.
-		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+		const editor = page.getByRole("dialog", { name: "Record", exact: true })
 		await expect(editor).toBeVisible()
-		await expect(editor.getByLabel("Title", { exact: true })).toHaveValue("FairPrice Run")
+		await expect(editor).toContainText("FairPrice Run")
+		// The preview opens on Edit, so the keyboard can go straight on to the form.
+		await expect(editor.getByRole("button", { name: "Edit", exact: true })).toBeFocused()
 		await expect(page).toHaveURL(origin)
 		await page.keyboard.press("Escape")
 		await expect(editor).toHaveCount(0)
@@ -675,7 +677,7 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await open.focus()
 		await page.keyboard.press("Enter")
 		// The Record opens over the Budget, so Budgets stays the only origin.
-		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+		const editor = page.getByRole("dialog", { name: "Record", exact: true })
 		await expect(editor).toBeVisible()
 		await expect(page).toHaveURL(budgetUrl)
 		await page.keyboard.press("Escape")
@@ -712,7 +714,7 @@ test("navigation history: Budget drill, fallbacks and static links preserve hist
 			.filter({ visible: true })
 			.first()
 			.click()
-		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+		const editor = page.getByRole("dialog", { name: "Record", exact: true })
 		await expect(editor).toBeVisible()
 		await expect(page).toHaveURL(origin)
 		await page.keyboard.press("Escape")
@@ -799,7 +801,7 @@ test("history clearing: cancelled links, top navigation and chart drills clear o
 		await expectNoBack(page)
 		const drilled = page.url()
 		await sheet.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
-		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+		const editor = page.getByRole("dialog", { name: "Record", exact: true })
 		await expect(editor).toBeVisible()
 		await expect(page).toHaveURL(drilled)
 		// Escape closes the Record first and leaves the sheet it was opened from.
