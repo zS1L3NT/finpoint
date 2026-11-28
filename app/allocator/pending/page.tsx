@@ -44,6 +44,7 @@ import {
 } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { SAME_ACTIVITY } from "@/logic/similarity"
 import {
 	listStatements,
 	replacementCandidates,
@@ -133,8 +134,10 @@ export default function AllocatorPendingPage() {
 	const selectionMissing =
 		!!pendingStatementId && allPending !== undefined && !selectedPendingStatement
 
-	const candidates = useLiveQuery(
-		(): Promise<{ data: CandidatePage | null; error: string | null }> =>
+	// A live query keeps its last result while the next one loads, so each result names its
+	// pending Statement: a newly selected one never flashes the previous one's imports.
+	const candidateResult = useLiveQuery(
+		(): Promise<{ pendingId?: string; data: CandidatePage | null; error: string | null }> =>
 			selectedPendingStatement
 				? replacementCandidates(selectedPendingStatement.id, {
 						query: candidateQuery || undefined,
@@ -142,8 +145,9 @@ export default function AllocatorPendingPage() {
 						page: candidatePage,
 						per_page: 25,
 					}).then(
-						data => ({ data, error: null }),
+						data => ({ pendingId: selectedPendingStatement.id, data, error: null }),
 						cause => ({
+							pendingId: selectedPendingStatement.id,
 							data: null,
 							error:
 								cause instanceof Error ? cause.message : "Unable to load imports.",
@@ -152,6 +156,8 @@ export default function AllocatorPendingPage() {
 				: Promise.resolve({ data: null, error: null }),
 		[selectedPendingStatement?.id, candidateQuery, candidateScope, candidatePage],
 	)
+	const candidates =
+		candidateResult?.pendingId === selectedPendingStatement?.id ? candidateResult : undefined
 
 	const selectPending = (statement: PendingReplacementStatement | null) => {
 		setReviewStatement(null)
@@ -441,7 +447,7 @@ export default function AllocatorPendingPage() {
 													data-filter-view
 													className="col-span-2 self-center text-xs/relaxed text-muted-foreground"
 												>
-													Within 7 days · up to $5 difference
+													Similar description or same amount
 												</span>
 											) : null}
 										</FilterBar>
@@ -467,14 +473,14 @@ export default function AllocatorPendingPage() {
 									exit={{ opacity: 0, y: -4, transition: TRANSITION.fast }}
 									transition={TRANSITION.base}
 								>
-									<Empty className="items-start p-4 text-left">
+									<Empty className="border">
 										<EmptyHeader>
 											<EmptyMedia variant="icon">
 												<IconifyIcon icon="lucide:replace" />
 											</EmptyMedia>
 											<EmptyTitle>Select a pending Statement</EmptyTitle>
 											<EmptyDescription>
-												Choose a placeholder to see nearby imported
+												Choose a placeholder to see similar imported
 												Statements that can inherit its Allocations.
 											</EmptyDescription>
 										</EmptyHeader>
@@ -668,6 +674,9 @@ function CandidateResults({
 									<span className="text-muted-foreground">
 										· {dateDifferenceLabel(statement.day_difference)}
 									</span>
+									{statement.similarity >= SAME_ACTIVITY ? (
+										<span className="text-creative">· Similar description</span>
+									) : null}
 								</div>
 								<p
 									className={cn(

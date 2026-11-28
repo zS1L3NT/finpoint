@@ -24,6 +24,18 @@ const statement = (
 	is_pending: 0,
 	...overrides,
 })
+/** Earlier PayNow payments to other recipients, so bank boilerplate weighs as little as it does
+ * in a real workspace and the recipient decides. */
+const payees = () =>
+	db.statements.bulkAdd(
+		"ALPHA BRAVO CHARLIE DELTA ECHO FOXTROT GOLF HOTEL INDIA JULIET KILO LIMA NOVEMBER OSCAR PAPA QUEBEC ROMEO SIERRA TANGO VICTOR"
+			.split(" ")
+			.map((name, i) =>
+				statement(`payee-${i}`, `FAST PAYMENT OTHR via PayNow-UEN to ${name} PTE.`, {
+					datetime: `2026-09-${String(i + 1).padStart(2, "0")} 12:00`,
+				}),
+			),
+	)
 beforeEach(async () => {
 	for (const table of db.tables) await table.clear()
 	await db.accounts.add({ id: "a", name: "FRANK", balance: 0, bank: "OCBC" })
@@ -64,6 +76,7 @@ test("spacing changes form groups and dismissals affect only one pair", async ()
 	expect((await duplicateGroups())[0]?.pairs).toHaveLength(3)
 })
 test("PayNow reordered wording matches while conflicting references and recipients do not", async () => {
+	await payees()
 	await db.statements.bulkAdd([
 		statement(
 			"a",
@@ -401,15 +414,14 @@ test("numeric reference sequences retain internal order", async () => {
 	])
 	expect(await duplicateGroups()).toEqual([])
 })
-test("banking vocabulary in recipient names remains meaningful", async () => {
-	for (const word of ["MOBILE", "NETS", "QR", "S", "UEN", "PAYNOW"]) {
-		await db.statements.clear()
-		await db.statements.bulkAdd([
-			statement("a", `FAST PAYMENT OTHR via PayNow-UEN to DSE ${word} SERVICE PTE.`),
-			statement("b", "FAST PAYMENT OTHR via PayNow-UEN to DSE SERVICE PTE."),
-		])
-		expect(await duplicateGroups()).toEqual([])
-	}
+test("an added word still matches while a different recipient does not", async () => {
+	await payees()
+	await db.statements.bulkAdd([
+		statement("a", "FAST PAYMENT OTHR via PayNow-UEN to DSE MOBILE SERVICE PTE."),
+		statement("b", "FAST PAYMENT OTHR via PayNow-UEN to DSE SERVICE PTE."),
+		statement("c", "FAST PAYMENT OTHR via PayNow-UEN to ABC SERVICE PTE."),
+	])
+	expect((await duplicateGroups()).map(g => g.statements.map(s => s.id))).toEqual([["a", "b"]])
 })
 test("groups report allocation counts per statement", async () => {
 	await db.statements.bulkAdd([statement("a"), statement("b")])

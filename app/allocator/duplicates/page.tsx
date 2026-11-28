@@ -206,7 +206,7 @@ export default function FixDuplicatesPage() {
 							onClear={() => updateParams({ query: "", account_id: "" })}
 						/>
 					</FilterBar>
-					<p className="text-xs/relaxed text-muted-foreground">
+					<p className="text-xs/relaxed text-muted-foreground lg:shrink-0 lg:whitespace-nowrap">
 						Same account · same day · same amount · {VIEWS[view].hint}
 					</p>
 				</div>
