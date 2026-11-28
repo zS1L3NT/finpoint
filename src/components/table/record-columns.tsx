@@ -58,14 +58,18 @@ export function PendingBadge({ record }: { record: Record }) {
 export function RecordDetails({
 	record,
 	details,
+	status,
 	className,
 }: {
 	record: Record
 	details: React.ReactNode
+	/** Leads the line, for rows too narrow to show the status beside the title. */
+	status?: React.ReactNode
 	className?: string
 }) {
 	return (
 		<p className={cn("flex min-w-0 items-center gap-1 text-muted-foreground", className)}>
+			{status}
 			<RecordMonthlyBudget record={record} inline />
 			{details ? <span className="min-w-0 truncate">· {details}</span> : null}
 		</p>
@@ -239,12 +243,13 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 						{leading?.(record)}
 						<Icon {...record.category} size={14} />
 						<div className="min-w-0 flex-1">
-							<p className="flex items-center gap-1.5">
+							<p className="flex">
 								<RecordTitle record={record} onOpen={onOpen} />
-								<PendingBadge record={record} />
 							</p>
+							{/* The status shares the second line so the title keeps the full width. */}
 							<RecordDetails
 								record={record}
+								status={<PendingBadge record={record} />}
 								details={[record.subtitle, formatRowTime(record.datetime, grouped)]
 									.filter(Boolean)
 									.join(" · ")}
