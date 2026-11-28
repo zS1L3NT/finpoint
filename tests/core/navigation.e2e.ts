@@ -1010,6 +1010,79 @@ test.describe("pending queue URL state", () => {
 		await expect(page).toHaveURL(/account_id=t1-d-acc-\d+/)
 	})
 
+	test("pending queue: choosing another row never shows the previous row's imports", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await page.goto("/allocator/pending?candidate_scope=all")
+		await expect(
+			page.locator('section[aria-label="Pending statements"] button[aria-pressed]').first(),
+		).toBeVisible()
+		// Each pending Statement's Account gets its own unallocated import to offer.
+		await page.evaluate(
+			() =>
+				new Promise<void>((resolve, reject) => {
+					const open = indexedDB.open("finpoint")
+					open.onerror = () => reject(open.error)
+					open.onsuccess = () => {
+						const tx = open.result.transaction("statements", "readwrite")
+						const store = tx.objectStore("statements")
+						const all = store.getAll()
+						all.onsuccess = () => {
+							for (const row of all.result as {
+								id: string
+								account_id: string
+								is_pending: number
+							}[])
+								if (row.is_pending === 1)
+									store.put({
+										id: `import-${row.id}`,
+										account_id: row.account_id,
+										description: `Import for ${row.id}`,
+										datetime: "2026-10-01 09:00",
+										amount: -1,
+										index: 0,
+										is_pending: 0,
+									})
+						}
+						tx.oncomplete = () => resolve()
+						tx.onerror = () => reject(tx.error)
+					}
+				}),
+		)
+		await page.reload()
+		const rows = page.locator('section[aria-label="Pending statements"] button[aria-pressed]')
+		const items = page.locator('[data-slot="pending-candidate-item"]')
+		await rows.first().click()
+		await expect(items.first()).toBeVisible()
+		const before = await items.allInnerTexts()
+		await page.evaluate(() => {
+			const shown: string[] = []
+			;(window as unknown as { shownCandidates: string[] }).shownCandidates = shown
+			new MutationObserver(records => {
+				for (const record of records)
+					for (const node of record.addedNodes)
+						if (node instanceof HTMLElement)
+							for (const item of [node, ...node.querySelectorAll<HTMLElement>("*")])
+								if (item.dataset.slot === "pending-candidate-item")
+									shown.push(item.innerText)
+			}).observe(document.body, { childList: true, subtree: true })
+		})
+		const back = page.getByRole("button", { name: "Back to pending Statements" })
+		if (await back.isVisible()) await back.click()
+		await rows.nth(1).click()
+		await expect(rows.nth(1)).toHaveAttribute("aria-pressed", "true")
+		await expect(items.first()).toBeVisible()
+		await page.waitForTimeout(1000)
+		const shown = await page.evaluate(
+			() => (window as unknown as { shownCandidates: string[] }).shownCandidates,
+		)
+		const after = await items.allInnerTexts()
+		expect(after).not.toEqual(before)
+		expect(shown.filter(text => !after.includes(text))).toEqual([])
+	})
+
 	test("pending queue: one Back undoes a search and restores the URL and the box", async ({
 		page,
 		workspace,
