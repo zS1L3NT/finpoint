@@ -320,8 +320,11 @@ for (const action of ["Cancel", "Create Record"] as const) {
 		if (action === "Create Record") {
 			await expect(page.locator('aside[aria-live="polite"]')).toHaveCount(0)
 			await page.goto("/records")
+			// Rows open their Record from a link now, not a trailing Edit button.
 			await expect(
-				page.getByRole("button", { name: "Edit Allocator exit regression", exact: true }),
+				page
+					.getByRole("link", { name: "Open Allocator exit regression", exact: true })
+					.filter({ visible: true }),
 			).toBeVisible()
 		} else {
 			await expect(row).toBeChecked()
