@@ -45,6 +45,7 @@ import {
 } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { SAME_ACTIVITY } from "@/logic/similarity"
 import {
 	listStatements,
 	replacementCandidates,
@@ -443,7 +444,7 @@ export default function AllocatorPendingPage() {
 													data-filter-view
 													className="col-span-2 self-center text-xs/relaxed text-muted-foreground"
 												>
-													Within 7 days · up to $5 difference
+													Similar description or same amount
 												</span>
 											) : null}
 										</FilterBar>
@@ -476,7 +477,7 @@ export default function AllocatorPendingPage() {
 											</EmptyMedia>
 											<EmptyTitle>Select a pending Statement</EmptyTitle>
 											<EmptyDescription>
-												Choose a placeholder to see nearby imported
+												Choose a placeholder to see similar imported
 												Statements that can inherit its Allocations.
 											</EmptyDescription>
 										</EmptyHeader>
@@ -670,6 +671,9 @@ function CandidateResults({
 									<span className="text-muted-foreground">
 										· {dateDifferenceLabel(statement.day_difference)}
 									</span>
+									{statement.similarity >= SAME_ACTIVITY ? (
+										<span className="text-creative">· Similar description</span>
+									) : null}
 								</div>
 								<p
 									className={cn(

@@ -10,8 +10,8 @@ const { importData } = await import("../../src/data/export-import")
 const { generateTestData } = await import("../../src/data/test-data")
 const { createMatchingRecords } = await import("../../src/logic/records")
 const { saveStatementRule } = await import("../../src/logic/statement-rules")
+const { descriptionTokens } = await import("../../src/logic/similarity")
 const {
-	descriptionTokens,
 	recordSuggestions,
 	similarStatements,
 	suggestedStatementRules,

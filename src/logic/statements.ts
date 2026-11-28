@@ -7,7 +7,6 @@ import { flagParam, numberParam, type ParamSource, textParam } from "@/logic/fil
 import { paginateItems } from "@/logic/pagination"
 import { enrichRecords } from "@/logic/records"
 import {
-	dayDifference,
 	ensureCanReplace,
 	maskDescription,
 	replacementComparison,
@@ -15,6 +14,7 @@ import {
 	unmaskDescription,
 } from "@/logic/replacements"
 import { inputToStored, newId, round2 } from "@/logic/shared"
+import { descriptionSimilarity, SAME_ACTIVITY } from "@/logic/similarity"
 import {
 	compareStatements,
 	enrichStatement,
@@ -271,9 +271,74 @@ export async function replacePendingStatement(statementId: string, pendingId: st
 	)
 }
 
-export async function replacementCandidates(
+type ReplacementOptions = {
+	query?: string
+	scope?: "suggested" | "all"
+	page?: number
+	per_page?: number
+}
+
+/**
+ * How alike each imported Statement is to a Pending Statement: to its handwritten description,
+ * or to the bank text behind past Records titled like the Records it is allocated to, since a
+ * placeholder written as "Lunch" rarely reads like the bank's own wording.
+ */
+async function replacementSimilarity() {
+	const [statements, allocations, records] = await Promise.all([
+		db.statements.toArray(),
+		db.allocations.toArray(),
+		db.records.toArray(),
+	])
+	const similarity = descriptionSimilarity(statements)
+	const titles = new Map(records.map(r => [r.id, r.title.toLowerCase()]))
+	const pendingIds = new Set(statements.filter(s => s.is_pending === 1).map(s => s.id))
+	// Imported Statements by the titles of the Records they were allocated to.
+	const byTitle = new Map<string, string[]>()
+	for (const a of allocations) {
+		const title = titles.get(a.record_id)
+		if (title === undefined || pendingIds.has(a.statement_id)) continue
+		const list = byTitle.get(title)
+		if (list) list.push(a.statement_id)
+		else byTitle.set(title, [a.statement_id])
+	}
+
+	return (pendingId: string) => {
+		const examples = [
+			pendingId,
+			...allocations
+				.filter(a => a.statement_id === pendingId)
+				.flatMap(a => byTitle.get(titles.get(a.record_id) ?? "") ?? []),
+		]
+		return (statementId: string) =>
+			Math.max(...examples.map(id => similarity.compare(id, statementId)))
+	}
+}
+
+export async function replacementCandidates(pendingId: string, options: ReplacementOptions = {}) {
+	return rankReplacements(pendingId, options, await replacementSimilarity())
+}
+
+/** Suggested replacement count per pending Statement, using the same rules as `replacementCandidates`. */
+export async function suggestedReplacementCounts(pendingIds: string[]) {
+	const counts: Record<string, number> = {}
+	const similarity = await replacementSimilarity()
+	for (const id of pendingIds) {
+		// A pending Statement replaced mid-query is gone or no longer pending; skip it.
+		const pending = await db.statements.get(id)
+		if (pending?.is_pending !== 1) continue
+		counts[id] = (
+			await rankReplacements(id, { scope: "suggested", per_page: 1 }, similarity)
+		).total
+	}
+	return counts
+}
+
+// Suggestions follow the description, never a date window or amount tolerance: an import alike
+// enough to the placeholder, or one for the very same amount, may replace it whenever it posts.
+async function rankReplacements(
 	pendingId: string,
-	options: { query?: string; scope?: "suggested" | "all"; page?: number; per_page?: number } = {},
+	options: ReplacementOptions,
+	similarity: Awaited<ReturnType<typeof replacementSimilarity>>,
 ) {
 	const pending = await db.statements.get(pendingId)
 	if (!pending) throw new Error("Statement not found.")
@@ -298,16 +363,15 @@ export async function replacementCandidates(
 	)
 	rows = rows.filter(s => !allocatedIds.has(s.id))
 
-	if (scope === "suggested") {
+	if (scope === "suggested")
 		rows = rows.filter(s => (pending.amount > 0 ? s.amount > 0 : s.amount < 0))
-		rows = rows.filter(s => Math.abs(dayDifference(s.datetime, pending.datetime)) <= 7)
-	}
 	if (options.query?.trim()) {
 		const q = options.query.trim().toLowerCase()
 		rows = rows.filter(s => maskDescription(s.description).toLowerCase().includes(q))
 	}
 
 	const pendingShape = { ...pending, is_pending: true }
+	const similarTo = similarity(pendingId)
 
 	let candidates = (await enrich(rows)).map(candidate => {
 		const reason = replacementReason(
@@ -323,17 +387,21 @@ export async function replacementCandidates(
 				pendingShape,
 				pendingAllocations,
 			),
+			similarity: similarTo(candidate.id),
 			can_replace: reason === null,
 			disabled_reason: reason,
 		}
 	})
 
-	if (scope === "suggested") {
-		candidates = candidates.filter(c => c.can_replace && c.amount_difference <= 5)
-	}
+	if (scope === "suggested")
+		candidates = candidates.filter(
+			c => c.can_replace && (c.similarity >= SAME_ACTIVITY || c.is_exact_amount),
+		)
 	candidates.sort(
 		(a, b) =>
+			Number(b.similarity >= SAME_ACTIVITY) - Number(a.similarity >= SAME_ACTIVITY) ||
 			Number(b.is_exact_amount) - Number(a.is_exact_amount) ||
+			b.similarity - a.similarity ||
 			a.amount_difference - b.amount_difference ||
 			Math.abs(a.day_difference) - Math.abs(b.day_difference) ||
 			a.id.localeCompare(b.id),
@@ -343,18 +411,6 @@ export async function replacementCandidates(
 	const perPage = Math.min(Math.max(1, options.per_page ?? 25), 100)
 
 	return paginateItems(candidates, page, perPage)
-}
-
-/** Suggested replacement count per pending Statement, using the same rules as `replacementCandidates`. */
-export async function suggestedReplacementCounts(pendingIds: string[]) {
-	const counts: Record<string, number> = {}
-	for (const id of pendingIds) {
-		// A pending Statement replaced mid-query is gone or no longer pending; skip it.
-		const pending = await db.statements.get(id)
-		if (pending?.is_pending !== 1) continue
-		counts[id] = (await replacementCandidates(id, { scope: "suggested", per_page: 1 })).total
-	}
-	return counts
 }
 
 export async function replacementReview(pendingId: string, statementId: string) {

@@ -1,22 +1,16 @@
 import { db, type StatementRow } from "@/data/db"
 import { maskDescription } from "@/logic/replacements"
 import { toCents } from "@/logic/shared"
+import { descriptionSimilarity, SAME_ACTIVITY } from "@/logic/similarity"
 import { Validator } from "@/logic/validate"
 
 const GENERIC = new Set(
 	"fast payment othr debit purchase via to paynow uen mobile qx qxvia nets qr xx s".split(" "),
 )
 
-// Exact word bags permit bank word reordering without a fuzzy threshold.
-// Numeric sequences and mixed reference IDs retain their internal order.
-// Split spacing-sensitive prefix tokens consistently; retain every digit and token count.
-function descriptionIdentity(description: string) {
-	return (
-		description
-			.toLowerCase()
-			.replace(/\(\s*qxvia(?=\s+paynow[-\s]+(?:mobile|uen)\b)/g, "(qx via")
-			.match(/[a-z]+|\d+/g) ?? []
-	).sort()
+// Some exports drop the space in "(QX via PayNow"; split it so both spellings share their words.
+function spaced(description: string) {
+	return description.replace(/\(\s*qxvia(?=\s+paynow[-\s]+(?:mobile|uen)\b)/gi, "(qx via")
 }
 
 function descriptionAnchors(description: string) {
@@ -31,14 +25,23 @@ function descriptionAnchors(description: string) {
 		.join("|")}`
 }
 
-function strongMatch(a: string, b: string) {
-	const left = descriptionIdentity(a)
-	const right = descriptionIdentity(b)
+// Reworded or reordered bank text matches through the shared similarity model. It drops
+// numbers and reference codes, so those must agree exactly and in order, and wording made only
+// of payment-method words matches nothing.
+function strongMatch(
+	a: StatementRow,
+	b: StatementRow,
+	similarity: ReturnType<typeof descriptionSimilarity>,
+) {
 	return (
-		descriptionAnchors(a) === descriptionAnchors(b) &&
-		left.some(token => /^[a-z]+$/.test(token) && !GENERIC.has(token)) &&
-		left.length > 0 &&
-		left.join("|") === right.join("|")
+		descriptionAnchors(a.description) === descriptionAnchors(b.description) &&
+		[a, b].every(s =>
+			spaced(s.description)
+				.toLowerCase()
+				.match(/[a-z]+/g)
+				?.some(word => !GENERIC.has(word)),
+		) &&
+		similarity.compare(a.id, b.id) >= SAME_ACTIVITY
 	)
 }
 
@@ -76,9 +79,11 @@ export type DuplicateGroup = {
 }
 
 export async function duplicateGroups(ignoreDescriptions = false): Promise<DuplicateGroup[]> {
-	const rows = (await db.statements.toArray())
-		.filter(s => s.is_pending === 0)
-		.sort((a, b) => a.id.localeCompare(b.id))
+	const statements = await db.statements.toArray()
+	const similarity = descriptionSimilarity(
+		statements.map(s => ({ id: s.id, description: spaced(s.description) })),
+	)
+	const rows = statements.filter(s => s.is_pending === 0).sort((a, b) => a.id.localeCompare(b.id))
 	const dismissed = new Set(
 		(await db.duplicate_dismissals.toArray()).map(p =>
 			pairKey(p.statement_id, p.other_statement_id),
@@ -101,8 +106,7 @@ export async function duplicateGroups(ignoreDescriptions = false): Promise<Dupli
 					a &&
 					b &&
 					(ignoreDescriptions ||
-						(!dismissed.has(pairKey(a.id, b.id)) &&
-							strongMatch(a.description, b.description)))
+						(!dismissed.has(pairKey(a.id, b.id)) && strongMatch(a, b, similarity)))
 				)
 					pairs.push(pairIds(a.id, b.id))
 			}

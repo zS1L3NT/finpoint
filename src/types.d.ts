@@ -40,6 +40,8 @@ export type StatementReplacementCandidate = Statement & {
 	is_exact_amount: boolean
 	allocated_amount: number
 	remaining_allocable_amount: number
+	/** Description similarity to the Pending Statement, from 0 to 1. */
+	similarity: number
 	can_replace: boolean
 	disabled_reason: string | null
 }

@@ -14,12 +14,11 @@ import {
 } from "@/data/db"
 import { parseDatetime, pluralize } from "@/lib/utils"
 import { resolveRecordChoices } from "@/logic/record-choices"
+import { descriptionSimilarity, descriptionTokens, SAME_ACTIVITY } from "@/logic/similarity"
 import { matchesStatement } from "@/logic/statement-rules"
 import { listStatements } from "@/logic/statements"
 import type { RuleActions, RuleField, StatementRule } from "@/types"
 
-/** Statements this alike are the same kind of activity, so one Record shape fits them all. */
-const SAME_ACTIVITY = 0.8
 /** A value needs this share of all matching evidence to become a chip, so a field the
  * similar Records mostly left empty stays without one. */
 const MIN_SHARE = 0.25
@@ -95,32 +94,6 @@ const CHIP_LIMIT: Record<RuleField, number> = {
 	monthly_budget_id: 1,
 }
 
-/** Lower-case words of a bank description in any script; numbers and reference codes drop out. */
-export function descriptionTokens(description: string): string[] {
-	const tokens = description
-		.toLowerCase()
-		.match(/[\p{L}\p{M}\p{N}]+/gu)
-		?.flatMap(chunk => {
-			// Digits only at the edges are part of a name ("7ELEVEN", "25JAN"); letters and
-			// digits interleaved make a reference code ("AWBP8DAGWKCFAV"), which says nothing.
-			const letters = chunk.match(/^\p{N}*([\p{L}\p{M}]+)\p{N}*$/u)?.[1]
-			if (!letters) return []
-			// Scripts written without spaces (Chinese, Japanese, Korean) compare by character pairs.
-			if (
-				/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(
-					letters,
-				)
-			) {
-				const chars = [...letters]
-				return chars.length === 1
-					? chars
-					: chars.slice(1).map((char, i) => `${chars[i]}${char}`)
-			}
-			return letters.length > 1 ? [letters] : []
-		})
-	return [...new Set(tokens)]
-}
-
 async function loadTables(): Promise<Tables> {
 	const [statements, records, allocations, categories, monthlyBudgets] = await Promise.all([
 		db.statements.toArray(),
@@ -143,42 +116,13 @@ async function loadTables(): Promise<Tables> {
 	}
 }
 
-/**
- * Words weigh by how rare they are across every Statement (inverse document frequency), so
- * bank boilerplate shared by many merchants ("SGD", "Contactless", "Singapore") counts for
- * little while merchant names decide.
- */
 function createModel({ statements, records, allocations }: Tables) {
-	const frequency = new Map<string, number>()
-	const tokensOf = new Map<string, string[]>()
-	for (const statement of statements) {
-		const words = descriptionTokens(statement.description)
-		// Blank descriptions (interest credits, some transfers) still resemble each other.
-		const tokens = words.length ? words : ["∅"]
-		tokensOf.set(statement.id, tokens)
-		for (const token of tokens) frequency.set(token, (frequency.get(token) ?? 0) + 1)
-	}
-	// A word seen only once (a new merchant, or a reference code) cannot match anything, but it
-	// still makes a description less like the others, at half the weight of the rarest shared word.
-	const weight = (token: string) => {
-		const count = frequency.get(token) ?? 0
-		// Wording on every Statement counts for almost nothing, yet a workspace with a single
-		// merchant still matches it.
-		return count < 2
-			? Math.log((statements.length + 1) / 2) / 2
-			: Math.log(1 + (statements.length - count + 0.5) / (count + 0.5))
-	}
-	const norm = (tokens: string[]) => tokens.reduce((sum, token) => sum + weight(token), 0)
-	const similarity = (a: string[], b: string[]) => {
-		const other = new Set(b)
-		const shared = a.reduce((sum, token) => sum + (other.has(token) ? weight(token) : 0), 0)
-		const scale = Math.sqrt(norm(a) * norm(b))
-		return scale ? shared / scale : 0
-	}
+	const { tokensOf, weight, shared, similarity, compare } = descriptionSimilarity(statements)
+
 	// Index examples by their most telling words; a close match must share one of them.
 	const keyTokens = (tokens: string[]) =>
 		tokens
-			.filter(token => (frequency.get(token) ?? 0) > 1)
+			.filter(shared)
 			.sort((a, b) => weight(b) - weight(a))
 			.slice(0, 3)
 
@@ -208,7 +152,7 @@ function createModel({ statements, records, allocations }: Tables) {
 	// the same kind of payment (only words seen elsewhere count, so a new merchant's name is set
 	// aside and "TRANSFER TO <someone new>" still resembles other transfers).
 	const neighbours = (tokens: string[], threshold: number) => {
-		const known = tokens.filter(token => (frequency.get(token) ?? 0) > 1)
+		const known = tokens.filter(shared)
 		const seen = new Set<Example>()
 		const result: { example: Example; similarity: number; shape: number }[] = []
 		for (const token of keyTokens(tokens))
@@ -216,10 +160,7 @@ function createModel({ statements, records, allocations }: Tables) {
 				if (seen.has(example)) continue
 				seen.add(example)
 				const score = similarity(tokens, example.tokens)
-				const shape = similarity(
-					known,
-					example.tokens.filter(t => (frequency.get(t) ?? 0) > 1),
-				)
+				const shape = similarity(known, example.tokens.filter(shared))
 				if (Math.max(score, shape) >= threshold)
 					result.push({ example, similarity: score, shape })
 			}
@@ -267,9 +208,9 @@ function createModel({ statements, records, allocations }: Tables) {
 	return {
 		tokensOf,
 		weight,
-		/** Whether a word appears in more than one Statement, so it can match anything. */
-		shared: (token: string) => (frequency.get(token) ?? 0) > 1,
+		shared,
 		similarity,
+		compare,
 		keyTokens,
 		neighbours,
 		examples,
@@ -804,10 +745,7 @@ export async function similarStatements(statementIds: string[]) {
 					selected.some(
 						s =>
 							Math.sign(s.amount) === Math.sign(candidate.amount) &&
-							model.similarity(
-								model.tokensOf.get(s.id) ?? [],
-								model.tokensOf.get(candidate.id) ?? [],
-							) >= SAME_ACTIVITY,
+							model.compare(s.id, candidate.id) >= SAME_ACTIVITY,
 					),
 			)
 			.map(s => s.id),
