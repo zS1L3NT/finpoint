@@ -266,7 +266,7 @@ test("old backup import converts to choices and validates", async () => {
 		}
 	})
 	const parsed = parseImportFile(JSON.stringify(old))
-	expect(parsed.version).toBe(8)
+	expect(parsed.version).toBe(9)
 	for (const row of parsed.tables.records as Record<string, unknown>[]) {
 		expect(row.treatment_choice).toBeDefined()
 		expect(row.monthly_budget_choice).toBeDefined()
@@ -304,8 +304,9 @@ test("version seven upgrade normalizes categories and converts choices while pre
 	for (const clean of [true, false]) {
 		const backup = await exportData()
 		// Simulate released v7 shape: choices -> legacy resolved+source
+		const { record_files: _, ...current } = backup.tables
 		const tables = {
-			...backup.tables,
+			...current,
 			categories: (backup.tables.categories as Record<string, unknown>[]).map(category =>
 				category.id === "food" ? { ...category, analytics_treatment: null } : category,
 			),
@@ -325,7 +326,7 @@ test("version seven upgrade normalizes categories and converts choices while pre
 			}),
 		}
 		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
-		const schema = Object.fromEntries(db.tables.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
+		const schema = Object.fromEntries(db.tables.filter(t => !["record_files", "file_blobs"].includes(t.name)).map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
 		await db.delete()
 		const old = new Dexie("finpoint")
 		old.version(7).stores({ ...schema, records: "id, datetime, category_id, monthly_budget_id, analytics_treatment" })
@@ -335,7 +336,7 @@ test("version seven upgrade normalizes categories and converts choices while pre
 		old.close()
 		await db.open()
 		// Both conversions run directly from the released schema.
-		expect(db.verno).toBe(10)
+		expect(db.verno).toBe(11)
 		expect((await db.categories.get("food"))?.analytics_treatment).toBe("automatic")
 		expect(db.records.schema.indexes.some(index => index.name === "monthly_budget_id")).toBe(false)
 		const taxi = await db.records.get("taxi-1")

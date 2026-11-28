@@ -3,9 +3,12 @@
 // Export: downloads one versioned JSON file containing every table.
 // Import: replaces the whole database from such a file (validated first).
 // Sessions persist automatically in IndexedDB — no manual save step.
+// Record file bytes ride along as base64 in `files` for backup files only; Drive
+// snapshots leave them out and sync them as separate Drive files.
 
 import { DateTime } from "luxon"
 import { db, withoutActionModes } from "@/data/db"
+import { fromBase64, pruneFileBlobs, SHA256_PATTERN, sha256Hex, toBase64 } from "@/data/files"
 import { migrateRecordChoices } from "@/data/record-choices"
 import {
 	DEFAULT_SETTINGS,
@@ -14,7 +17,7 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 8
+export const EXPORT_VERSION = 9
 
 type TableName =
 	| "statement_rules"
@@ -24,6 +27,7 @@ type TableName =
 	| "categories"
 	| "records"
 	| "allocations"
+	| "record_files"
 	| "budgets"
 	| "budget_records"
 	| "monthly_budgets"
@@ -39,6 +43,7 @@ export const TABLES: TableName[] = [
 	"categories",
 	"records",
 	"allocations",
+	"record_files",
 	"budgets",
 	"budget_records",
 	"monthly_budgets",
@@ -55,6 +60,18 @@ export type FinpointExport = {
 	exported_at: string
 	settings: FinpointSettings
 	tables: Record<TableName, unknown[]>
+	/** Record file bytes as base64 by SHA-256; only in backup files. */
+	files?: Record<string, string>
+}
+
+/** The workspace for a backup file: the snapshot plus every Record file's bytes. */
+export async function exportBackup(): Promise<FinpointExport> {
+	const data = await exportData()
+	const blobs = await db.file_blobs.toArray()
+	return {
+		...data,
+		files: Object.fromEntries(blobs.map(blob => [blob.sha256, toBase64(blob.data)])),
+	}
 }
 
 export async function exportData(): Promise<FinpointExport> {
@@ -135,7 +152,11 @@ export function parseImportFile(text: string): FinpointExport {
 		parsed.version = 7
 	}
 	if (parsed?.version === 6) parsed.version = 7
-	if (parsed?.version === 7) parsed.version = EXPORT_VERSION
+	if (parsed?.version === 7) parsed.version = 8
+	if (parsed?.version === 8 && parsed.tables) {
+		parsed.tables.record_files = []
+		parsed.version = 9
+	}
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
 	}
@@ -189,6 +210,24 @@ export function parseImportFile(text: string): FinpointExport {
 		)
 			throw new Error("This backup contains an invalid Record choice.")
 	}
+	for (const row of parsed.tables.record_files as Record<string, unknown>[]) {
+		if (
+			!["id", "record_id", "name", "type", "created_at"].every(
+				key => typeof row[key] === "string",
+			) ||
+			typeof row.size !== "number" ||
+			!SHA256_PATTERN.test(String(row.sha256))
+		)
+			throw new Error("This backup contains an invalid Record file.")
+	}
+	if (
+		parsed.files != null &&
+		(typeof parsed.files !== "object" ||
+			Object.entries(parsed.files).some(
+				([hash, data]) => !SHA256_PATTERN.test(hash) || typeof data !== "string",
+			))
+	)
+		throw new Error("This backup contains an invalid Record file.")
 	const startDate = parsed.settings?.default_filter_start_date
 	if (startDate != null && !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
 		throw new Error("This backup contains an invalid default filter date.")
@@ -276,6 +315,7 @@ function brokenReferences(tables: Record<TableName, unknown[]>): string[] {
 	)
 	check("allocations", "allocations", r => r.statement_id, statements, "Statement")
 	check("allocations", "allocations", r => r.record_id, records, "Record")
+	check("record_files", "Record files", r => r.record_id, records, "Record")
 	check("budget_records", "Budget links", r => r.budget_id, budgets, "Budget")
 	check("budget_records", "Budget links", r => r.record_id, records, "Record")
 	for (const table of ["monthly_budget_defaults", "monthly_budget_amounts"] as const)
@@ -305,15 +345,26 @@ function brokenReferences(tables: Record<TableName, unknown[]>): string[] {
  */
 export async function importData(data: FinpointExport): Promise<FinpointExport> {
 	data = parseImportFile(JSON.stringify(data))
+	const blobs = await Promise.all(
+		Object.entries(data.files ?? {}).map(async ([sha256, text]) => {
+			const bytes = fromBase64(text)
+			if ((await sha256Hex(bytes)) !== sha256)
+				throw new Error("This backup contains a damaged Record file. Nothing was changed.")
+			return { sha256, data: bytes }
+		}),
+	)
 	return db.transaction(
 		"rw",
-		[...TABLES.map(table => db.table(table)), db.settings, db.meta],
+		[...TABLES.map(table => db.table(table)), db.file_blobs, db.settings, db.meta],
 		async () => {
 			for (const table of TABLES) {
 				await db.table(table).clear()
 				const rows = data.tables[table]
 				if (rows.length) await db.table(table).bulkAdd(rows)
 			}
+			// Bytes already here (a Drive pull fetches them first) stay unless nothing uses them.
+			await db.file_blobs.bulkPut(blobs)
+			await pruneFileBlobs()
 			await replaceSettings(data.settings)
 			await db.meta.put({ key: "seeded_v1", value: "1" })
 			await db.meta.put({ key: "seeded_v2", value: "1" })
@@ -323,13 +374,18 @@ export async function importData(data: FinpointExport): Promise<FinpointExport> 
 }
 
 export async function clearAllData(): Promise<void> {
-	await db.transaction("rw", [...TABLES.map(table => db.table(table)), db.meta], async () => {
-		for (const table of TABLES) {
-			await db.table(table).clear()
-		}
-		await db.meta.delete("seeded_v1")
-		await db.meta.delete("seeded_v2")
-	})
+	await db.transaction(
+		"rw",
+		[...TABLES.map(table => db.table(table)), db.file_blobs, db.meta],
+		async () => {
+			for (const table of TABLES) {
+				await db.table(table).clear()
+			}
+			await db.file_blobs.clear()
+			await db.meta.delete("seeded_v1")
+			await db.meta.delete("seeded_v2")
+		},
+	)
 }
 
 export async function tableCounts(): Promise<Record<TableName, number>> {

@@ -231,6 +231,7 @@ export function generateTestData(): FinpointExport {
 	const tables = {
 		statement_rules: [],
 		duplicate_dismissals: [],
+		record_files: [],
 		accounts: [
 			{ id: "demo-dbs-savings", name: "Everyday Savings", balance: 12480.55, bank: "DBS" },
 			{ id: "demo-uob-card", name: "One Card", balance: -842.2, bank: "UOB" },

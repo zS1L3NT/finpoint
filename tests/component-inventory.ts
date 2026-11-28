@@ -789,6 +789,15 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
+		path: "src/components/record-files.tsx",
+		owner: "team3",
+		routes: ["/records/[id]"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/selection-bar.tsx",
 		owner: "team3",
 		routes: ["/allocator"],
@@ -2011,6 +2020,8 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Label activation with valid time/date edits, keyboard open and disabled value retention; empty has no clear affordance and error alerts render through the shared FormField wrapper",
 	"src/components/form/record-analytics-fields.tsx#field.options":
 		"Treatment gating and scroll/Escape dismissal for both selects; long Monthly Budget label is selected intact, fits the popup/trigger, clears to Unbudgeted and remains cleared through Income/Spending changes",
+	"src/components/record-files.tsx#display.interaction":
+		"File tiles open the preview by pointer with a pointer cursor; Delete asks for a second press before removing the file; Download links the stored bytes under the file name",
 	"src/components/form/rule-suggestions.tsx#display.values":
 		"Chips learned from past Records carry the evidence behind them and hide the value the field already holds",
 	"src/components/form/rule-suggestions.tsx#display.interaction":
@@ -2769,6 +2780,15 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"overview metrics: month change updates values and the accessible sparkline period",
 		"detail summary: long and missing values fit each viewport and a changed value keeps its final text",
 		"detail summary: changed value settles through frames after keyboard action",
+	],
+	"src/components/record-files.tsx#export.default.behaviour": [
+		"Record files: add an image and a PDF, preview, download and delete",
+	],
+	"src/components/record-files.tsx#display.values": [
+		"Record files: add an image and a PDF, preview, download and delete",
+	],
+	"src/components/record-files.tsx#display.interaction": [
+		"Record files: add an image and a PDF, preview, download and delete",
 	],
 	"src/components/record-amount.tsx#export.default.behaviour": [
 		"Record detail zero: renders amount, Category, Treatment and Allocations",
@@ -4823,6 +4843,9 @@ export const modalAnimationCoverage: Record<string, string[]> = {
 	],
 	"src/components/ui/command.tsx": [
 		"modal primitives: dialog, sheet, command and alert animate in and out",
+	],
+	"src/components/record-files.tsx": [
+		"Record file preview: Close preserves the popup and backdrop through exit",
 	],
 	"src/components/dialogs/drive-overwrite-confirmation.tsx": [
 		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",

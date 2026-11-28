@@ -50,9 +50,10 @@ test("version seven upgrade normalizes categories and preserves clean and dirty 
 	await createRecord({ title: "Lunch", amount: -10, datetime: "2026-10-01T12:00", category_id: "food" })
 	for (const clean of [true, false]) {
 		const backup = await exportData()
-		const tables = { ...backup.tables, categories: backup.tables.categories.map(category => ({ ...category as object, analytics_treatment: null })) }
+		const { record_files: _, ...current } = backup.tables
+		const tables = { ...current, categories: current.categories.map(category => ({ ...category as object, analytics_treatment: null })) }
 		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
-		const schema = Object.fromEntries(db.tables.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
+		const schema = Object.fromEntries(db.tables.filter(t => !["record_files", "file_blobs"].includes(t.name)).map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
 		await db.delete()
 		const old = new Dexie("finpoint")
 		old.version(7).stores(schema)

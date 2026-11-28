@@ -2,6 +2,7 @@
 // `Api\CompletionsController`, and `Record::appQuery`.
 
 import { db, type RecordRow } from "@/data/db"
+import { pruneFileBlobs } from "@/data/files"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { compareRecords, contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
@@ -510,11 +511,17 @@ export async function updateRecord(id: string, input: RecordInput & { revision?:
 }
 
 export async function deleteRecord(id: string) {
-	await db.transaction("rw", [db.records, db.allocations, db.budget_records], async () => {
-		await db.allocations.where("record_id").equals(id).delete()
-		await db.budget_records.where("record_id").equals(id).delete()
-		await db.records.delete(id)
-	})
+	await db.transaction(
+		"rw",
+		[db.records, db.allocations, db.budget_records, db.record_files, db.file_blobs],
+		async () => {
+			await db.allocations.where("record_id").equals(id).delete()
+			await db.budget_records.where("record_id").equals(id).delete()
+			await db.record_files.where("record_id").equals(id).delete()
+			await pruneFileBlobs()
+			await db.records.delete(id)
+		},
+	)
 }
 
 export async function recordCompletions() {

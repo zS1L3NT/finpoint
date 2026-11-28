@@ -361,3 +361,22 @@ for (const action of ["Cancel", "Save changes"] as const) {
 		await expect(page.locator('aside[aria-live="polite"]')).toHaveCount(0)
 	})
 }
+
+test("Record file preview: Close preserves the popup and backdrop through exit", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	void workspace
+	await page.goto(`/records/${IDS.records.zero}`)
+	await page.getByLabel("Add files").setInputFiles({
+		name: "invoice.pdf",
+		mimeType: "application/pdf",
+		buffer: Buffer.from("%PDF-1.4\n%%EOF"),
+	})
+	const tile = page.getByRole("button", { name: "invoice.pdf", exact: true })
+	await expectModalEntrance(page, '[data-slot="dialog-content"]', () => tile.click())
+	const dialog = page.getByRole("dialog", { name: "invoice.pdf", exact: true })
+	await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+		dialog.locator('[data-slot="dialog-footer"]').getByRole("button", { name: "Close" }).click(),
+	)
+	await expect(tile).toBeVisible()
+})

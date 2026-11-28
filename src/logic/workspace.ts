@@ -4,7 +4,7 @@ import { db } from "@/data/db"
 import {
 	clearAllData,
 	downloadExport,
-	exportData,
+	exportBackup,
 	importData,
 	parseImportFile,
 	tableCounts,
@@ -29,7 +29,7 @@ export async function hasWorkspaceActivity() {
 }
 
 export async function exportWorkspace() {
-	downloadExport(await exportData())
+	downloadExport(await exportBackup())
 }
 
 export async function importWorkspace(text: string) {

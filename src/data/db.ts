@@ -72,6 +72,26 @@ export type AllocationRow = {
 	amount: number
 }
 
+/** A file kept with a Record. Its bytes live in `file_blobs`, keyed by content hash. */
+export type RecordFileRow = {
+	id: string
+	record_id: string
+	name: string
+	/** MIME type of the stored bytes */
+	type: string
+	size: number
+	/** SHA-256 hex of the stored bytes */
+	sha256: string
+	/** ISO timestamp */
+	created_at: string
+}
+
+/** Local file bytes. Kept out of snapshots: backups and Drive carry them separately. */
+export type FileBlobRow = {
+	sha256: string
+	data: ArrayBuffer
+}
+
 export type BudgetRow = {
 	id: string
 	name: string
@@ -129,7 +149,7 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 10
+export const DB_VERSION = 11
 
 class FinpointDB extends Dexie {
 	statement_rules!: Table<StatementRule, string>
@@ -139,6 +159,8 @@ class FinpointDB extends Dexie {
 	categories!: Table<CategoryRow, string>
 	records!: Table<RecordRow, string>
 	allocations!: Table<AllocationRow, [string, string]>
+	record_files!: Table<RecordFileRow, string>
+	file_blobs!: Table<FileBlobRow, string>
 	budgets!: Table<BudgetRow, string>
 	budget_records!: Table<BudgetRecordRow, [string, string]>
 	monthly_budgets!: Table<MonthlyBudgetRow, string>
@@ -530,6 +552,45 @@ class FinpointDB extends Dexie {
 						key: "drive_last_hash",
 						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
 					})
+				}
+			})
+		this.version(11)
+			.stores({ record_files: "id, record_id, sha256", file_blobs: "sha256" })
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const name of [
+					"statement_rules",
+					"accounts",
+					"statements",
+					"duplicate_dismissals",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"monthly_budgets",
+					"monthly_budget_defaults",
+					"monthly_budget_amounts",
+					"analytics_months",
+				])
+					tables[name] = await transaction.table(name).toArray()
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const before = await Dexie.waitFor(hashSnapshot({ settings, tables }))
+				const after = await Dexie.waitFor(
+					hashSnapshot({ settings, tables: { ...tables, record_files: [] } }),
+				)
+				// Adding an empty table must not turn a clean Drive baseline or an untouched
+				// starter workspace into unsynced edits.
+				for (const key of ["drive_last_hash", "seed_hash"]) {
+					if ((await transaction.table("meta").get(key))?.value === before)
+						await transaction.table("meta").put({ key, value: after })
 				}
 			})
 	}

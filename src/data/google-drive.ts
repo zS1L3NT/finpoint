@@ -415,3 +415,59 @@ export async function getFileMeta(token: string, id: string): Promise<DriveFileM
 	const response = await driveFetch(`/drive/v3/files/${id}?fields=id,modifiedTime,size`, token)
 	return (await response.json()) as DriveFileMeta
 }
+
+// Record file bytes live beside the snapshot, one immutable Drive file per content hash,
+// so the snapshot stays small and an unchanged file is never uploaded twice.
+const RECORD_FILE_PREFIX = "finpoint-file-"
+
+/** Drive file ids of the stored Record file bytes, by SHA-256. */
+export async function listRecordFileIds(token: string): Promise<Map<string, string>> {
+	const query = encodeURIComponent(
+		`name contains '${RECORD_FILE_PREFIX}' and 'appDataFolder' in parents and trashed = false`,
+	)
+	const ids = new Map<string, string>()
+	let page: string | undefined
+	do {
+		const response = await driveFetch(
+			`/drive/v3/files?q=${query}&spaces=appDataFolder&fields=nextPageToken,files(id,name)&pageSize=1000${page ? `&pageToken=${page}` : ""}`,
+			token,
+		)
+		const parsed = (await response.json()) as {
+			nextPageToken?: string
+			files?: { id: string; name: string }[]
+		}
+		for (const file of parsed.files ?? [])
+			ids.set(file.name.slice(RECORD_FILE_PREFIX.length), file.id)
+		page = parsed.nextPageToken
+	} while (page)
+	return ids
+}
+
+export async function uploadRecordFile(
+	token: string,
+	sha256: string,
+	data: ArrayBuffer,
+	type: string,
+): Promise<void> {
+	const metadata = JSON.stringify({
+		name: `${RECORD_FILE_PREFIX}${sha256}`,
+		parents: ["appDataFolder"],
+	})
+	const boundary = `finpoint-${crypto.randomUUID()}`
+	const body = new Blob([
+		`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n`,
+		`--${boundary}\r\nContent-Type: ${type}\r\n\r\n`,
+		data,
+		`\r\n--${boundary}--`,
+	])
+	await driveFetch("/upload/drive/v3/files?uploadType=multipart", token, {
+		method: "POST",
+		headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
+		body,
+	})
+}
+
+export async function downloadRecordFile(token: string, id: string): Promise<ArrayBuffer> {
+	const response = await driveFetch(`/drive/v3/files/${id}?alt=media`, token)
+	return response.arrayBuffer()
+}

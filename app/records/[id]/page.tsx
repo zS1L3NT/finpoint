@@ -10,6 +10,7 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import RecordAmount from "@/components/record-amount"
+import RecordFiles from "@/components/record-files"
 import DataTable from "@/components/table/data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Badge } from "@/components/ui/badge"
@@ -153,6 +154,8 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 						/>
 					</CardContent>
 				</Card>
+
+				<RecordFiles recordId={record.id} />
 			</PageContent>
 
 			{editingStatement ? (
